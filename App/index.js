@@ -10,7 +10,7 @@ var objects = new Array() // Our array of objects
 var debug = true
 
 // Add 0.001 to a GPS decimal to get ~6 meters
-var metersToPixels = 10 // ...pixels equals ~0.65 meters
+var metersToPixels = 20 // ...pixels equals ~0.65 meters
 
 // How much motion is required for certain actions
 var rotateRequiredShoot = 400
@@ -23,12 +23,26 @@ var capacity = 8
 var magazine = capacity
 var timeReload = 300
 
-var requiredShotDistance = 10
+var maxShotDistance = 10
+var minShotDistance = 2
 var aimingAngle = 10
+
+var sweepTick = 0
+var sweepHeight = 4
+var sweepSpeed = 22 // Lower values result in a faster sweep
+var canScan = true
+var timeScan = 500
+
+/*
+ejecta.getText('Test', 'Please enter...something', function(text)
+{
+	console.log(text)
+})
+*/
 
 function world() // Run once by the GPS function once we have a lock
 {
-	spawnZombies(50) // 100 seems to be the max if I want ~60 FPS when not in debug mode (which is slower)
+	spawnZombies(7) // 100 seems to be the max if I want ~60 FPS when not in debug mode (which is slower)
 }
 
 setInterval(function() // Main game loop
@@ -43,7 +57,7 @@ setInterval(function() // Main game loop
             // Beep if we're "looking" at a zombie
 	        if ((compass - aimingAngle) < objects[i].bearing && objects[i].bearing < (compass + aimingAngle))
             {
-                if (objects[i].distance < requiredShotDistance)
+                if (objects[i].distance > minShotDistance && objects[i].distance < maxShotDistance)
                 {
                 	if (debug)
                 	{
@@ -55,14 +69,26 @@ setInterval(function() // Main game loop
         }
     }
 
-    blank()
+    blank() // Place draw calls after this
+
+    // Objects are drawn in a stack.  Things drawn last effectively have a greater z-index and appear on top.
+
+    ctx.fillStyle = '#ff434b'
+	ctx.fillRect(0, Math.sin(sweepTick / sweepSpeed) * canvas.height / 2 + canvas.height / 2 - sweepHeight / 2, canvas.width, sweepHeight) // Animate the sweep
+	sweepTick++
+
+	if (Math.sin(sweepTick / sweepSpeed) > 0.999 || Math.sin(sweepTick / sweepSpeed) < -0.999)
+	{
+		scan()
+	}
 
     // Draw the aiming cone for debugging purposes
     if (debug)
     {
-    	line((canvas.width / 2) - (canvas.height / 2 * Math.tan(aimingAngle * Math.PI / 180)), 0, canvas.width / 2, canvas.height / 2, '#4c4c4c')
-    	line(canvas.width / 2, canvas.height / 2, (canvas.width / 2) + (canvas.height / 2 * Math.tan(aimingAngle * Math.PI / 180)), 0, '#4c4c4c')
-		circle(canvas.width / 2, canvas.height / 2, requiredShotDistance * metersToPixels, '#4c4c4c')
+    	line((canvas.width / 2) - (canvas.height / 2 * Math.tan(aimingAngle.toRad())), 0, canvas.width / 2, canvas.height / 2, '#4c4c4c')
+    	line(canvas.width / 2, canvas.height / 2, (canvas.width / 2) + (canvas.height / 2 * Math.tan(aimingAngle.toRad())), 0, '#4c4c4c')
+		circle(canvas.width / 2, canvas.height / 2, maxShotDistance * metersToPixels, '#4c4c4c')
+		circle(canvas.width / 2, canvas.height / 2, minShotDistance * metersToPixels, '#4c4c4c')
     }
 
 	polygon(canvas.width / 2, canvas.height / 2, 10, '#ffffff') // Draw the player
@@ -97,8 +123,8 @@ function draw()
 {
 	for (var i = 0; i < objects.length; i++)
     {
-	    var x = (canvas.width / 2) + (Math.cos(((objects[i].bearing - compass) + 270) * (Math.PI / 180)) * (objects[i].distance * metersToPixels))
-	    var y = (canvas.height / 2) + (Math.sin(((objects[i].bearing - compass) + 270) * (Math.PI / 180)) * (objects[i].distance * metersToPixels))
+	    var x = (canvas.width / 2) + (Math.cos(((objects[i].bearing - compass) + 270).toRad()) * (objects[i].distance * metersToPixels))
+	    var y = (canvas.height / 2) + (Math.sin(((objects[i].bearing - compass) + 270).toRad()) * (objects[i].distance * metersToPixels))
 
 	    if (debug)
 	    {
@@ -203,4 +229,17 @@ function shootZombie(zombieId, damage)
             zombies.splice(zombieId, 1)
         }
     }, 200)
+}
+
+function scan()
+{
+	if (canScan)
+	{
+		sfxBeep.play()
+		canScan = false
+
+		setTimeout(function() {
+			canScan = true
+		}, timeScan)
+	}
 }

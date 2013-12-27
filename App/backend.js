@@ -73,6 +73,16 @@ function error(error)
     }
 }
 
+Number.prototype.toRad = function()
+{
+	return this * Math.PI / 180
+}
+
+Number.prototype.toDeg = function()
+{
+	return this * 180 / Math.PI
+}
+
 function distance(lat2, lon2)
 {
 	var km = 6371
