@@ -122,4 +122,13 @@ function line(x1, y1, x2, y2, color)
 	ctx.lineTo(x2, y2)
 	ctx.lineWidth = 1
 	ctx.stroke()
-}   
+}
+
+function circle(x, y, radius, color)
+{
+	ctx.beginPath()
+	ctx.arc(x, y, radius, 0, 2 * Math.PI, false)
+	ctx.lineWidth = 1
+	ctx.strokeStyle = '#4c4c4c'
+	ctx.stroke()
+}

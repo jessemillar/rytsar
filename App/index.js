@@ -28,7 +28,7 @@ var aimingAngle = 10
 
 function world() // Run once by the GPS function once we have a lock
 {
-	spawnZombies(100)
+	spawnZombies(50) // 100 seems to be the max if I want ~60 FPS when not in debug mode (which is slower)
 }
 
 setInterval(function() // Main game loop
@@ -62,6 +62,7 @@ setInterval(function() // Main game loop
     {
     	line((canvas.width / 2) - (canvas.height / 2 * Math.tan(aimingAngle * Math.PI / 180)), 0, canvas.width / 2, canvas.height / 2, '#4c4c4c')
     	line(canvas.width / 2, canvas.height / 2, (canvas.width / 2) + (canvas.height / 2 * Math.tan(aimingAngle * Math.PI / 180)), 0, '#4c4c4c')
+		circle(canvas.width / 2, canvas.height / 2, requiredShotDistance * metersToPixels, '#4c4c4c')
     }
 
 	polygon(canvas.width / 2, canvas.height / 2, 10, '#ffffff') // Draw the player
