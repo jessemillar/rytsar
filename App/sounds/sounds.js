@@ -4,7 +4,6 @@ var sfxEmpty = document.createElement('audio')
 	sfxEmpty.loop = false
 	sfxEmpty.volume = 1
 	sfxEmpty.load()
-	document.body.appendChild(sfxEmpty)
 var sfxFire = document.createElement('audio')
 	sfxFire.src = 'sounds/guns/nineteen/fire.mp3'
 	sfxFire.preload = true
