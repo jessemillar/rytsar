@@ -73,7 +73,7 @@ function error(error)
     }
 }
 
-function crow(lat2, lon2)
+function distance(lat2, lon2)
 {
 	var km = 6371
 	var distance = Math.acos(Math.sin(gps.latitude) * Math.sin(lat2) + 

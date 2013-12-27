@@ -8,7 +8,7 @@ var ctx = canvas.getContext('2d')
 var objects = new Array() // Our array of objects
 
 // Add 0.001 to a GPS decimal to get ~6 meters
-var meterConversion = 100 // ...pixels equals ~0.65 meters
+var metersToPixels = 100 // ...pixels equals ~0.65 meters
 
 // How much motion is required for certain actions
 var rotateRequiredShoot = 425
@@ -27,31 +27,28 @@ var zombieLongitude
 function world() // Run once by the GPS function once we have a lock
 {
 	spawnZombies(100)
-	// zombieLatitude = gps.latitude + 0.0001
-	// zombieLongitude = gps.longitude + 0.0001
 }
 
 setInterval(function() // Main game loop
 {
-	ctx.fillStyle = '#2b2e26'
-	ctx.fillRect(0, 0, canvas.width, canvas.height)
+	blank()
 
 	polygon(canvas.width / 2, canvas.height / 2, 10, '#ffffff') // Draw the player
 
-	var click = bearing(zombieLatitude, zombieLongitude)
-	var distance = crow(zombieLatitude, zombieLongitude) // Distance in meters from the player to an object
+	// Draw the world objects
+	for (var i = 0; i < objects.length; i++) // Set and store the relative bearing for all the objects in the world
+    {
+	    var x = (canvas.width / 2) + (Math.cos(((objects[i].bearing - compass) + 270) * (Math.PI / 180)) * (objects[i].distance * metersToPixels))
+	    var y = (canvas.height / 2) + (Math.sin(((objects[i].bearing - compass) + 270) * (Math.PI / 180)) * (objects[i].distance * metersToPixels))
 
-    // Use radians for sin and cos calculation whenever possible
-    var x = (canvas.width / 2) + (Math.cos(((click - compass) + 270) * (Math.PI / 180)) * (distance * meterConversion))
-    var y = (canvas.height / 2) + (Math.sin(((click - compass) + 270) * (Math.PI / 180)) * (distance * meterConversion))
+	    polygon(x, y, 6, '#ff0000')
+	}
 
-    polygon(x, y, 6, '#ff0000')
-
-    for (var i = 0; i < zombies.length; i++) // Set and store the relative bearing for all the objects in the world
+    for (var i = 0; i < objects.length; i++) // Set and store the relative bearing for all the objects in the world
     {
         if (objects[i].kind == 'enemy')
         {
-            objects[i].bearing = findBearing(gps.latitude, gps.longitude, zombies[i].lat, zombies[i].lon);
+            objects[i].bearing = bearing(gps.latitude, gps.longitude, objects[i].latitude, objects[i].longitude);
         }
     }
 
@@ -60,11 +57,11 @@ setInterval(function() // Main game loop
     {
         if (objects[i].kind == 'enemy')
         {
-            objects[i].distance = findDistance(gps.latitude, gps.longitude, objects[i].latitude, objects[i].longitude);
+            objects[i].distance = distance(objects[i].latitude, objects[i].longitude);
         }
     }
 
-	
+	/*
 	for (var i = 0; i < objects.length; i++) // Beep when looking at a zombie
     {
         if (objects[i].kind == 'enemy')
@@ -88,6 +85,7 @@ setInterval(function() // Main game loop
         	radarHasBeeped = 0
         }
     }
+    */
 
     if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
     {
@@ -106,6 +104,12 @@ setInterval(function() // Main game loop
         }
     }
 }, 1000 / 60) // FPS
+
+function blank()
+{
+	ctx.fillStyle = '#2b2e26'
+	ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
 
 function fire()
 {
@@ -177,6 +181,8 @@ function make(markerKind, markerName, markerLatitude, markerLongitude, markerHea
     object.health = markerHealth
     object.bearing = null
     object.distance = null
+
+    console.log(gps.latitude, gps.longitude, object.latitude, object.longitude)
 
     // Push these values to the database array
 	objects.push(object)
