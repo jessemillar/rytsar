@@ -6,6 +6,7 @@ ejecta.include('sounds/sounds.js')
 var ctx = canvas.getContext('2d')
 
 var objects = new Array() // Our array of objects
+var vision = new Array() // The objects in our field of view
 
 var debug = true
 
@@ -25,16 +26,16 @@ var timeReload = 300
 
 var maxShotDistance = 10
 var minShotDistance = 2
-var aimingAngle = 10
+var fieldOfView = 22
 
 var sweepTick = 0
 var sweepHeight = 4
-var sweepSpeed = 22 // Lower values result in a faster sweep
+var sweepSpeed = 20 // Lower values result in a faster sweep
 var canScan = true
 var timeScan = 500
 
 /*
-ejecta.getText('Test', 'Please enter...something', function(text)
+ejecta.getText('Nickname', 'Give us a friendly name that you want to be known as', function(text)
 {
 	console.log(text)
 })
@@ -42,11 +43,13 @@ ejecta.getText('Test', 'Please enter...something', function(text)
 
 function world() // Run once by the GPS function once we have a lock
 {
-	spawnZombies(7) // 100 seems to be the max if I want ~60 FPS when not in debug mode (which is slower)
+	spawnZombies(75) // 100 seems to be the max if I want ~60 FPS when not in debug mode (which is slower)
 }
 
 setInterval(function() // Main game loop
 {
+	vision.length = 0 // Clear the field of view array on each pass so we get fresh results
+
     for (var i = 0; i < objects.length; i++) // Set and store the relative bearing for all the objects in the world
     {
         if (objects[i].kind == 'enemy')
@@ -55,19 +58,25 @@ setInterval(function() // Main game loop
             objects[i].distance = distance(objects[i].latitude, objects[i].longitude)
 
             // Beep if we're "looking" at a zombie
-	        if ((compass - aimingAngle) < objects[i].bearing && objects[i].bearing < (compass + aimingAngle))
+	        if ((compass - fieldOfView) < objects[i].bearing && objects[i].bearing < (compass + fieldOfView))
             {
                 if (objects[i].distance > minShotDistance && objects[i].distance < maxShotDistance)
                 {
-                	if (debug)
-                	{
-                		console.log('Looking at ' + objects[i].name + ' at ' + objects[i].bearing.toFixed(0) + ' with ' + compass.toFixed(0))
-                	}
+                	vision.push(objects[i])
     	            // sfxBeep.play()
                 }
             }
         }
     }
+
+    if (vision.length > 0) // If we're looking at at least one zombie...
+    {
+		vision.sort(function(a, b) // Sort the vision array to find the zombie that's closest to us
+		{
+			return a.distance - b.distance
+		})
+		console.log(vision[0].name, vision[0].distance, vision[0].health)
+    }    
 
     blank() // Place draw calls after this
 
@@ -85,15 +94,15 @@ setInterval(function() // Main game loop
     // Draw the aiming cone for debugging purposes
     if (debug)
     {
-    	line((canvas.width / 2) - (canvas.height / 2 * Math.tan(aimingAngle.toRad())), 0, canvas.width / 2, canvas.height / 2, '#4c4c4c')
-    	line(canvas.width / 2, canvas.height / 2, (canvas.width / 2) + (canvas.height / 2 * Math.tan(aimingAngle.toRad())), 0, '#4c4c4c')
+    	line((canvas.width / 2) - (canvas.height / 2 * Math.tan(fieldOfView.toRad())), 0, canvas.width / 2, canvas.height / 2, '#4c4c4c')
+    	line(canvas.width / 2, canvas.height / 2, (canvas.width / 2) + (canvas.height / 2 * Math.tan(fieldOfView.toRad())), 0, '#4c4c4c')
 		circle(canvas.width / 2, canvas.height / 2, maxShotDistance * metersToPixels, '#4c4c4c')
 		circle(canvas.width / 2, canvas.height / 2, minShotDistance * metersToPixels, '#4c4c4c')
     }
 
 	polygon(canvas.width / 2, canvas.height / 2, 10, '#ffffff') // Draw the player
 
-	draw()
+	drawObjects()
 
     if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
     {
@@ -109,6 +118,10 @@ setInterval(function() // Main game loop
         if (-rotation.z > rotateRequiredShoot) // Fire
         {
             fire()
+            if (vision.length > 0) // If we're looking at at least one zombie...
+			{
+				shootZombie(vision[0].name, 50)
+			}
         }
     }
 }, 1000 / 60) // FPS
@@ -119,7 +132,7 @@ function blank()
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
-function draw()
+function drawObjects()
 {
 	for (var i = 0; i < objects.length; i++)
     {
@@ -211,13 +224,14 @@ function make(markerKind, markerName, markerLatitude, markerLongitude, markerHea
 	objects.push(object)
 }
 
-function shootZombie(zombieId, damage)
+function shootZombie(zombieName, damage)
 {
+	var zombie = find(zombieName)
     setTimeout(function() // Add a timeout so the zombie doesn't scream instantly
     {
-        zombies[zombieId].health -= damage
+        objects[zombie].health -= damage
         
-        if (zombies[zombieId].health > 0)
+        if (objects[zombie].health > 0)
         {
             sfxGroan.play()
         }
@@ -226,7 +240,7 @@ function shootZombie(zombieId, damage)
             // Kill the zombie if it's health is low enough
             sfxImpact.play()
             // Remove the dead zombie from the database
-            zombies.splice(zombieId, 1)
+            objects.splice(zombie, 1)
         }
     }, 200)
 }

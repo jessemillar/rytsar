@@ -142,3 +142,14 @@ function circle(x, y, radius, color)
 	ctx.strokeStyle = '#4c4c4c'
 	ctx.stroke()
 }
+
+function find(name)
+{
+	for (var i = 0; i < objects.length; i++)
+	{
+		if (objects[i].name == name)
+		{
+			return i
+		}
+	}
+}

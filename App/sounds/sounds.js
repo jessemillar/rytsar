@@ -26,3 +26,19 @@ var sfxBeep = document.createElement('audio')
 	sfxBeep.volume = 0.1
 	sfxBeep.load()
 	document.body.appendChild(sfxBeep)
+
+var sfxGroan = document.createElement('audio')
+	sfxGroan.src = 'sounds/zombie/groan.mp3'
+	sfxGroan.preload = true
+	sfxGroan.loop = false
+	sfxGroan.volume = 1
+	sfxGroan.load()
+	document.body.appendChild(sfxGroan)
+
+var sfxImpact = document.createElement('audio')
+	sfxImpact.src = 'sounds/guns/impact.mp3'
+	sfxImpact.preload = true
+	sfxImpact.loop = false
+	sfxImpact.volume = 1
+	sfxImpact.load()
+	document.body.appendChild(sfxImpact)
