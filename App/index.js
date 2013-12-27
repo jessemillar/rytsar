@@ -8,10 +8,12 @@ var ctx = canvas.getContext('2d')
 var objects = new Array() // Our array of objects
 var vision = new Array() // The objects in our field of view
 
-var debug = true
+var debug = false
 
 // Add 0.001 to a GPS decimal to get ~6 meters
-var metersToPixels = 20 // ...pixels equals ~0.65 meters
+var metersToPixels = 25 // ...pixels equals ~0.65 meters
+var spawnRadiusLatitude = 0.015 // 0.015 is about a half mile in the latitude plane (in San Antonio, TX)
+var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude plane (in San Antonio, TX)
 
 // How much motion is required for certain actions
 var rotateRequiredShoot = 400
@@ -28,22 +30,33 @@ var maxShotDistance = 10
 var minShotDistance = 2
 var fieldOfView = 22
 
+var sweepColor = '#ff0000'
 var sweepTick = 0
 var sweepHeight = 4
 var sweepSpeed = 20 // Lower values result in a faster sweep
-var canScan = true
-var timeScan = 500
-
-/*
-ejecta.getText('Nickname', 'Give us a friendly name that you want to be known as', function(text)
-{
-	console.log(text)
-})
-*/
+var canScan = true // For the sound
+var timeScan = 500 // Also for the sound
 
 function world() // Run once by the GPS function once we have a lock
 {
-	spawnZombies(75) // 100 seems to be the max if I want ~60 FPS when not in debug mode (which is slower)
+	/*
+	var request = new XMLHttpRequest()
+	request.open('GET', 'http://www.jessemillar.com/database/zombits/data.json') // Get the initial object database
+	request.send() // Send the request
+
+	request.onreadystatechange = function() {
+		if (request.readyState == request.DONE && request.status == 200)
+		{
+			console.log(request.responseText) // Print the response
+		}
+	}
+	*/
+
+	spawnZombies(3) // 100 seems to be the max if I want ~60 FPS when not in debug mode (which is slower)
+
+	var request = new XMLHttpRequest()
+	request.open('GET', 'http://www.jessemillar.com/database/zombits/save.php?q=' + JSON.stringify(objects))
+	request.send()
 }
 
 setInterval(function() // Main game loop
@@ -75,21 +88,15 @@ setInterval(function() // Main game loop
 		{
 			return a.distance - b.distance
 		})
-		console.log(vision[0].name, vision[0].distance, vision[0].health)
-    }    
 
-    blank() // Place draw calls after this
+		if (debug)
+		{
+			// console.log(vision[0].name, vision[0].distance, vision[0].health)
+		}
+    }
 
     // Objects are drawn in a stack.  Things drawn last effectively have a greater z-index and appear on top.
-
-    ctx.fillStyle = '#ff434b'
-	ctx.fillRect(0, Math.sin(sweepTick / sweepSpeed) * canvas.height / 2 + canvas.height / 2 - sweepHeight / 2, canvas.width, sweepHeight) // Animate the sweep
-	sweepTick++
-
-	if (Math.sin(sweepTick / sweepSpeed) > 0.999 || Math.sin(sweepTick / sweepSpeed) < -0.999)
-	{
-		scan()
-	}
+    blank() // Place draw calls after this
 
     // Draw the aiming cone for debugging purposes
     if (debug)
@@ -124,6 +131,8 @@ setInterval(function() // Main game loop
 			}
         }
     }
+
+    sweep()
 }, 1000 / 60) // FPS
 
 function blank()
@@ -200,8 +209,8 @@ function spawnZombies(zombieCount)
 {
 	for (var i = 0; i < zombieCount; i++)
 	{
-		var latitude = gps.latitude + ((Math.random() * 0.01) - (Math.random() * 0.01))
-        var longitude = gps.longitude + ((Math.random() * 0.01) - (Math.random() * 0.01))
+		var latitude = gps.latitude + ((Math.random() * spawnRadiusLatitude) - (Math.random() * spawnRadiusLatitude))
+        var longitude = gps.longitude + ((Math.random() * spawnRadiusLongitude) - (Math.random() * spawnRadiusLongitude))
 
 		make('enemy', 'zombie' + i, latitude, longitude, 100)
 	}
@@ -245,15 +254,22 @@ function shootZombie(zombieName, damage)
     }, 200)
 }
 
-function scan()
+function sweep()
 {
-	if (canScan)
-	{
-		sfxBeep.play()
-		canScan = false
+	ctx.fillStyle = sweepColor
+	ctx.fillRect(0, Math.sin(sweepTick / sweepSpeed) * canvas.height / 2 + canvas.height / 2 - sweepHeight / 2, canvas.width, sweepHeight) // Animate the sweep
+	sweepTick++
 
-		setTimeout(function() {
-			canScan = true
-		}, timeScan)
+	if (Math.sin(sweepTick / sweepSpeed) > 0.999 || Math.sin(sweepTick / sweepSpeed) < -0.999)
+	{
+		if (canScan)
+		{
+			sfxBeep.play()
+			canScan = false
+
+			setTimeout(function() {
+				canScan = true
+			}, timeScan)
+		}
 	}
 }

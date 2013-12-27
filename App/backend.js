@@ -108,16 +108,11 @@ function bearing(latitude2, longitude2)
 
 function polygon(x, y, size, color)
 {
-	var sides = 4
-
 	ctx.beginPath()
-	ctx.moveTo(x + size * Math.cos(0), y + size * Math.sin(0))
-
-	for (var i = 1; i <= sides; i += 1)
-	{
-		ctx.lineTo(x + size * Math.cos(i * 2 * Math.PI / sides), y + size * Math.sin(i * 2 * Math.PI / sides))
-	}
-
+	ctx.moveTo(x, y - size)
+	ctx.lineTo(x + size, y)
+	ctx.lineTo(x, y + size)
+	ctx.lineTo(x - size, y)
 	ctx.closePath()
 	ctx.fillStyle = color
 	ctx.fill()
@@ -143,7 +138,7 @@ function circle(x, y, radius, color)
 	ctx.stroke()
 }
 
-function find(name)
+function find(name) // Find a zombie by it's name
 {
 	for (var i = 0; i < objects.length; i++)
 	{
@@ -152,4 +147,12 @@ function find(name)
 			return i
 		}
 	}
+}
+
+function keyboard(title, message)
+{
+	ejecta.getText(title, message, function(text)
+	{
+		console.log(text)
+	})
 }
