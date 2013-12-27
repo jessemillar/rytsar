@@ -61,8 +61,6 @@ function geolocation(position)
     {
     	compass = position.coords.heading
     }
-
-    console.log(compass, gps.accuracy)
 }
 
 function error(error)
