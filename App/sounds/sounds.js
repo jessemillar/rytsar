@@ -20,7 +20,7 @@ var sfxReload = document.createElement('audio')
 	document.body.appendChild(sfxReload)
 
 var sfxBeep = document.createElement('audio')
-	sfxBeep.src = 'sounds/beep.mp3'
+	sfxBeep.src = 'sounds/beep.wav'
 	sfxBeep.preload = true
 	sfxBeep.loop = false
 	sfxBeep.volume = 1

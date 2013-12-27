@@ -99,19 +99,27 @@ function bearing(latitude2, longitude2)
 function polygon(x, y, size, color)
 {
 	var sides = 4
-	var size = size
-	var xCenter = x
-	var yCenter = y
 
 	ctx.beginPath()
-	ctx.moveTo(xCenter +  size * Math.cos(0), yCenter +  size *  Math.sin(0))
+	ctx.moveTo(x + size * Math.cos(0), y + size * Math.sin(0))
 
 	for (var i = 1; i <= sides; i += 1)
 	{
-		ctx.lineTo(xCenter + size * Math.cos(i * 2 * Math.PI / sides), yCenter + size * Math.sin(i * 2 * Math.PI / sides))
+		ctx.lineTo(x + size * Math.cos(i * 2 * Math.PI / sides), y + size * Math.sin(i * 2 * Math.PI / sides))
 	}
 
 	ctx.closePath()
 	ctx.fillStyle = color
 	ctx.fill()
 }
+
+function line(x1, y1, x2, y2, color)
+{
+	ctx.strokeStyle = color
+
+	ctx.beginPath()
+	ctx.moveTo(x1, y1)
+	ctx.lineTo(x2, y2)
+	ctx.lineWidth = 1
+	ctx.stroke()
+}   

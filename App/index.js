@@ -7,12 +7,14 @@ var ctx = canvas.getContext('2d')
 
 var objects = new Array() // Our array of objects
 
+var debug = true
+
 // Add 0.001 to a GPS decimal to get ~6 meters
-var metersToPixels = 100 // ...pixels equals ~0.65 meters
+var metersToPixels = 10 // ...pixels equals ~0.65 meters
 
 // How much motion is required for certain actions
-var rotateRequiredShoot = 425
-var rotateRequiredReload = 500 // Set higher than needed to prevent accidental reloading
+var rotateRequiredShoot = 400
+var rotateRequiredReload = 450 // Set higher than needed to prevent accidental reloading
 
 // These variables help the weapons feel more "realistic" and keep the sound effects in line by setting the "length" of sound effects
 var canShoot = true
@@ -21,8 +23,8 @@ var capacity = 8
 var magazine = capacity
 var timeReload = 300
 
-var zombieLatitude
-var zombieLongitude
+var requiredShotDistance = 10
+var aimingAngle = 10
 
 function world() // Run once by the GPS function once we have a lock
 {
@@ -31,61 +33,40 @@ function world() // Run once by the GPS function once we have a lock
 
 setInterval(function() // Main game loop
 {
-	blank()
-
-	polygon(canvas.width / 2, canvas.height / 2, 10, '#ffffff') // Draw the player
-
-	// Draw the world objects
-	for (var i = 0; i < objects.length; i++) // Set and store the relative bearing for all the objects in the world
-    {
-	    var x = (canvas.width / 2) + (Math.cos(((objects[i].bearing - compass) + 270) * (Math.PI / 180)) * (objects[i].distance * metersToPixels))
-	    var y = (canvas.height / 2) + (Math.sin(((objects[i].bearing - compass) + 270) * (Math.PI / 180)) * (objects[i].distance * metersToPixels))
-
-	    polygon(x, y, 6, '#ff0000')
-	}
-
     for (var i = 0; i < objects.length; i++) // Set and store the relative bearing for all the objects in the world
     {
         if (objects[i].kind == 'enemy')
         {
-            objects[i].bearing = bearing(gps.latitude, gps.longitude, objects[i].latitude, objects[i].longitude);
-        }
-    }
+            objects[i].bearing = bearing(objects[i].latitude, objects[i].longitude)
+            objects[i].distance = distance(objects[i].latitude, objects[i].longitude)
 
-    
-    for (var i = 0; i < objects.length; i++) // Find the distance from the player to the objects in the world
-    {
-        if (objects[i].kind == 'enemy')
-        {
-            objects[i].distance = distance(objects[i].latitude, objects[i].longitude);
-        }
-    }
-
-	/*
-	for (var i = 0; i < objects.length; i++) // Beep when looking at a zombie
-    {
-        if (objects[i].kind == 'enemy')
-        {
-            // Check if we're withing the required accuracy 'cone'
-	        if ((Math.abs(objects[i].bearing) - aimingAngle) < Math.abs(bearing) && Math.abs(bearing) < (Math.abs(objects[i].bearing) + aimingAngle))
+            // Beep if we're "looking" at a zombie
+	        if ((compass - aimingAngle) < objects[i].bearing && objects[i].bearing < (compass + aimingAngle))
             {
-                // Only beep if we're close enough since we don't want to beep for a zombie that's across the country from us
                 if (objects[i].distance < requiredShotDistance)
                 {
-                	if (radarHasBeeped == 0)
+                	if (debug)
                 	{
-    	            	sfxBeep.play()
-    	            	radarHasBeeped = 1
-    	            }
+                		console.log('Looking at ' + objects[i].name + ' at ' + objects[i].bearing.toFixed(0) + ' with ' + compass.toFixed(0))
+                	}
+    	            // sfxBeep.play()
                 }
             }
         }
-        else
-        {
-        	radarHasBeeped = 0
-        }
     }
-    */
+
+    blank()
+
+    // Draw the aiming cone for debugging purposes
+    if (debug)
+    {
+    	line((canvas.width / 2) - (canvas.height / 2 * Math.tan(aimingAngle * Math.PI / 180)), 0, canvas.width / 2, canvas.height / 2, '#4c4c4c')
+    	line(canvas.width / 2, canvas.height / 2, (canvas.width / 2) + (canvas.height / 2 * Math.tan(aimingAngle * Math.PI / 180)), 0, '#4c4c4c')
+    }
+
+	polygon(canvas.width / 2, canvas.height / 2, 10, '#ffffff') // Draw the player
+
+	draw()
 
     if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
     {
@@ -109,6 +90,23 @@ function blank()
 {
 	ctx.fillStyle = '#2b2e26'
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
+
+function draw()
+{
+	for (var i = 0; i < objects.length; i++)
+    {
+	    var x = (canvas.width / 2) + (Math.cos(((objects[i].bearing - compass) + 270) * (Math.PI / 180)) * (objects[i].distance * metersToPixels))
+	    var y = (canvas.height / 2) + (Math.sin(((objects[i].bearing - compass) + 270) * (Math.PI / 180)) * (objects[i].distance * metersToPixels))
+
+	    if (debug)
+	    {
+	    	ctx.fillStyle = '#ffffff';
+    		ctx.fillText(objects[i].name, x + 9, y + 2)
+	    }
+
+	    polygon(x, y, 6, '#ff0000')
+	}
 }
 
 function fire()
@@ -181,8 +179,6 @@ function make(markerKind, markerName, markerLatitude, markerLongitude, markerHea
     object.health = markerHealth
     object.bearing = null
     object.distance = null
-
-    console.log(gps.latitude, gps.longitude, object.latitude, object.longitude)
 
     // Push these values to the database array
 	objects.push(object)
