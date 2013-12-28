@@ -1,11 +1,9 @@
 var debug = true
 
 ejecta.include('backend.js') // This gives us access to readable sensor variables
-
 ejecta.include('sounds/sounds.js')
 
 var ctx = canvas.getContext('2d')
-
 var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variable we'll use to keep track of the server
 
 var enemies = new Array() // Our array of zombies
@@ -16,66 +14,60 @@ var self = new Object() // The object we push to the server with data about the 
 
 var vision = new Array() // The things in our field of view
 
-var renderDistance = 15
-
-// Add 0.001 to a GPS decimal to get ~6 meters
+var renderDistance = 15 // Distance in "meters"
+var maxShotDistance = 10 // Distance in "meters"
+var minShotDistance = 2 // Distance in "meters"
+var fieldOfView = 23 // In degrees
 var metersToPixels = 20 // ...pixels equals ~0.65 meters
 
 // How much motion is required for certain actions
 var rotateRequiredShoot = 400
 var rotateRequiredReload = 450 // Set higher than needed to prevent accidental reloading
 
-// These variables help the weapons feel more "realistic" and keep the sound effects in line by setting the "length" of sound effects
+// Keep the sound effects in line by setting their "length"
 var canShoot = true
-var timeCool = 200
+var timeShoot = 200
+var timeReload = 300 // canShoot manages timeReload
+var canScan = true
+var timeScan = 500 // Set higher than needed for safety
+
+// General gun variables
 var capacity = 8
 var magazine = capacity
-var timeReload = 300
 
-var maxShotDistance = 10
-var minShotDistance = 2
-var fieldOfView = 23
-
+// UI values
 var canvasColor = '#2a303a'
-
 var sweepColor = '#ffffff'
-var sweepTick = 0
 var sweepHeight = 4
-var sweepSpeed = 20 // Lower values result in a faster sweep
-var canScan = true // For the sound
-var timeScan = 500 // Also for the sound
 
-function world() // Run once by the GPS function once we have a lock
+// Radar sweep variables
+var sweepTick = 0
+var sweepSpeed = 20 // Lower values result in a faster sweep
+
+socket.addEventListener('message', function(message) // Keep track of messages coming from the server
+{
+	enemies = JSON.parse(message.data) // Right now, the only messages coming refer to zombies
+})
+
+function gps() // Run once by the GPS function once we have a lock
 {
 	self.id = Math.floor(Math.random() * 90000) + 10000 // Generate a five-digit-long id for this user
 	self.latitude = gps.latitude
 	self.longitude = gps.longitude
 
-	socket.addEventListener('message', function(message)
-	{
-		enemies = JSON.parse(message.data)
-	})
+	socket.send(JSON.stringify(self)) // Tell the server where the player is
 }
 
 setInterval(function() // Server update loop
 {
-	socket.send(JSON.stringify(self)) // Tell the server where the player is	
+	socket.send(JSON.stringify(self)) // Tell the server on a regular basis where the player is	
 }, 2000) // Update once every two seconds
-
-setInterval(function() // Zombie data update loop
-{
-	for (var i = 0; i < enemies.length; i++) // Beep if we're "looking" at a zombie
-    {
-	    enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
-		enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
-	}
-}, 10000) // Update once every ten seconds
 
 setInterval(function() // Main game loop
 {
 	vision.length = 0 // Clear the field of view array on each pass so we get fresh results
 
-    for (var i = 0; i < enemies.length; i++) // Beep if we're "looking" at a zombie
+    for (var i = 0; i < enemies.length; i++) // Do stuff with the zombies
     {
     	if (enemies[i].distance < renderDistance)
     	{
@@ -102,15 +94,13 @@ setInterval(function() // Main game loop
 
 		if (debug)
 		{
-			// console.log(vision[0].name, vision[0].distance, vision[0].health)
+			console.log(vision[0].name, vision[0].distance, vision[0].health)
 		}
     }
 
-    // enemies are drawn in a stack.  Things drawn last effectively have a greater z-index and appear on top.
     blank() // Place draw calls after this
 
-    // Draw the aiming cone for debugging purposes
-    if (debug)
+    if (debug) // Draw the aiming cone for debugging purposes
     {
     	line((canvas.width / 2) - (canvas.height / 2 * Math.tan(fieldOfView.toRad())), 0, canvas.width / 2, canvas.height / 2, '#4c4c4c')
     	line(canvas.width / 2, canvas.height / 2, (canvas.width / 2) + (canvas.height / 2 * Math.tan(fieldOfView.toRad())), 0, '#4c4c4c')
@@ -120,7 +110,7 @@ setInterval(function() // Main game loop
 
 	polygon(canvas.width / 2, canvas.height / 2, 10, '#ffffff') // Draw the player
 
-	drawEnemies()
+	drawEnemies() // Duh
 
     if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
     {
@@ -154,8 +144,6 @@ function blank()
 
 function drawEnemies()
 {
-	// console.log(JSON.stringify(enemies))
-
 	for (var i = 0; i < enemies.length; i++)
     {
     	if (enemies[i].distance < renderDistance)
@@ -190,7 +178,7 @@ function fire()
 
 	        setTimeout(function() {
 	            canShoot = true
-	        }, timeCool)
+	        }, timeShoot)
 	    }
 	    else
 	    {
@@ -199,7 +187,7 @@ function fire()
 
 	        setTimeout(function() {
 	            canShoot = true
-	        }, timeCool)
+	        }, timeShoot)
 	    }
 	}
 }

@@ -44,7 +44,7 @@ function geolocation(position)
 	{
 		if (gps.latitude && gps.longitude)
 		{
-			world()
+			gps()
 			genesis = true
 		}
 	}
