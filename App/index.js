@@ -1,4 +1,4 @@
-var debug = false
+var debug = true
 
 ejecta.include('backend.js') // This gives us access to readable sensor variables
 
@@ -6,18 +6,20 @@ ejecta.include('sounds/sounds.js')
 
 var ctx = canvas.getContext('2d')
 
-var socket = new WebSocket('ws://www.jessemillar.com:8787') // Connect to the server
+var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variable we'll use to keep track of the server
 
 var enemies = new Array() // Our array of zombies
-var serverEnemies = new Array() // The zombie array we "download" from the server
 var objects = new Array() // Monitor the objects placed throughout the world
 var players = new Array() // Keep track of the players "logged in" and their coordinates
-var self = new Object()
+
+var self = new Object() // The object we push to the server with data about the player/client
 
 var vision = new Array() // The things in our field of view
 
+var renderDistance = 15
+
 // Add 0.001 to a GPS decimal to get ~6 meters
-var metersToPixels = 25 // ...pixels equals ~0.65 meters
+var metersToPixels = 20 // ...pixels equals ~0.65 meters
 
 // How much motion is required for certain actions
 var rotateRequiredShoot = 400
@@ -32,7 +34,7 @@ var timeReload = 300
 
 var maxShotDistance = 10
 var minShotDistance = 2
-var fieldOfView = 22
+var fieldOfView = 23
 
 var canvasColor = '#2a303a'
 
@@ -51,21 +53,23 @@ function world() // Run once by the GPS function once we have a lock
 
 	socket.addEventListener('message', function(message)
 	{
-		serverEnemies = JSON.parse(message.data)
+		enemies = JSON.parse(message.data)
 	})
 }
 
-setInterval(function() // Server update loop and zombie calculation loop for higher FPS
+setInterval(function() // Server update loop
 {
-	socket.send(JSON.stringify(self)) // Tell the server where the player is
+	socket.send(JSON.stringify(self)) // Tell the server where the player is	
+}, 2000) // Update once every two seconds
 
-	enemies = serverEnemies
-	for (var i = 0; i < serverEnemies.length; i++) // Set and store the relative bearing and distance for all the enemies in the world
-	{
-		enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
+setInterval(function() // Zombie data update loop
+{
+	for (var i = 0; i < enemies.length; i++) // Beep if we're "looking" at a zombie
+    {
+	    enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
 		enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
 	}
-}, 1000) // Update once every second
+}, 10000) // Update once every ten seconds
 
 setInterval(function() // Main game loop
 {
@@ -73,6 +77,12 @@ setInterval(function() // Main game loop
 
     for (var i = 0; i < enemies.length; i++) // Beep if we're "looking" at a zombie
     {
+    	if (enemies[i].distance < renderDistance)
+    	{
+    		enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
+			enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
+    	}
+
         if ((compass - fieldOfView) < enemies[i].bearing && enemies[i].bearing < (compass + fieldOfView))
         {
             if (enemies[i].distance > minShotDistance && enemies[i].distance < maxShotDistance)
@@ -148,16 +158,19 @@ function drawEnemies()
 
 	for (var i = 0; i < enemies.length; i++)
     {
-	    var x = (canvas.width / 2) + (Math.cos(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
-	    var y = (canvas.height / 2) + (Math.sin(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
+    	if (enemies[i].distance < renderDistance)
+    	{
+		    var x = (canvas.width / 2) + (Math.cos(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
+		    var y = (canvas.height / 2) + (Math.sin(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
 
-	    if (debug)
-	    {
-	    	ctx.fillStyle = '#ffffff';
-    		ctx.fillText(enemies[i].name, x + 9, y + 2)
-	    }
+		    if (debug)
+		    {
+		    	ctx.fillStyle = '#ffffff';
+	    		ctx.fillText(enemies[i].name, x + 9, y + 2)
+		    }
 
-	    polygon(x, y, 6, '#ff0000')
+		    polygon(x, y, 6, '#ff0000')
+		}
 	}
 }
 
@@ -166,7 +179,7 @@ function fire()
 	if (canShoot)
     {
     	// Flash the screen
-    	ctx.fillStyle = '#ff434b'
+    	ctx.fillStyle = sweepColor
     	ctx.fillRect(0, 0, canvas.width, canvas.height)
 
 	    if (magazine > 0)
@@ -235,7 +248,7 @@ function sweep()
 	ctx.fillRect(0, Math.sin(sweepTick / sweepSpeed) * canvas.height / 2 + canvas.height / 2 - sweepHeight / 2, canvas.width, sweepHeight) // Animate the sweep
 	sweepTick++
 
-	if (Math.sin(sweepTick / sweepSpeed) > 0.999 || Math.sin(sweepTick / sweepSpeed) < -0.999)
+	if (Math.sin(Math.sin(sweepTick / sweepSpeed) < -0.999)) // Beep only at the top of the screen
 	{
 		if (canScan)
 		{

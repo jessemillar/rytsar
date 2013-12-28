@@ -5,7 +5,7 @@ var enemies = new Array()
 var objects = new Array()
 var players = new Array()
 
-var zombieCount = 30 // 100 seems to be the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
+var zombieCount = 35 // 100 seems to be the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
 var spawnRadiusLatitude = 0.015 // 0.015 is about a half mile in the latitude plane (in San Antonio, TX)
 var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude plane (in San Antonio, TX)
 
@@ -55,7 +55,8 @@ wss.on('connection', function(socket) {
 
 function sayPopulation()
 {
-	console.log(players.length + ' player(s) connected with ' + enemies.length + ' zombie(s)')
+    var date = new Date()
+	console.log(players.length + ' player(s) connected in a world with ' + enemies.length + ' zombie(s) at ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ' on ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear())
 }
 
 function updateEnemies()

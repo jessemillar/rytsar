@@ -83,20 +83,20 @@ Number.prototype.toDeg = function()
 	return this * 180 / Math.PI
 }
 
-function distance(lat2, lon2)
+function distance(latitude, longitude)
 {
 	var km = 6371
-	var distance = Math.acos(Math.sin(gps.latitude) * Math.sin(lat2) + 
-                   Math.cos(gps.latitude) * Math.cos(lat2) *
-            	   Math.cos(lon2 - gps.longitude)) * km
+	var distance = Math.acos(Math.sin(gps.latitude) * Math.sin(latitude) + 
+                   Math.cos(gps.latitude) * Math.cos(latitude) *
+            	   Math.cos(longitude - gps.longitude)) * km
 	return distance
 }
 
-function bearing(latitude2, longitude2)
+function bearing(latitude, longitude)
 {
 	var lat1 = gps.latitude.toRad()
-	var lat2 = latitude2.toRad()
-	var dLon = (longitude2 - gps.longitude).toRad()
+	var lat2 = latitude.toRad()
+	var dLon = (longitude - gps.longitude).toRad()
 
 	var y = Math.sin(dLon) * Math.cos(lat2)
 	var x = Math.cos(lat1) * Math.sin(lat2) -
