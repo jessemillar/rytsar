@@ -51,8 +51,7 @@ function world() // Run once by the GPS function once we have a lock
 
 	socket.addEventListener('message', function(message)
 	{
-		// console.log(message.data)
-		enemies = message.data
+		enemies = JSON.parse(message.data)
 	})
 }
 
