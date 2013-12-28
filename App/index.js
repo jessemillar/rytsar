@@ -1,5 +1,6 @@
-// This gives us access to readable sensor variables
-ejecta.include('backend.js')
+var debug = false
+
+ejecta.include('backend.js') // This gives us access to readable sensor variables
 
 ejecta.include('sounds/sounds.js')
 
@@ -8,13 +9,12 @@ var ctx = canvas.getContext('2d')
 var socket = new WebSocket('ws://www.jessemillar.com:8787') // Connect to the server
 
 var enemies = new Array() // Our array of zombies
+var serverEnemies = new Array() // The zombie array we "download" from the server
 var objects = new Array() // Monitor the objects placed throughout the world
 var players = new Array() // Keep track of the players "logged in" and their coordinates
 var self = new Object()
 
 var vision = new Array() // The things in our field of view
-
-var debug = true
 
 // Add 0.001 to a GPS decimal to get ~6 meters
 var metersToPixels = 25 // ...pixels equals ~0.65 meters
@@ -51,26 +51,28 @@ function world() // Run once by the GPS function once we have a lock
 
 	socket.addEventListener('message', function(message)
 	{
-		enemies = JSON.parse(message.data)
+		serverEnemies = JSON.parse(message.data)
 	})
 }
 
-setInterval(function() // Server update loop
+setInterval(function() // Server update loop and zombie calculation loop for higher FPS
 {
-	// console.log('sending: ' + JSON.stringify(self))
-	socket.send(JSON.stringify(self))
+	socket.send(JSON.stringify(self)) // Tell the server where the player is
+
+	enemies = serverEnemies
+	for (var i = 0; i < serverEnemies.length; i++) // Set and store the relative bearing and distance for all the enemies in the world
+	{
+		enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
+		enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
+	}
 }, 1000) // Update once every second
 
 setInterval(function() // Main game loop
 {
 	vision.length = 0 // Clear the field of view array on each pass so we get fresh results
 
-    for (var i = 0; i < enemies.length; i++) // Set and store the relative bearing for all the enemies in the world
+    for (var i = 0; i < enemies.length; i++) // Beep if we're "looking" at a zombie
     {
-        enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
-        enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
-
-        // Beep if we're "looking" at a zombie
         if ((compass - fieldOfView) < enemies[i].bearing && enemies[i].bearing < (compass + fieldOfView))
         {
             if (enemies[i].distance > minShotDistance && enemies[i].distance < maxShotDistance)

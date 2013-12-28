@@ -5,7 +5,7 @@ var enemies = new Array()
 var objects = new Array()
 var players = new Array()
 
-var zombieCount = 50 // 100 seems to be the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
+var zombieCount = 30 // 100 seems to be the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
 var spawnRadiusLatitude = 0.015 // 0.015 is about a half mile in the latitude plane (in San Antonio, TX)
 var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude plane (in San Antonio, TX)
 
@@ -21,24 +21,25 @@ wss.on('connection', function(socket) {
     {
     	var data = JSON.parse(message)
 
-        if (players.length == 0) // If we're on an empty server
-        {
-        	players.push(data)
-        }
-        else
-        {
-        	for (var i = 0; i < players.length; i++) // If we're not on an empty server
+    	if (players.length == 0)
+    	{
+    		players.push(data)
+    	}
+    	else
+    	{
+    		for (var i = 0; i < players.length; i++) // If we're not on an empty server
 	        {
-	        	if (players[i].id == data.id) // Don't duplicate the player
+	        	if (data.id == players[i].id) // Don't duplicate the player
 	        	{
 	        		break
 	        	}
-	        	else if (i == players.length) // Add the player if he doesn't exist
+	        	
+	        	if (i + 1 == players.length) // Add the player if he doesn't exist
 	        	{
 	        		players.push(data)
 	        	}
 	        }
-	    }
+    	}
 
         updateEnemies()
         sayPopulation()
