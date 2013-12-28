@@ -5,15 +5,19 @@ ejecta.include('sounds/sounds.js')
 
 var ctx = canvas.getContext('2d')
 
-var objects = new Array() // Our array of objects
-var vision = new Array() // The objects in our field of view
+var socket = new WebSocket('ws://www.jessemillar.com:8787') // Connect to the server
+
+var enemies = new Array() // Our array of zombies
+var objects = new Array() // Monitor the objects placed throughout the world
+var players = new Array() // Keep track of the players "logged in" and their coordinates
+var self = new Object()
+
+var vision = new Array() // The things in our field of view
 
 var debug = false
 
 // Add 0.001 to a GPS decimal to get ~6 meters
 var metersToPixels = 25 // ...pixels equals ~0.65 meters
-var spawnRadiusLatitude = 0.015 // 0.015 is about a half mile in the latitude plane (in San Antonio, TX)
-var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude plane (in San Antonio, TX)
 
 // How much motion is required for certain actions
 var rotateRequiredShoot = 400
@@ -39,52 +43,40 @@ var timeScan = 500 // Also for the sound
 
 function world() // Run once by the GPS function once we have a lock
 {
-	/*
-	var request = new XMLHttpRequest()
-	request.open('GET', 'http://www.jessemillar.com/database/zombits/data.json') // Get the initial object database
-	request.send() // Send the request
-
-	request.onreadystatechange = function() {
-		if (request.readyState == request.DONE && request.status == 200)
-		{
-			console.log(request.responseText) // Print the response
-		}
-	}
-	*/
-
-	spawnZombies(1) // 100 seems to be the max if I want ~60 FPS when not in debug mode (which is slower)
-
-	var socket = new WebSocket('ws://www.jessemillar.com:8787')
-
-	socket.addEventListener('open', function()
-	{
-		socket.send(JSON.stringify(objects))
-	})
+	self.id = Math.floor(Math.random() * 90000) + 10000 // Generate a five-digit-long id for this user
+	self.latitude = gps.latitude
+	self.longitude = gps.longitude
 
 	socket.addEventListener('message', function(message)
 	{
 		console.log(message.data)
-		objects = message.data
+		enemies = JSON.parse(message.data)
 	})
 }
+
+setInterval(function() // Server update loop
+{
+	console.log('sending: ' + JSON.stringify(self))
+	socket.send(JSON.stringify(self))
+}, 1000) // Update once every second
 
 setInterval(function() // Main game loop
 {
 	vision.length = 0 // Clear the field of view array on each pass so we get fresh results
 
-    for (var i = 0; i < objects.length; i++) // Set and store the relative bearing for all the objects in the world
+    for (var i = 0; i < enemies.length; i++) // Set and store the relative bearing for all the enemies in the world
     {
-        if (objects[i].kind == 'enemy')
+        if (enemies[i].kind == 'enemy')
         {
-            objects[i].bearing = bearing(objects[i].latitude, objects[i].longitude)
-            objects[i].distance = distance(objects[i].latitude, objects[i].longitude)
+            enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
+            enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
 
             // Beep if we're "looking" at a zombie
-	        if ((compass - fieldOfView) < objects[i].bearing && objects[i].bearing < (compass + fieldOfView))
+	        if ((compass - fieldOfView) < enemies[i].bearing && enemies[i].bearing < (compass + fieldOfView))
             {
-                if (objects[i].distance > minShotDistance && objects[i].distance < maxShotDistance)
+                if (enemies[i].distance > minShotDistance && enemies[i].distance < maxShotDistance)
                 {
-                	vision.push(objects[i])
+                	vision.push(enemies[i])
     	            // sfxBeep.play()
                 }
             }
@@ -104,7 +96,7 @@ setInterval(function() // Main game loop
 		}
     }
 
-    // Objects are drawn in a stack.  Things drawn last effectively have a greater z-index and appear on top.
+    // enemies are drawn in a stack.  Things drawn last effectively have a greater z-index and appear on top.
     blank() // Place draw calls after this
 
     // Draw the aiming cone for debugging purposes
@@ -118,7 +110,7 @@ setInterval(function() // Main game loop
 
 	polygon(canvas.width / 2, canvas.height / 2, 10, '#ffffff') // Draw the player
 
-	drawObjects()
+	drawenemies()
 
     if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
     {
@@ -150,17 +142,17 @@ function blank()
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
-function drawObjects()
+function drawenemies()
 {
-	for (var i = 0; i < objects.length; i++)
+	for (var i = 0; i < enemies.length; i++)
     {
-	    var x = (canvas.width / 2) + (Math.cos(((objects[i].bearing - compass) + 270).toRad()) * (objects[i].distance * metersToPixels))
-	    var y = (canvas.height / 2) + (Math.sin(((objects[i].bearing - compass) + 270).toRad()) * (objects[i].distance * metersToPixels))
+	    var x = (canvas.width / 2) + (Math.cos(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
+	    var y = (canvas.height / 2) + (Math.sin(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
 
 	    if (debug)
 	    {
 	    	ctx.fillStyle = '#ffffff';
-    		ctx.fillText(objects[i].name, x + 9, y + 2)
+    		ctx.fillText(enemies[i].name, x + 9, y + 2)
 	    }
 
 	    polygon(x, y, 6, '#ff0000')
@@ -214,42 +206,14 @@ function reload()
 	}
 }
 
-function spawnZombies(zombieCount)
-{
-	for (var i = 0; i < zombieCount; i++)
-	{
-		var latitude = gps.latitude + ((Math.random() * spawnRadiusLatitude) - (Math.random() * spawnRadiusLatitude))
-        var longitude = gps.longitude + ((Math.random() * spawnRadiusLongitude) - (Math.random() * spawnRadiusLongitude))
-
-		make('enemy', 'zombie' + i, latitude, longitude, 100)
-	}
-}
-
-function make(markerKind, markerName, markerLatitude, markerLongitude, markerHealth)
-{
-    // Make an object with the function's values
-	var object = new Object()
-
-    object.kind = markerKind
-    object.name = markerName
-    object.latitude = markerLatitude
-    object.longitude = markerLongitude
-    object.health = markerHealth
-    object.bearing = null
-    object.distance = null
-
-    // Push these values to the database array
-	objects.push(object)
-}
-
 function shootZombie(zombieName, damage)
 {
 	var zombie = find(zombieName)
     setTimeout(function() // Add a timeout so the zombie doesn't scream instantly
     {
-        objects[zombie].health -= damage
+        enemies[zombie].health -= damage
         
-        if (objects[zombie].health > 0)
+        if (enemies[zombie].health > 0)
         {
             sfxGroan.play()
         }
@@ -258,7 +222,7 @@ function shootZombie(zombieName, damage)
             // Kill the zombie if it's health is low enough
             sfxImpact.play()
             // Remove the dead zombie from the database
-            objects.splice(zombie, 1)
+            enemies.splice(zombie, 1)
         }
     }, 200)
 }

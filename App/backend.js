@@ -94,16 +94,16 @@ function distance(lat2, lon2)
 
 function bearing(latitude2, longitude2)
 {
-	var lat1 = gps.latitude * (Math.PI / 180)
-	var lat2 = latitude2 * (Math.PI / 180)
-	var dLon = (longitude2 - gps.longitude) * (Math.PI / 180)
+	var lat1 = gps.latitude.toRad()
+	var lat2 = latitude2.toRad()
+	var dLon = (longitude2 - gps.longitude).toRad()
 
 	var y = Math.sin(dLon) * Math.cos(lat2)
 	var x = Math.cos(lat1) * Math.sin(lat2) -
 			Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon)
 	var bearing = Math.atan2(y, x)
 
-	return (bearing * (180 / Math.PI) + 360) % 360
+	return (bearing.toDeg() + 360) % 360
 }
 
 function polygon(x, y, size, color)
@@ -153,6 +153,6 @@ function keyboard(title, message)
 {
 	ejecta.getText(title, message, function(text)
 	{
-		console.log(text)
+		return text
 	})
 }
