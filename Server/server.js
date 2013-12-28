@@ -5,37 +5,69 @@ var enemies = new Array()
 var objects = new Array()
 var players = new Array()
 
+var zombieCount = 50 // 100 seems to be the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
 var spawnRadiusLatitude = 0.015 // 0.015 is about a half mile in the latitude plane (in San Antonio, TX)
 var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude plane (in San Antonio, TX)
 
-console.log('Zombits server started')
-
-if (enemies.length == 0 && players.length > 0)
-{
-	var zombieCount = 50 // 100 seems to be the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
-	for (var i = 0; i < zombieCount; i++)
-	{
-		var latitude = players[0].latitude + ((Math.random() * spawnRadiusLatitude) - (Math.random() * spawnRadiusLatitude))
-	    var longitude = players[0].longitude + ((Math.random() * spawnRadiusLongitude) - (Math.random() * spawnRadiusLongitude))
-
-		make('enemy', 'zombie' + i, latitude, longitude, 100)
-	}
-}
+console.log(players.length + ' player(s) connected')
 
 wss.on('connection', function(socket) {
-	if (objects.length > 0)
+	if (enemies.length > 0) // If there are zombies, send the data to each new client when it connects
 	{
-		socket.send(objects)
-		console.log('sent: ' + JSON.stringify(objects))
+		socket.send(enemies)
 	}
 
-    socket.on('message', function(message)
+    socket.on('message', function(message) // Do the following whenever the server receives a message
     {
+    	checkZombies()
+
+    	var data = JSON.parse(message)
         console.log('received: ' + message)
-        objects = message.objects
-        socket.send(message)
+
+        if (players.length == 0) // If we're on an empty server
+        {
+        	players.push(data)
+        }
+        else
+        {
+        	for (var i = 0; i < players.length; i++) // If we're not on an empty server
+	        {
+	        	if (players[i].id == data.id)
+	        	{
+	        		break
+	        	}
+	        	else if (i == players.length)
+	        	{
+	        		players.push(data)
+	        	}
+	        }
+	    }
+        console.log(players.length + ' player(s) connected')
+        // console.log('sending: ' + JSON.stringify(enemies))
+		socket.send(JSON.stringify(enemies))
+    })
+
+    socket.on('close', function() // Wipe the player database when someone disconnects so it can rebuilt with only active players
+    {
+    	players.length = 0
+    	console.log(players.length + ' player(s) connected')
     })
 })
+
+function checkZombies()
+{
+	console.log(enemies.length + ' enemies exist')
+	if (enemies.length == 0 && players.length > 0)
+	{
+		for (var i = 0; i < zombieCount; i++)
+		{
+			var latitude = players[0].latitude + ((Math.random() * spawnRadiusLatitude) - (Math.random() * spawnRadiusLatitude))
+		    var longitude = players[0].longitude + ((Math.random() * spawnRadiusLongitude) - (Math.random() * spawnRadiusLongitude))
+
+			make('enemy', 'zombie' + i, latitude, longitude, 100)
+		}
+	}
+}
 
 function make(markerKind, markerName, markerLatitude, markerLongitude, markerHealth)
 {
@@ -62,37 +94,4 @@ function make(markerKind, markerName, markerLatitude, markerLongitude, markerHea
     {
     	// Do stuff
     }	
-}
-
-function distance(latitude1, longitude1, latitude2, longitude2)
-{
-	var km = 6371
-	var distance = Math.acos(Math.sin(latitude1) * Math.sin(latitude2) + 
-                   Math.cos(latitude1) * Math.cos(latitude2) *
-            	   Math.cos(longitude2 - longitude1)) * km
-	return distance
-}
-
-function bearing(latitude1, longitude1, latitude2, longitude2)
-{
-	var lat1 = latitude1.toRad()
-	var lat2 = latitude2.toRad()
-	var dLon = (longitude2 - longitude1).toRad()
-
-	var y = Math.sin(dLon) * Math.cos(lat2)
-	var x = Math.cos(lat1) * Math.sin(lat2) -
-			Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon)
-	var bearing = Math.atan2(y, x)
-
-	return (bearing.toDeg() + 360) % 360
-}
-
-Number.prototype.toRad = function()
-{
-	return this * Math.PI / 180
-}
-
-Number.prototype.toDeg = function()
-{
-	return this * 180 / Math.PI
 }

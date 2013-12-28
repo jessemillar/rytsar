@@ -148,11 +148,3 @@ function find(name) // Find a zombie by it's name
 		}
 	}
 }
-
-function keyboard(title, message)
-{
-	ejecta.getText(title, message, function(text)
-	{
-		return text
-	})
-}

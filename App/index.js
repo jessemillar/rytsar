@@ -14,7 +14,7 @@ var self = new Object()
 
 var vision = new Array() // The things in our field of view
 
-var debug = false
+var debug = true
 
 // Add 0.001 to a GPS decimal to get ~6 meters
 var metersToPixels = 25 // ...pixels equals ~0.65 meters
@@ -34,7 +34,9 @@ var maxShotDistance = 10
 var minShotDistance = 2
 var fieldOfView = 22
 
-var sweepColor = '#ff0000'
+var canvasColor = '#2a303a'
+
+var sweepColor = '#ffffff'
 var sweepTick = 0
 var sweepHeight = 4
 var sweepSpeed = 20 // Lower values result in a faster sweep
@@ -49,14 +51,14 @@ function world() // Run once by the GPS function once we have a lock
 
 	socket.addEventListener('message', function(message)
 	{
-		console.log(message.data)
-		enemies = JSON.parse(message.data)
+		// console.log(message.data)
+		enemies = message.data
 	})
 }
 
 setInterval(function() // Server update loop
 {
-	console.log('sending: ' + JSON.stringify(self))
+	// console.log('sending: ' + JSON.stringify(self))
 	socket.send(JSON.stringify(self))
 }, 1000) // Update once every second
 
@@ -66,19 +68,16 @@ setInterval(function() // Main game loop
 
     for (var i = 0; i < enemies.length; i++) // Set and store the relative bearing for all the enemies in the world
     {
-        if (enemies[i].kind == 'enemy')
-        {
-            enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
-            enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
+        enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
+        enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
 
-            // Beep if we're "looking" at a zombie
-	        if ((compass - fieldOfView) < enemies[i].bearing && enemies[i].bearing < (compass + fieldOfView))
+        // Beep if we're "looking" at a zombie
+        if ((compass - fieldOfView) < enemies[i].bearing && enemies[i].bearing < (compass + fieldOfView))
+        {
+            if (enemies[i].distance > minShotDistance && enemies[i].distance < maxShotDistance)
             {
-                if (enemies[i].distance > minShotDistance && enemies[i].distance < maxShotDistance)
-                {
-                	vision.push(enemies[i])
-    	            // sfxBeep.play()
-                }
+            	vision.push(enemies[i])
+	            // sfxBeep.play()
             }
         }
     }
@@ -110,7 +109,7 @@ setInterval(function() // Main game loop
 
 	polygon(canvas.width / 2, canvas.height / 2, 10, '#ffffff') // Draw the player
 
-	drawenemies()
+	drawEnemies()
 
     if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
     {
@@ -138,12 +137,14 @@ setInterval(function() // Main game loop
 
 function blank()
 {
-	ctx.fillStyle = '#2b2e26'
+	ctx.fillStyle = canvasColor
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
-function drawenemies()
+function drawEnemies()
 {
+	// console.log(JSON.stringify(enemies))
+
 	for (var i = 0; i < enemies.length; i++)
     {
 	    var x = (canvas.width / 2) + (Math.cos(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
