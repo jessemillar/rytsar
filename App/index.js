@@ -52,11 +52,20 @@ function world() // Run once by the GPS function once we have a lock
 	}
 	*/
 
-	spawnZombies(3) // 100 seems to be the max if I want ~60 FPS when not in debug mode (which is slower)
+	spawnZombies(1) // 100 seems to be the max if I want ~60 FPS when not in debug mode (which is slower)
 
-	var request = new XMLHttpRequest()
-	request.open('GET', 'http://www.jessemillar.com/database/zombits/save.php?q=' + JSON.stringify(objects))
-	request.send()
+	var socket = new WebSocket('ws://www.jessemillar.com:8787')
+
+	socket.addEventListener('open', function()
+	{
+		socket.send(JSON.stringify(objects))
+	})
+
+	socket.addEventListener('message', function(message)
+	{
+		console.log(message.data)
+		objects = message.data
+	})
 }
 
 setInterval(function() // Main game loop
