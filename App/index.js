@@ -110,7 +110,7 @@ setInterval(function() // Main game loop
 		}
     }
 
-    blank() // Place draw calls after this
+    blank(canvasColor) // Place draw calls after this
 
     if (debug) // Draw the aiming cone for debugging purposes
     {
@@ -145,7 +145,7 @@ setInterval(function() // Main game loop
         }
     }
 
-    sweep()
+    sweep() // Put this last so it draws on top of everything
 }, 1000 / 60) // FPS
 
 function reload()
@@ -169,9 +169,7 @@ function fire()
 {
 	if (canShoot)
     {
-    	// Flash the screen
-    	ctx.fillStyle = flashColor
-    	ctx.fillRect(0, 0, canvas.width, canvas.height)
+    	blank(flashColor) // Flash the screen
 
 	    if (magazine > 0) // Don't fire if we don't have ammo
 	    {
@@ -197,7 +195,8 @@ function fire()
 
 function shootZombie(zombieName, damage)
 {
-	var zombie = find(zombieName)
+	// Create a function on the server to find the zombie that's being referenced
+
     setTimeout(function() // Add a timeout so the zombie doesn't scream instantly
     {
         enemies[zombie].health -= damage
@@ -215,9 +214,9 @@ function shootZombie(zombieName, damage)
     }, 200)
 }
 
-function blank()
+function blank(color)
 {
-	ctx.fillStyle = canvasColor
+	ctx.fillStyle = color
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
@@ -243,8 +242,7 @@ function drawEnemies()
 
 function sweep()
 {
-	ctx.fillStyle = sweepColor
-	ctx.fillRect(0, Math.sin(sweepTick / sweepSpeed) * canvas.height / 2 + canvas.height / 2 - sweepHeight / 2, canvas.width, sweepHeight) // Draw and animate the sweep
+	square(0, Math.sin(sweepTick / sweepSpeed) * canvas.height / 2 + canvas.height / 2 - sweepHeight / 2, canvas.width, sweepHeight, sweepColor) // Draw the sweep
 	sweepTick++ // Increase the seed we use to run the sin function and make the sweep animate smoothly
 
 	if (Math.sin(Math.sin(sweepTick / sweepSpeed)) < -0.8) // Beep only at the top of the screen

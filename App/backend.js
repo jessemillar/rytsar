@@ -107,6 +107,23 @@ function bearing(latitude, longitude)
 	return (bearing.toDeg() + 360) % 360
 }
 
+function line(x1, y1, x2, y2, color)
+{
+	ctx.strokeStyle = color
+
+	ctx.beginPath()
+	ctx.moveTo(x1, y1)
+	ctx.lineTo(x2, y2)
+	ctx.lineWidth = 1
+	ctx.stroke()
+}
+
+function square(x, y, width, height, color)
+{
+	ctx.fillStyle = color
+	ctx.fillRect(x, y, width, height)
+}
+
 function polygon(x, y, size, color)
 {
 	ctx.beginPath()
@@ -117,17 +134,6 @@ function polygon(x, y, size, color)
 	ctx.closePath()
 	ctx.fillStyle = color
 	ctx.fill()
-}
-
-function line(x1, y1, x2, y2, color)
-{
-	ctx.strokeStyle = color
-
-	ctx.beginPath()
-	ctx.moveTo(x1, y1)
-	ctx.lineTo(x2, y2)
-	ctx.lineWidth = 1
-	ctx.stroke()
 }
 
 function circle(x, y, radius, color)
