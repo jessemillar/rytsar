@@ -1,12 +1,7 @@
-var debug = false
+var debug = true
 
 ejecta.include('backend.js') // This gives us access to readable sensor variables
 ejecta.include('sounds/sounds.js')
-
-// Smooth things out
-var canvas = document.getElementById('canvas')
-	canvas.MSAAEnabled = true
-	canvas.MSAASamples = 2
 
 var ctx = canvas.getContext('2d')
 var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variable we'll use to keep track of the server
@@ -45,7 +40,7 @@ var shotDamage = 50 // How much damage a bullet deals (change this later to be m
 var canvasColor = '#2a303a'
 var flashColor = '#ffffff'
 var debugColor = '#61737e'
-var enemyColor = '#cc7251'
+var enemyColor = '#ff0000'
 var playerColor = '#ffffff'
 var sweepColor = '#ffffff'
 var sweepHeight = 4 // ...in pixels
@@ -56,15 +51,25 @@ var enemySize = 10
 var sweepTick = 0
 var sweepSpeed = 20 // Lower values result in a faster sweep
 
+document.addEventListener('pagehide', function() // Close the connection to the server upon leaving the app
+{
+	socket.close()
+})
+
+document.addEventListener('pageshow', function() // Reconnect to the server upon resuming the app
+{
+	socket = new WebSocket('ws://www.jessemillar.com:8787')
+})
+
 socket.addEventListener('message', function(message) // Keep track of messages coming from the server
 {
-	// console.log(message.data)
 	enemies = JSON.parse(message.data) // Right now, the only messages coming refer to zombies
 })
 
 function init() // Run once by the GPS function once we have a lock
 {
-	self.id = Math.floor(Math.random() * 90000) + 10000 // Generate a five-digit-long id for this user
+	self._type = 'player' // Set the message type so the server knows what to do
+	self.id = Math.floor(Math.random() * 90000000000000) + 10000000000000 // Generate a fifteen-digit-long ID for this user
 	self.latitude = gps.latitude
 	self.longitude = gps.longitude
 
@@ -169,10 +174,9 @@ function fire()
 {
 	if (canShoot)
     {
-    	blank(flashColor) // Flash the screen
-
 	    if (magazine > 0) // Don't fire if we don't have ammo
 	    {
+	    	blank(flashColor) // Flash the screen
 	        magazine-- // Remove a bullet
 	        sfxFire.play()
 	        canShoot = false
