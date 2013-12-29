@@ -26,6 +26,7 @@ var rotateRequiredReload = 450 // Set higher than needed to prevent accidental r
 
 // Keep the sound effects in line by setting their "length"
 var canShoot = true
+var canShootServer = true
 var timeShoot = 200
 var timeReload = 300 // canShoot manages timeReload
 var canScan = true
@@ -41,6 +42,7 @@ var canvasColor = '#2a303a'
 var flashColor = '#ffffff'
 var debugColor = '#61737e'
 var enemyColor = '#ff0000'
+var deadColor = '#61737e'
 var playerColor = '#ffffff'
 var sweepColor = '#ffffff'
 var sweepHeight = 4 // ...in pixels
@@ -197,25 +199,28 @@ function fire()
 	}
 }
 
-function shootZombie(zombieName, damage)
+function shootZombie(zombieName, damageAmount)
 {
-	// Create a function on the server to find the zombie that's being referenced
+	if (canShootServer)
+	{
+		var shot = new Object()
+			shot._type = 'damage' // Set the message type
+			shot.name = zombieName // Tell the server the name of the zombie and it'll find it's location in the array and do the rest
+			shot.damage = damageAmount
 
-    setTimeout(function() // Add a timeout so the zombie doesn't scream instantly
-    {
-        enemies[zombie].health -= damage
-        
-        if (enemies[zombie].health > 0)
-        {
-            sfxGroan.play()
-        }
-        else // Kill the zombie if its health is low enough
-        {
-            sfxImpact.play()
-            // Remove the dead zombie from the database
-            enemies.splice(zombie, 1)
-        }
-    }, 200)
+		socket.send(JSON.stringify(shot))
+
+	    setTimeout(function() // Add a timeout so the zombie doesn't groan instantly
+	    {
+	    	sfxGroan.play()
+	    }, 200)
+
+	    canShootServer = false
+
+        setTimeout(function() {
+            canShootServer = true
+        }, timeShoot)
+	}
 }
 
 function blank(color)
@@ -239,7 +244,14 @@ function drawEnemies()
 	    		ctx.fillText(enemies[i].name, x + enemySize + 3, y)
 		    }
 
-		    polygon(x, y, enemySize, enemyColor) // Draw the sucker
+		    if (enemies[i].health > 0)
+		    {
+		    	polygon(x, y, enemySize, enemyColor) // Draw the sucker
+		    }
+		    else
+		    {
+		    	polygon(x, y, enemySize, deadColor) // He's dead, Jim
+		    }
 		}
 	}
 }

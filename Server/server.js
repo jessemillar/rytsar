@@ -14,6 +14,11 @@ var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude 
 
 report() // Give a bit of feedback to show that the server started
 
+setInterval(function()
+{
+    report() // Post a general update every two seconds
+}, 2000)
+
 wss.on('connection', function(socket) {
 	if (enemies.length > 1) // If there are zombies, send the data to each new client when it connects
 	{
@@ -29,7 +34,7 @@ wss.on('connection', function(socket) {
             if (players.length == 1) // Log the first player on the server
             {
                 players.push(data)
-                console.log('Player(s) connected')
+                console.log('Player connected')
             }
             else // If we're not on an empty server
             {
@@ -43,14 +48,31 @@ wss.on('connection', function(socket) {
                     if (i + 1 == players.length) // Add the player if he doesn't exist
                     {
                         players.push(data)
-                        console.log('Player(s) connected')
+                        console.log('Player connected')
+                    }
+                }
+            }
+        }
+        else if (data._type = 'damage')
+        {
+            for (var i = 1; i < enemies.length; i++)
+            {
+                if (enemies[i].name == data.name) // Find the zombie in question in the array
+                {
+                    if (enemies[i].health > 0)
+                    {
+                        enemies[i].health -= data.damage // Apply damage
+                    }
+
+                    if (enemies[i].health < 0)
+                    {
+                        enemies[i].health = 0
                     }
                 }
             }
         }
 
         updateEnemies()
-        report()
 		socket.send(JSON.stringify(enemies)) // Send the enemy array to the clients
     })
 
