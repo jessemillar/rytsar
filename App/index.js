@@ -97,7 +97,7 @@ setInterval(function() // Main game loop
 
         if ((compass - fieldOfView) < enemies[i].bearing && enemies[i].bearing < (compass + fieldOfView))
         {
-            if (enemies[i].distance > minShotDistance && enemies[i].distance < maxShotDistance)
+            if (enemies[i].distance > minShotDistance && enemies[i].distance < maxShotDistance && enemies[i].health > 0)
             {
             	vision.push(enemies[i])
 	            // sfxBeep.play()
@@ -165,7 +165,8 @@ function reload()
 	        sfxReload.play()
 	        canShoot = false
 
-	        setTimeout(function() {
+	        setTimeout(function()
+	        {
 	            canShoot = true
 	        }, timeReload)
 	    }
@@ -183,7 +184,8 @@ function fire()
 	        sfxFire.play()
 	        canShoot = false
 
-	        setTimeout(function() {
+	        setTimeout(function()
+	        {
 	            canShoot = true
 	        }, timeShoot)
 	    }
@@ -192,7 +194,8 @@ function fire()
 	        sfxEmpty.play()
 	        canShoot = false
 
-	        setTimeout(function() {
+	        setTimeout(function()
+	        {
 	            canShoot = true
 	        }, timeShoot)
 	    }
@@ -203,23 +206,27 @@ function shootZombie(zombieName, damageAmount)
 {
 	if (canShootServer)
 	{
-		var shot = new Object()
-			shot._type = 'damage' // Set the message type
-			shot.name = zombieName // Tell the server the name of the zombie and it'll find it's location in the array and do the rest
-			shot.damage = damageAmount
-
-		socket.send(JSON.stringify(shot))
-
-	    setTimeout(function() // Add a timeout so the zombie doesn't groan instantly
+		if (magazine > 0) // Don't fire if we don't have ammo
 	    {
-	    	sfxGroan.play()
-	    }, 200)
+			var shot = new Object()
+				shot._type = 'damage' // Set the message type
+				shot.name = zombieName // Tell the server the name of the zombie and it'll find it's location in the array and do the rest
+				shot.damage = damageAmount
 
-	    canShootServer = false
+			socket.send(JSON.stringify(shot))
 
-        setTimeout(function() {
-            canShootServer = true
-        }, timeShoot)
+		    setTimeout(function() // Add a timeout so the zombie doesn't groan instantly
+		    {
+		    	sfxGroan.play()
+		    }, 200)
+
+		    canShootServer = false
+
+	        setTimeout(function()
+	        {
+	            canShootServer = true
+	        }, timeShoot)
+	    }
 	}
 }
 
@@ -268,7 +275,8 @@ function sweep()
 			sfxBeep.play()
 			canScan = false
 
-			setTimeout(function() {
+			setTimeout(function()
+			{
 				canScan = true
 			}, timeScan)
 		}
