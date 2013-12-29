@@ -1,4 +1,4 @@
-var debug = true
+var debug = false
 
 ejecta.include('backend.js') // This gives us access to readable sensor variables
 ejecta.include('sounds/sounds.js')
@@ -58,6 +58,7 @@ var sweepSpeed = 20 // Lower values result in a faster sweep
 
 socket.addEventListener('message', function(message) // Keep track of messages coming from the server
 {
+	// console.log(message.data)
 	enemies = JSON.parse(message.data) // Right now, the only messages coming refer to zombies
 })
 
@@ -120,9 +121,8 @@ setInterval(function() // Main game loop
 		circle(canvas.width / 2, canvas.height / 2, minShotDistance * metersToPixels, debugColor)
     }
 
-	polygon(canvas.width / 2, canvas.height / 2, playerSize, playerColor) // Draw the player
-
 	drawEnemies() // Duh
+	polygon(canvas.width / 2, canvas.height / 2, playerSize, playerColor) // Draw the player
 
     if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
     {

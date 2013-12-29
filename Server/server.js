@@ -14,20 +14,20 @@ sayPopulation() // Give a bit of feedback to show that the server started
 wss.on('connection', function(socket) {
 	if (enemies.length > 0) // If there are zombies, send the data to each new client when it connects
 	{
-		socket.send(enemies)
+		socket.send(JSON.stringify(enemies))
 	}
 
     socket.on('message', function(message) // Do the following whenever the server receives a message
     {
-    	var data = JSON.parse(message)
+    	var data = JSON.parse(message) // Change the data from JSON to an object
 
-    	if (players.length == 0)
+    	if (players.length == 0) // Log the first player on the server
     	{
     		players.push(data)
     	}
-    	else
+    	else // If we're not on an empty server
     	{
-    		for (var i = 0; i < players.length; i++) // If we're not on an empty server
+    		for (var i = 0; i < players.length; i++)
 	        {
 	        	if (data.id == players[i].id) // Don't duplicate the player
 	        	{
@@ -43,7 +43,7 @@ wss.on('connection', function(socket) {
 
         updateEnemies()
         sayPopulation()
-		socket.send(JSON.stringify(enemies))
+		socket.send(JSON.stringify(enemies)) // Send the enemy array to the clients
     })
 
     socket.on('close', function() // Wipe the player database when someone disconnects so it can rebuilt with only active players
@@ -61,10 +61,11 @@ function sayPopulation()
 
 function updateEnemies()
 {
-	if (enemies.length == 0 && players.length > 0)
+	if (enemies.length == 0 && players.length > 0) // If we have players but no zombies...
 	{
-		for (var i = 0; i < zombieCount; i++)
+		for (var i = 0; i < zombieCount; i++) // Spawn the number of zombies we defined at the top of the script
 		{
+            // Spawn in relation to the first player that joined the server
 			var latitude = players[0].latitude + ((Math.random() * spawnRadiusLatitude) - (Math.random() * spawnRadiusLatitude))
 		    var longitude = players[0].longitude + ((Math.random() * spawnRadiusLongitude) - (Math.random() * spawnRadiusLongitude))
 
