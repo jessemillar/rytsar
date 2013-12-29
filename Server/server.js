@@ -8,7 +8,7 @@ var objects = new Array()
 var players = new Array()
     players[0] = 'players'
 
-var zombieCount = 40 // 100 seems to be the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
+var zombieCount = 50 // 100 seems to be the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
 var spawnRadiusLatitude = 0.015 // 0.015 is about a half mile in the latitude plane (in San Antonio, TX)
 var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude plane (in San Antonio, TX)
 
@@ -62,12 +62,19 @@ wss.on('connection', function(socket) {
                     if (enemies[i].health > 0)
                     {
                         enemies[i].health -= data.damage // Apply damage
-                        console.log('A zombie has been shot')
                     }
 
                     if (enemies[i].health < 0)
                     {
-                        enemies[i].health = 0
+                        enemies[i].health = 0 // Fix things if the health drops below zero
+                    }
+
+                    if (enemies[i].health > 0)
+                    {
+                        console.log('A zombie has been shot')
+                    }
+                    else
+                    {
                         console.log('A zombie has been killed')
                     }
                 }
@@ -93,8 +100,18 @@ wss.on('connection', function(socket) {
 
 function report()
 {
+    var liveZombies = 0
+
+    for (var i = 1; i < enemies.length; i++)
+    {
+        if (enemies[i].health > 0)
+        {
+            liveZombies++
+        }
+    }
+
     var date = new Date()
-	console.log((players.length - 1) + ' player(s) connected in a world with ' + (enemies.length - 1) + ' zombie(s) at ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ' on ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear())
+	console.log((players.length - 1) + ' player(s) connected in a world with ' + liveZombies + ' zombie(s) at ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ' on ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear())
 }
 
 function updateEnemies()

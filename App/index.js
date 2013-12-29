@@ -22,7 +22,7 @@ var metersToPixels = 20 // ...pixels equals ~0.65 meters
 
 // How much motion is required for certain actions
 var rotateRequiredShoot = 400
-var rotateRequiredReload = 450 // Set higher than needed to prevent accidental reloading
+var rotateRequiredReload = 500 // Set higher than needed to prevent accidental reloading
 
 // Keep the sound effects in line by setting their "length"
 var canShoot = true
@@ -60,7 +60,7 @@ document.addEventListener('pagehide', function() // Close the connection to the 
 
 document.addEventListener('pageshow', function() // Reconnect to the server upon resuming the app
 {
-	socket = new WebSocket('ws://www.jessemillar.com:8787')
+	enemies.length = 1 // Wipe the zombie database and don't reopen the connection
 })
 
 socket.addEventListener('message', function(message) // Keep track of messages coming from the server
