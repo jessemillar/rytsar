@@ -1,3 +1,4 @@
+// Save everything to easily-readable variables that we can access from other scripts
 var tilt = new Object()
 	tilt.x = 0
 	tilt.y = 0
@@ -44,7 +45,7 @@ function geolocation(position)
 	{
 		if (gps.latitude && gps.longitude)
 		{
-			gps()
+			init()
 			genesis = true
 		}
 	}
@@ -55,7 +56,7 @@ function geolocation(position)
 
 	if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
     {
-    	compass = position.coords.heading - tilt.x
+    	compass = position.coords.heading - tilt.x // Compass value with compensation for holding the phone in gun orientation
     }
     else
     {
@@ -134,17 +135,6 @@ function circle(x, y, radius, color)
 	ctx.beginPath()
 	ctx.arc(x, y, radius, 0, 2 * Math.PI, false)
 	ctx.lineWidth = 1
-	ctx.strokeStyle = '#4c4c4c'
+	ctx.strokeStyle = color
 	ctx.stroke()
-}
-
-function find(name) // Find a zombie by it's name
-{
-	for (var i = 0; i < objects.length; i++)
-	{
-		if (objects[i].name == name)
-		{
-			return i
-		}
-	}
 }

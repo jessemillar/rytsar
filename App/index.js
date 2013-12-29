@@ -3,21 +3,26 @@ var debug = true
 ejecta.include('backend.js') // This gives us access to readable sensor variables
 ejecta.include('sounds/sounds.js')
 
+// Smooth things out
+var canvas = document.getElementById('canvas')
+	canvas.MSAAEnabled = true
+	canvas.MSAASamples = 2
+
 var ctx = canvas.getContext('2d')
 var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variable we'll use to keep track of the server
+
+var self = new Object() // The object we push to the server with data about the player/client
 
 var enemies = new Array() // Our array of zombies
 var objects = new Array() // Monitor the objects placed throughout the world
 var players = new Array() // Keep track of the players "logged in" and their coordinates
-
-var self = new Object() // The object we push to the server with data about the player/client
 
 var vision = new Array() // The things in our field of view
 
 var renderDistance = 15 // Distance in "meters"
 var maxShotDistance = 10 // Distance in "meters"
 var minShotDistance = 2 // Distance in "meters"
-var fieldOfView = 23 // In degrees
+var fieldOfView = 24 // In degrees
 var metersToPixels = 20 // ...pixels equals ~0.65 meters
 
 // How much motion is required for certain actions
@@ -29,16 +34,23 @@ var canShoot = true
 var timeShoot = 200
 var timeReload = 300 // canShoot manages timeReload
 var canScan = true
-var timeScan = 500 // Set higher than needed for safety
+var timeScan = 1000 // Set higher than needed for safety
 
 // General gun variables
 var capacity = 8
 var magazine = capacity
+var shotDamage = 50 // How much damage a bullet deals (change this later to be more dynamic)
 
 // UI values
 var canvasColor = '#2a303a'
+var flashColor = '#ffffff'
+var debugColor = '#61737e'
+var enemyColor = '#cc7251'
+var playerColor = '#ffffff'
 var sweepColor = '#ffffff'
-var sweepHeight = 4
+var sweepHeight = 4 // ...in pixels
+var playerSize = 15
+var enemySize = 10
 
 // Radar sweep variables
 var sweepTick = 0
@@ -49,7 +61,7 @@ socket.addEventListener('message', function(message) // Keep track of messages c
 	enemies = JSON.parse(message.data) // Right now, the only messages coming refer to zombies
 })
 
-function gps() // Run once by the GPS function once we have a lock
+function init() // Run once by the GPS function once we have a lock
 {
 	self.id = Math.floor(Math.random() * 90000) + 10000 // Generate a five-digit-long id for this user
 	self.latitude = gps.latitude
@@ -102,13 +114,13 @@ setInterval(function() // Main game loop
 
     if (debug) // Draw the aiming cone for debugging purposes
     {
-    	line((canvas.width / 2) - (canvas.height / 2 * Math.tan(fieldOfView.toRad())), 0, canvas.width / 2, canvas.height / 2, '#4c4c4c')
-    	line(canvas.width / 2, canvas.height / 2, (canvas.width / 2) + (canvas.height / 2 * Math.tan(fieldOfView.toRad())), 0, '#4c4c4c')
-		circle(canvas.width / 2, canvas.height / 2, maxShotDistance * metersToPixels, '#4c4c4c')
-		circle(canvas.width / 2, canvas.height / 2, minShotDistance * metersToPixels, '#4c4c4c')
+    	line((canvas.width / 2) - (canvas.height / 2 * Math.tan(fieldOfView.toRad())), 0, canvas.width / 2, canvas.height / 2, debugColor)
+    	line(canvas.width / 2, canvas.height / 2, (canvas.width / 2) + (canvas.height / 2 * Math.tan(fieldOfView.toRad())), 0, debugColor)
+		circle(canvas.width / 2, canvas.height / 2, maxShotDistance * metersToPixels, debugColor)
+		circle(canvas.width / 2, canvas.height / 2, minShotDistance * metersToPixels, debugColor)
     }
 
-	polygon(canvas.width / 2, canvas.height / 2, 10, '#ffffff') // Draw the player
+	polygon(canvas.width / 2, canvas.height / 2, playerSize, playerColor) // Draw the player
 
 	drawEnemies() // Duh
 
@@ -125,10 +137,10 @@ setInterval(function() // Main game loop
 
         if (-rotation.z > rotateRequiredShoot) // Fire
         {
-            fire()
+            fire() // Fire regardless of whether we're looking at a zombie
             if (vision.length > 0) // If we're looking at at least one zombie...
 			{
-				shootZombie(vision[0].name, 50)
+				shootZombie(vision[0].name, shotDamage) // Shoot the closest zombie
 			}
         }
     }
@@ -136,29 +148,20 @@ setInterval(function() // Main game loop
     sweep()
 }, 1000 / 60) // FPS
 
-function blank()
+function reload()
 {
-	ctx.fillStyle = canvasColor
-	ctx.fillRect(0, 0, canvas.width, canvas.height)
-}
-
-function drawEnemies()
-{
-	for (var i = 0; i < enemies.length; i++)
+	if (canShoot) // Prevent reloading during the playback of sound effects
     {
-    	if (enemies[i].distance < renderDistance)
-    	{
-		    var x = (canvas.width / 2) + (Math.cos(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
-		    var y = (canvas.height / 2) + (Math.sin(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
+	    if (magazine < capacity) // Don't reload if we already have a full magazine
+	    {
+	        magazine = capacity // Fill the magazine to capacity
+	        sfxReload.play()
+	        canShoot = false
 
-		    if (debug)
-		    {
-		    	ctx.fillStyle = '#ffffff';
-	    		ctx.fillText(enemies[i].name, x + 9, y + 2)
-		    }
-
-		    polygon(x, y, 6, '#ff0000')
-		}
+	        setTimeout(function() {
+	            canShoot = true
+	        }, timeReload)
+	    }
 	}
 }
 
@@ -167,12 +170,12 @@ function fire()
 	if (canShoot)
     {
     	// Flash the screen
-    	ctx.fillStyle = sweepColor
+    	ctx.fillStyle = flashColor
     	ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-	    if (magazine > 0)
+	    if (magazine > 0) // Don't fire if we don't have ammo
 	    {
-	        magazine--
+	        magazine-- // Remove a bullet
 	        sfxFire.play()
 	        canShoot = false
 
@@ -192,23 +195,6 @@ function fire()
 	}
 }
 
-function reload()
-{
-	if (canShoot)
-    {
-	    if (magazine < capacity)
-	    {
-	        magazine = capacity
-	        sfxReload.play()
-	        canShoot = false
-
-	        setTimeout(function() {
-	            canShoot = true
-	        }, timeReload)
-	    }
-	}
-}
-
 function shootZombie(zombieName, damage)
 {
 	var zombie = find(zombieName)
@@ -220,9 +206,8 @@ function shootZombie(zombieName, damage)
         {
             sfxGroan.play()
         }
-        else
+        else // Kill the zombie if its health is low enough
         {
-            // Kill the zombie if it's health is low enough
             sfxImpact.play()
             // Remove the dead zombie from the database
             enemies.splice(zombie, 1)
@@ -230,15 +215,41 @@ function shootZombie(zombieName, damage)
     }, 200)
 }
 
+function blank()
+{
+	ctx.fillStyle = canvasColor
+	ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
+
+function drawEnemies()
+{
+	for (var i = 0; i < enemies.length; i++)
+    {
+    	if (enemies[i].distance < renderDistance) // This is the bit that helps with framerate
+    	{
+		    var x = (canvas.width / 2) + (Math.cos(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
+		    var y = (canvas.height / 2) + (Math.sin(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
+
+		    if (debug) // Write the zombie's name next to its marker if we're in debug mode
+		    {
+		    	ctx.fillStyle = debugColor;
+	    		ctx.fillText(enemies[i].name, x + enemySize + 3, y)
+		    }
+
+		    polygon(x, y, enemySize, enemyColor) // Draw the sucker
+		}
+	}
+}
+
 function sweep()
 {
 	ctx.fillStyle = sweepColor
-	ctx.fillRect(0, Math.sin(sweepTick / sweepSpeed) * canvas.height / 2 + canvas.height / 2 - sweepHeight / 2, canvas.width, sweepHeight) // Animate the sweep
-	sweepTick++
+	ctx.fillRect(0, Math.sin(sweepTick / sweepSpeed) * canvas.height / 2 + canvas.height / 2 - sweepHeight / 2, canvas.width, sweepHeight) // Draw and animate the sweep
+	sweepTick++ // Increase the seed we use to run the sin function and make the sweep animate smoothly
 
-	if (Math.sin(Math.sin(sweepTick / sweepSpeed) < -0.999)) // Beep only at the top of the screen
+	if (Math.sin(Math.sin(sweepTick / sweepSpeed)) < -0.8) // Beep only at the top of the screen
 	{
-		if (canScan)
+		if (canScan) // Don't play the beep more than once
 		{
 			sfxBeep.play()
 			canScan = false
