@@ -1,4 +1,4 @@
-var debug = true
+var debug = false
 
 ejecta.include('backend.js')
 ejecta.include('sounds/sounds.js')
@@ -6,7 +6,8 @@ ejecta.include('sounds/sounds.js')
 var ctx = canvas.getContext('2d')
 var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variable we'll use to keep track of the server
 
-var self = new Object() // The object we push to the server with data about the player/client
+var self = new Array() // The array we push to the server with data about the player/client
+	self[0] = 'player'
 
 var data = new Array() // The array we'll use to parse the JSON the server will send to us
 
@@ -88,12 +89,12 @@ socket.addEventListener('message', function(message) // Keep track of messages c
 
 function init() // Run once by the GPS function once we have a lock
 {
-	self._type = 'player' // Set the message type so the server knows what to do
-	self.id = Math.floor(Math.random() * 90000000000000) + 10000000000000 // Generate a fifteen-digit-long ID for this user
-	self.latitude = gps.latitude
-	self.longitude = gps.longitude
+	self[1] = new Object()
+	self[1].id = Math.floor(Math.random() * 90000000000000) + 10000000000000 // Generate a fifteen-digit-long ID for this user
+	self[1].latitude = gps.latitude
+	self[1].longitude = gps.longitude
 
-	localStorage.setItem('id', self.id)
+	localStorage.setItem('id', self[1].id)
 
 	socket.send(JSON.stringify(self)) // Tell the server where the player is
 }
@@ -246,10 +247,11 @@ function shootZombie(zombieName, damageAmount)
 	{
 		if (magazine > 0) // Don't fire if we don't have ammo
 	    {
-			var shot = new Object()
-				shot._type = 'damage' // Set the message type
-				shot.name = zombieName // Tell the server the name of the zombie and it'll find it's location in the array and do the rest
-				shot.damage = damageAmount
+			var shot = new Array()
+				shot[0] = 'damage'
+				shot[1] = new Object()
+				shot[1].name = zombieName // Tell the server the name of the zombie and it'll find it's location in the array and do the rest
+				shot[1].damage = damageAmount
 
 			socket.send(JSON.stringify(shot))
 
