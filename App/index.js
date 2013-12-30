@@ -1,4 +1,4 @@
-var debug = false
+var debug = true
 
 ejecta.include('backend.js')
 ejecta.include('sounds/sounds.js')
@@ -90,11 +90,19 @@ socket.addEventListener('message', function(message) // Keep track of messages c
 function init() // Run once by the GPS function once we have a lock
 {
 	self[1] = new Object()
-	self[1].id = Math.floor(Math.random() * 90000000000000) + 10000000000000 // Generate a fifteen-digit-long ID for this user
+
+	if (localStorage.getItem('id'))
+	{
+		self[1].id = localStorage.getItem('id') // Reload the previous player ID if there is one
+	}
+	else
+	{
+		self[1].id = Math.floor(Math.random() * 90000000000000) + 10000000000000 // Generate a fifteen-digit-long ID for this user
+		localStorage.setItem('id', self[1].id)
+	}
+
 	self[1].latitude = gps.latitude
 	self[1].longitude = gps.longitude
-
-	localStorage.setItem('id', self[1].id)
 
 	socket.send(JSON.stringify(self)) // Tell the server where the player is
 }
@@ -102,7 +110,10 @@ function init() // Run once by the GPS function once we have a lock
 setInterval(function() // Server update loop
 {
 	socket.send(JSON.stringify(self)) // Tell the server on a regular basis where the player is	
-	socket.send(JSON.stringify(proximity)) // Tell the server which zombies are close to us
+	if (proximity.length > 1)
+	{
+		socket.send(JSON.stringify(proximity)) // Tell the server which zombies are close to us
+	}
 }, 2000) // Update once every two seconds
 
 setInterval(function() // Main game loop
@@ -120,6 +131,7 @@ setInterval(function() // Main game loop
 
     	if (enemies[i].distance < renderDistance)
     	{
+    		enemies[i].target = localStorage.getItem('id') // Add the user's ID so the server knows which player to move the zombies toward
     		proximity.push(enemies[i])
     	}
 
