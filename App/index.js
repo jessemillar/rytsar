@@ -22,6 +22,7 @@ var vision = new Array() // The things in our field of view
 var renderDistance = 15 // Distance in "meters"
 var maxShotDistance = 10 // Distance in "meters"
 var minShotDistance = 2 // Distance in "meters"
+var damageDistance = 1 // Distance in "meters"
 var fieldOfView = 22 // In degrees
 var metersToPixels = 20 // ...pixels equals ~0.65 meters
 
@@ -40,7 +41,9 @@ var timeScan = 1000 // Set higher than needed for safety
 // General gun variables
 var capacity = 8
 var magazine = capacity
-var shotDamage = 50 // How much damage a bullet deals (change this later to be more dynamic)
+var shotDamage = 2 // How much damage a bullet deals (change this later to be more dynamic)
+
+var playerHealth = 5
 
 // UI values
 var canvasColor = '#2a303a'
@@ -52,9 +55,10 @@ var playerColor = '#ffffff'
 var sweepColor = '#ffffff'
 var sweepHeight = 4 // ...in pixels
 var ammoColor = '#ffffff'
-var ammoWidth = 15
-var ammoHeight = 7
-var ammoSpacing = 5
+var healthColor = '#ff0000'
+var indicatorWidth = 15
+var indicatorHeight = 7
+var indicatorSpacing = 5
 var playerSize = 15
 var otherPlayerSize = 12
 var enemySize = 10
@@ -103,6 +107,7 @@ function init() // Run once by the GPS function once we have a lock
 
 	self[1].latitude = gps.latitude
 	self[1].longitude = gps.longitude
+	self[1].health = playerHealth
 
 	socket.send(JSON.stringify(self)) // Tell the server where the player is
 }
@@ -175,6 +180,7 @@ setInterval(function() // Main game loop
     	line(canvas.width / 2, canvas.height / 2, (canvas.width / 2) + (canvas.height / 2 * Math.tan(fieldOfView.toRad())), 0, debugColor)
 		circle(canvas.width / 2, canvas.height / 2, maxShotDistance * metersToPixels, debugColor)
 		circle(canvas.width / 2, canvas.height / 2, minShotDistance * metersToPixels, debugColor)
+		circle(canvas.width / 2, canvas.height / 2, damageDistance * metersToPixels, debugColor)
     }
 
     polygon(canvas.width / 2, canvas.height / 2, playerSize, playerColor) // Draw the player
@@ -202,6 +208,7 @@ setInterval(function() // Main game loop
         }
     }
 
+    drawHealth() // Give a visual on current health level
     drawAmmo() // Give us a visual on how much ammo we have left
     sweep() // Put this last so it draws on top of everything
 }, 1000 / 60) // FPS
@@ -305,7 +312,7 @@ function drawEnemies()
 
 		    if (enemies[i].health > 0)
 		    {
-		    	polygon(x, y, enemySize, enemyColor) // Draw the sucker
+		    	polygon(x, y, enemySize, enemyColor) // Draw the sucker normally
 		    }
 		    else
 		    {
@@ -329,6 +336,18 @@ function drawPlayers()
 	}
 }
 
+function drawHealth()
+{
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Things are only set up for right handed users right now
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	for (var i = 0; i < playerHealth; i++)
+	{
+		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, healthColor)
+	}
+}
+
 function drawAmmo()
 {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -337,7 +356,7 @@ function drawAmmo()
 
 	for (var i = 0; i < magazine + 1; i++)
 	{
-		rectangle(canvas.width - ammoSpacing - ammoWidth, canvas.height - (ammoHeight + ammoSpacing) * i, ammoWidth, ammoHeight, ammoColor)
+		rectangle(canvas.width - indicatorSpacing - indicatorWidth, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, ammoColor)
 	}
 }
 

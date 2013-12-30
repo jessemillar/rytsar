@@ -14,6 +14,7 @@ var enemyCount = 50 // 100 seems to be the max if I want ~60 FPS on the clients 
 var spawnRadiusLatitude = 0.015 // 0.015 is about a half mile in the latitude plane (in San Antonio, TX)
 var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude plane (in San Antonio, TX)
 var enemySpeed = 0.25 // The ratio to divide the distance of the zombie to the target player by
+var enemyHealth = 4
 
 report() // Give a bit of feedback to show that the server started
 
@@ -139,7 +140,7 @@ function updateEnemies()
 			var latitude = players[1].latitude + ((Math.random() * spawnRadiusLatitude) - (Math.random() * spawnRadiusLatitude))
 		    var longitude = players[1].longitude + ((Math.random() * spawnRadiusLongitude) - (Math.random() * spawnRadiusLongitude))
 
-			make('enemy', 'zombie' + i, latitude, longitude, 100)
+			make('enemy', 'zombie' + i, latitude, longitude, enemyHealth)
 		}
 
         console.log(enemyCount + ' zombie(s) have been spawned')
