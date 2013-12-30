@@ -118,7 +118,7 @@ function line(x1, y1, x2, y2, color)
 	ctx.stroke()
 }
 
-function square(x, y, width, height, color)
+function rectangle(x, y, width, height, color)
 {
 	ctx.fillStyle = color
 	ctx.fillRect(x, y, width, height)

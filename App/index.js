@@ -1,4 +1,4 @@
-var debug = false
+var debug = true
 
 ejecta.include('backend.js')
 ejecta.include('sounds/sounds.js')
@@ -50,7 +50,12 @@ var deadColor = '#61737e'
 var playerColor = '#ffffff'
 var sweepColor = '#ffffff'
 var sweepHeight = 4 // ...in pixels
+var ammoColor = '#ffffff'
+var ammoWidth = 15
+var ammoHeight = 7
+var ammoSpacing = 5
 var playerSize = 15
+var otherPlayerSize = 12
 var enemySize = 10
 
 // Radar sweep variables
@@ -159,8 +164,9 @@ setInterval(function() // Main game loop
 		circle(canvas.width / 2, canvas.height / 2, minShotDistance * metersToPixels, debugColor)
     }
 
+    polygon(canvas.width / 2, canvas.height / 2, playerSize, playerColor) // Draw the player
 	drawEnemies() // Duh
-	polygon(canvas.width / 2, canvas.height / 2, playerSize, playerColor) // Draw the player
+	drawPlayers() // Draw the other players
 
     if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
     {
@@ -183,6 +189,7 @@ setInterval(function() // Main game loop
         }
     }
 
+    drawAmmo() // Give us a visual on how much ammo we have left
     sweep() // Put this last so it draws on top of everything
 }, 1000 / 60) // FPS
 
@@ -303,14 +310,26 @@ function drawPlayers()
 		    var x = (canvas.width / 2) + (Math.cos(((players[i].bearing - compass) + 270).toRad()) * (players[i].distance * metersToPixels))
 		    var y = (canvas.height / 2) + (Math.sin(((players[i].bearing - compass) + 270).toRad()) * (players[i].distance * metersToPixels))
 
-		    polygon(x, y, playerSize, playerColor) // Draw the player in question
+		    polygon(x, y, otherPlayerSize, playerColor) // Draw the player in question
 		}
+	}
+}
+
+function drawAmmo()
+{
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Things are only set up for right handed users right now
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	for (var i = 0; i < magazine + 1; i++)
+	{
+		rectangle(canvas.width - ammoSpacing - ammoWidth, canvas.height - (ammoHeight + ammoSpacing) * i, ammoWidth, ammoHeight, ammoColor)
 	}
 }
 
 function sweep()
 {
-	square(0, Math.sin(sweepTick / sweepSpeed) * canvas.height / 2 + canvas.height / 2 - sweepHeight / 2, canvas.width, sweepHeight, sweepColor) // Draw the sweep
+	rectangle(0, Math.sin(sweepTick / sweepSpeed) * canvas.height / 2 + canvas.height / 2 - sweepHeight / 2, canvas.width, sweepHeight, sweepColor) // Draw the sweep
 	sweepTick++ // Increase the seed we use to run the sin function and make the sweep animate smoothly
 
 	if (Math.sin(Math.sin(sweepTick / sweepSpeed)) < -0.8) // Beep only at the top of the screen
