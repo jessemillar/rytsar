@@ -19,13 +19,13 @@ var sfxReload = document.createElement('audio')
 	sfxReload.load()
 	document.body.appendChild(sfxReload)
 
-var sfxBeep = document.createElement('audio')
-	sfxBeep.src = 'sounds/beep.wav'
-	sfxBeep.preload = true
-	sfxBeep.loop = false
-	sfxBeep.volume = 0.1
-	sfxBeep.load()
-	document.body.appendChild(sfxBeep)
+var sfxSweep = document.createElement('audio')
+	sfxSweep.src = 'sounds/sweep.wav'
+	sfxSweep.preload = true
+	sfxSweep.loop = false
+	sfxSweep.volume = 1
+	sfxSweep.load()
+	document.body.appendChild(sfxSweep)
 
 var sfxGroan = document.createElement('audio')
 	sfxGroan.src = 'sounds/zombie/groan.mp3'
@@ -35,10 +35,17 @@ var sfxGroan = document.createElement('audio')
 	sfxGroan.load()
 	document.body.appendChild(sfxGroan)
 
-var sfxImpact = document.createElement('audio')
-	sfxImpact.src = 'sounds/guns/impact.mp3'
-	sfxImpact.preload = true
-	sfxImpact.loop = false
-	sfxImpact.volume = 1
-	sfxImpact.load()
-	document.body.appendChild(sfxImpact)
+var sfxHurt = document.createElement('audio')
+	sfxHurt.src = 'sounds/hurt.wav'
+	sfxHurt.preload = true
+	sfxHurt.loop = false
+	sfxHurt.volume = 1
+	sfxHurt.load()
+	document.body.appendChild(sfxHurt)
+var sfxFlatline = document.createElement('audio')
+	sfxFlatline.src = 'sounds/flatline.mp3'
+	sfxFlatline.preload = true
+	sfxFlatline.loop = false
+	sfxFlatline.volume = 1
+	sfxFlatline.load()
+	document.body.appendChild(sfxFlatline)

@@ -43,7 +43,7 @@ var capacity = 8
 var magazine = capacity
 var shotDamage = 2 // How much damage a bullet deals (change this later to be more dynamic)
 
-var playerHealth = 5
+var playerMaxHealth = 5
 
 // UI values
 var canvasColor = '#2a303a'
@@ -77,6 +77,11 @@ document.addEventListener('pageshow', function() // Reconnect to the server upon
 	enemies.length = 1 // Wipe the zombie database and don't reopen the connection
 })
 
+document.addEventListener('touchstart', function(ev) // Monitor touches
+{
+	debug = !debug // Toggle debug mode for framerate increase
+})
+
 socket.addEventListener('message', function(message) // Keep track of messages coming from the server
 {
 	data = JSON.parse(message.data)
@@ -107,13 +112,14 @@ function init() // Run once by the GPS function once we have a lock
 
 	self[1].latitude = gps.latitude
 	self[1].longitude = gps.longitude
-	self[1].health = playerHealth
+	self[1].health = playerMaxHealth
 
 	socket.send(JSON.stringify(self)) // Tell the server where the player is
 }
 
 setInterval(function() // Server update loop
 {
+	enemyAttack() // Potentially hurt the player if a zombie is close enough
 	socket.send(JSON.stringify(self)) // Tell the server on a regular basis where the player is	
 	if (proximity.length > 1)
 	{
@@ -145,7 +151,7 @@ setInterval(function() // Main game loop
             if (enemies[i].distance > minShotDistance && enemies[i].distance < maxShotDistance && enemies[i].health > 0)
             {
             	vision.push(enemies[i])
-	            // sfxBeep.play()
+	            // sfxSweep.play()
             }
         }
     }
@@ -289,6 +295,25 @@ function shootZombie(zombieName, damageAmount)
 	}
 }
 
+function enemyAttack()
+{
+	for (var i = 1; i < enemies.length; i++)
+	{
+		if (enemies[i].distance < damageDistance && self[1].health > 0)
+		{
+			self[1].health -= 1
+			if (self[1].health > 0)
+			{
+				sfxHurt.play()
+			}
+			else
+			{
+				sfxFlatline.play()
+			}
+		}	
+	}
+}
+
 function blank(color)
 {
 	ctx.fillStyle = color
@@ -342,7 +367,7 @@ function drawHealth()
     // Things are only set up for right handed users right now
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	for (var i = 0; i < playerHealth; i++)
+	for (var i = 0; i < self[1].health; i++)
 	{
 		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, healthColor)
 	}
@@ -369,7 +394,7 @@ function sweep()
 	{
 		if (canScan) // Don't play the beep more than once
 		{
-			sfxBeep.play()
+			sfxSweep.play()
 			canScan = false
 
 			setTimeout(function()

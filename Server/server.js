@@ -10,11 +10,11 @@ var players = new Array()
 
 var proximity = new Array() // The array we'll use to move zombies closer to appropriate players
 
-var enemyCount = 50 // 100 seems to be the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
+var enemyCount = 30 // 100 "seems to be" the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
 var spawnRadiusLatitude = 0.015 // 0.015 is about a half mile in the latitude plane (in San Antonio, TX)
 var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude plane (in San Antonio, TX)
 var enemySpeed = 0.25 // The ratio to divide the distance of the zombie to the target player by
-var enemyHealth = 4
+var enemyMaxHealth = 4
 
 report() // Give a bit of feedback to show that the server started
 
@@ -104,7 +104,7 @@ wss.on('connection', function(socket) {
     socket.on('error', function(message) // Do the following whenever the server receives an error message
     {
         players.length = 1
-        console.log('Recovering from an unknown error')
+        console.log('Recovering from an "error"')
     })
 
     socket.on('close', function() // Wipe the player database when someone disconnects so it can rebuilt with only active players
@@ -140,7 +140,7 @@ function updateEnemies()
 			var latitude = players[1].latitude + ((Math.random() * spawnRadiusLatitude) - (Math.random() * spawnRadiusLatitude))
 		    var longitude = players[1].longitude + ((Math.random() * spawnRadiusLongitude) - (Math.random() * spawnRadiusLongitude))
 
-			make('enemy', 'zombie' + i, latitude, longitude, enemyHealth)
+			make('enemy', 'zombie' + i, latitude, longitude, enemyMaxHealth)
 		}
 
         console.log(enemyCount + ' zombie(s) have been spawned')
@@ -173,7 +173,7 @@ function advanceEnemies()
             }
         }
 
-        if (enemyPointer !== 0 && playerPointer !== 0)
+        if (enemyPointer !== 0 && playerPointer !== 0 && proximity[i].health > 0)
         {
             var ratio = enemySpeed / distance(players[playerPointer].latitude, players[playerPointer].longitude, enemies[enemyPointer].latitude, enemies[enemyPointer].longitude)
 
