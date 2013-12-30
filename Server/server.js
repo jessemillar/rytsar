@@ -13,7 +13,7 @@ var proximity = new Array() // The array we'll use to move zombies closer to app
 var enemyCount = 30 // 100 "seems to be" the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
 var spawnRadiusLatitude = 0.015 // 0.015 is about a half mile in the latitude plane (in San Antonio, TX)
 var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude plane (in San Antonio, TX)
-var enemySpeed = 0.25 // The ratio to divide the distance of the zombie to the target player by
+var enemySpeed = 0.15 // The ratio to divide the distance of the zombie to the target player by
 var enemyMaxHealth = 4
 
 report() // Give a bit of feedback to show that the server started

@@ -1,4 +1,4 @@
-var debug = true
+var debug = true // Can be toggled by tapping the screen
 
 ejecta.include('backend.js')
 ejecta.include('sounds/sounds.js')
@@ -20,7 +20,7 @@ var proximity = new Array() // The zombies close enough to see us
 var vision = new Array() // The things in our field of view
 
 var renderDistance = 15 // Distance in "meters"
-var maxShotDistance = 10 // Distance in "meters"
+var maxShotDistance = 5 // Distance in "meters"
 var minShotDistance = 2 // Distance in "meters"
 var damageDistance = 1 // Distance in "meters"
 var fieldOfView = 22 // In degrees
@@ -174,7 +174,7 @@ setInterval(function() // Main game loop
 
 		if (debug)
 		{
-			console.log(vision[0].name, vision[0].distance, vision[0].health)
+			console.log(gps.latitude, gps.longitude, vision[0].name, vision[0].latitude, vision[0].longitude, vision[0].distance, vision[0].health)
 		}
     }
 

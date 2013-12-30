@@ -86,7 +86,7 @@ Number.prototype.toDeg = function()
 
 function distance(latitude, longitude)
 {
-	var km = 6371 // Radius of the earth in kilometers
+	var km = 6378 // Radius of the earth in meters
 	var distance = Math.acos(Math.sin(gps.latitude) * Math.sin(latitude) + 
                    Math.cos(gps.latitude) * Math.cos(latitude) *
             	   Math.cos(longitude - gps.longitude)) * km
