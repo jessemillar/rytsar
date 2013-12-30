@@ -1,6 +1,6 @@
-var debug = true
+var debug = false
 
-ejecta.include('backend.js') // This gives us access to readable sensor variables
+ejecta.include('backend.js')
 ejecta.include('sounds/sounds.js')
 
 var ctx = canvas.getContext('2d')
@@ -8,16 +8,20 @@ var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variab
 
 var self = new Object() // The object we push to the server with data about the player/client
 
+var data = new Array() // The array we'll use to parse the JSON the server will send to us
+
 var enemies = new Array() // Our array of zombies
 var objects = new Array() // Monitor the objects placed throughout the world
-var players = new Array() // Keep track of the players "logged in" and their coordinates
+var players = new Array() // Keep track of connected players and their coordinates
 
+var proximity = new Array() // The zombies close enough to see us
+	proximity[0] = 'proximity'
 var vision = new Array() // The things in our field of view
 
 var renderDistance = 15 // Distance in "meters"
 var maxShotDistance = 10 // Distance in "meters"
 var minShotDistance = 2 // Distance in "meters"
-var fieldOfView = 24 // In degrees
+var fieldOfView = 22 // In degrees
 var metersToPixels = 20 // ...pixels equals ~0.65 meters
 
 // How much motion is required for certain actions
@@ -65,7 +69,16 @@ document.addEventListener('pageshow', function() // Reconnect to the server upon
 
 socket.addEventListener('message', function(message) // Keep track of messages coming from the server
 {
-	enemies = JSON.parse(message.data) // Right now, the only messages coming refer to zombies
+	data = JSON.parse(message.data)
+
+	if (data[0] == 'enemies')
+	{
+		enemies = data
+	}
+	else if (data[0] == 'players')
+	{
+		players = data
+	}
 })
 
 function init() // Run once by the GPS function once we have a lock
@@ -75,24 +88,33 @@ function init() // Run once by the GPS function once we have a lock
 	self.latitude = gps.latitude
 	self.longitude = gps.longitude
 
+	localStorage.setItem('id', self.id)
+
 	socket.send(JSON.stringify(self)) // Tell the server where the player is
 }
 
 setInterval(function() // Server update loop
 {
 	socket.send(JSON.stringify(self)) // Tell the server on a regular basis where the player is	
+	socket.send(JSON.stringify(proximity)) // Tell the server which zombies are close to us
 }, 2000) // Update once every two seconds
 
 setInterval(function() // Main game loop
 {
+	proximity.length = 1 // Wipe the proximity array so we can send fresh data
 	vision.length = 0 // Clear the field of view array on each pass so we get fresh results
 
-    for (var i = 0; i < enemies.length; i++) // Do stuff with the zombies
+    for (var i = 1; i < enemies.length; i++) // Do stuff with the zombies
     {
     	if (enemies[i].distance < renderDistance)
     	{
     		enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
 			enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
+    	}
+
+    	if (enemies[i].distance < renderDistance)
+    	{
+    		proximity.push(enemies[i])
     	}
 
         if ((compass - fieldOfView) < enemies[i].bearing && enemies[i].bearing < (compass + fieldOfView))
@@ -103,6 +125,15 @@ setInterval(function() // Main game loop
 	            // sfxBeep.play()
             }
         }
+    }
+
+    for (var i = 1; i < players.length; i++) // Do stuff with the players
+    {
+    	if (players[i].distance < renderDistance)
+    	{
+    		players[i].bearing = bearing(players[i].latitude, players[i].longitude)
+			players[i].distance = distance(players[i].latitude, players[i].longitude)
+    	}
     }
 
     if (vision.length > 0) // If we're looking at at least one zombie...
@@ -238,7 +269,7 @@ function blank(color)
 
 function drawEnemies()
 {
-	for (var i = 0; i < enemies.length; i++)
+	for (var i = 1; i < enemies.length; i++)
     {
     	if (enemies[i].distance < renderDistance) // This is the bit that helps with framerate
     	{
@@ -259,6 +290,20 @@ function drawEnemies()
 		    {
 		    	polygon(x, y, enemySize, deadColor) // He's dead, Jim
 		    }
+		}
+	}
+}
+
+function drawPlayers()
+{
+	for (var i = 1; i < players.length; i++)
+    {
+    	if (players[i].distance < renderDistance && players[i].id !== localStorage.getItem('id')) // This is the bit that helps with framerate
+    	{
+		    var x = (canvas.width / 2) + (Math.cos(((players[i].bearing - compass) + 270).toRad()) * (players[i].distance * metersToPixels))
+		    var y = (canvas.height / 2) + (Math.sin(((players[i].bearing - compass) + 270).toRad()) * (players[i].distance * metersToPixels))
+
+		    polygon(x, y, playerSize, playerColor) // Draw the player in question
 		}
 	}
 }

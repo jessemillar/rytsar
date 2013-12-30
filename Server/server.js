@@ -22,7 +22,8 @@ setInterval(function()
 wss.on('connection', function(socket) {
 	if (enemies.length > 1) // If there are zombies, send the data to each new client when it connects
 	{
-		socket.send(JSON.stringify(enemies))
+		socket.send(JSON.stringify(enemies)) // Initially send the enemies array to the clients
+        socket.send(JSON.stringify(players)) // Initially send the players array to the clients
 	}
 
     socket.on('message', function(message) // Do the following whenever the server receives a message
@@ -53,7 +54,12 @@ wss.on('connection', function(socket) {
                 }
             }
         }
-        else if (data._type = 'damage')
+        else if (data._type == 'proximity')
+        {
+            // Move zombies closer
+            console.log(data)
+        }
+        else if (data._type == 'damage')
         {
             for (var i = 1; i < enemies.length; i++)
             {
@@ -83,6 +89,7 @@ wss.on('connection', function(socket) {
 
         updateEnemies()
 		socket.send(JSON.stringify(enemies)) // Send the enemy array to the clients
+        socket.send(JSON.stringify(players)) // Send the updated player array to the clients
     })
 
     socket.on('error', function(message) // Do the following whenever the server receives a message
