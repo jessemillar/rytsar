@@ -46,16 +46,16 @@ var shotDamage = 2 // How much damage a bullet deals (change this later to be mo
 var playerMaxHealth = 5
 
 // UI values
-var canvasColor = '#2a303a'
-var flashColor = '#ffffff'
+var canvasColor = '#33322d'
+var flashColor = '#fff8e3'
 var debugColor = '#61737e'
-var enemyColor = '#ff0000'
+var enemyColor = '#db4105'
 var deadColor = '#61737e'
-var playerColor = '#ffffff'
-var sweepColor = '#ffffff'
+var playerColor = '#fff8e3'
+var sweepColor = '#fff8e3'
 var sweepHeight = 4 // ...in pixels
-var ammoColor = '#ffffff'
-var healthColor = '#ff0000'
+var ammoColor = '#fff8e3'
+var healthColor = '#9fb4cc'
 var indicatorWidth = 15
 var indicatorHeight = 7
 var indicatorSpacing = 5
