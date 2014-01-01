@@ -74,9 +74,19 @@ var menuGlyphWidth = menuSize / 3.5
 var menuGlyphHeight = menuGlyphWidth * 1.6
 var menuGlyphSpacing = menuSize / 24
 var menuGlyphColor = canvasColor
-var menuEnemyCount = 10
+var menuEnemyCount = 35
 var menuEnemies = new Array()
-var menuEnemySpeed = 0.01
+var menuEnemySpeed = 0.05
+var menuMusicPlaying = false
+var menuSfx = 1
+var xStats = xCenter - menuSize / 2 - menuSpacing
+var yStats = yCenter - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
+var xSingle = xCenter + menuSize / 2 + menuSpacing
+var ySingle = yCenter - menuSize / 2 - menuSpacing
+var xMulti = xCenter - menuSize / 2 - menuSpacing
+var yMulti = yCenter + menuSize / 2 + menuSpacing
+var xPrefs = xCenter + menuSize / 2 + menuSpacing
+var yPrefs = yCenter + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 2
 
 // Radar sweep variables
 var sweepTick = 0
@@ -94,7 +104,23 @@ document.addEventListener('pageshow', function() // Reconnect to the server upon
 
 document.addEventListener('touchstart', function(ev) // Monitor touches
 {
-	debug = !debug // Toggle debug mode for framerate increase
+	if (gameScreen == 'game')
+	{
+		debug = !debug // Toggle debug mode for framerate increase
+	}
+	else if (gameScreen == 'menu')
+	{
+		if (debug)
+		{
+			var x = ev.touches[0].pageX
+			var y = ev.touches[0].pageY
+			
+			if (Math.abs(xStats - x) * Math.abs(xStats - x) + Math.abs(yStats - y) * Math.abs(yStats - y) < menuSize * menuSize)
+			{
+				gameScreen = 'stats'
+			}
+		}
+	}
 })
 
 socket.addEventListener('message', function(message) // Keep track of messages coming from the server
@@ -149,14 +175,16 @@ setInterval(function() // Main game loop
 {
 	if (gameScreen == 'menu')
 	{
-		var xStats = xCenter - menuSize / 2 - menuSpacing
-		var yStats = yCenter - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
-		var xSingle = xCenter + menuSize / 2 + menuSpacing
-		var ySingle = yCenter - menuSize / 2 - menuSpacing
-		var xMulti = xCenter - menuSize / 2 - menuSpacing
-		var yMulti = yCenter + menuSize / 2 + menuSpacing
-		var xPrefs = xCenter + menuSize / 2 + menuSpacing
-		var yPrefs = yCenter + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 2
+		if (!menuMusicPlaying)
+		{
+			musMenu.play()
+			menuMusicPlaying = true
+		}
+
+		if (Math.random() > 0.999) // Play random zombie sounds
+		{
+			sfxGroan.play()
+		}
 
 		if (menuEnemies.length == 0) // Generate menu zombies if there are none
 		{
@@ -172,13 +200,32 @@ setInterval(function() // Main game loop
 		}
 		else // Move the zombies toward their destination
 		{
-			/*
 			for (var i = 0; i < menuEnemies.length; i++)
 			{
-				menuEnemies[i].x += (menuEnemies[i].xDestination - menuEnemies[i].x) / menuEnemySpeed
-				menuEnemies[i].y += (menuEnemies[i].yDestination - menuEnemies[i].y) / menuEnemySpeed
+				if (menuEnemies[i].x < menuEnemies[i].xDestination)
+				{
+					menuEnemies[i].x += menuEnemySpeed
+				}
+				else
+				{
+					menuEnemies[i].x -= menuEnemySpeed
+				}
+
+				if (menuEnemies[i].y < menuEnemies[i].yDestination)
+				{
+					menuEnemies[i].y += menuEnemySpeed
+				}
+				else
+				{
+					menuEnemies[i].y -= menuEnemySpeed
+				}
+
+				if (Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination) && Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination)) // Pick a new destination once we arrive
+				{
+					menuEnemies[i].xDestination = Math.random() * canvas.width
+					menuEnemies[i].yDestination = Math.random() * canvas.height
+				}
 			}
-			*/
 		}
 
 		blank(canvasColor)
@@ -217,6 +264,23 @@ setInterval(function() // Main game loop
 		polygon(xPrefs, yPrefs - menuGlyphWidth / 2 - menuGlyphSpacing, menuGlyphWidth, menuGlyphColor)
 		rectangle(xPrefs - menuGlyphWidth / 2, yPrefs - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight, menuGlyphColor)
 		rectangle(xPrefs - menuGlyphWidth * 0.6 / 2, yPrefs - menuGlyphWidth / 2 - menuGlyphSpacing - menuGlyphWidth, menuGlyphWidth * 0.6, menuGlyphWidth, playerColor) // Mask
+	}
+	else if (gameScreen == 'stats')
+	{
+		// Shots fired
+		// Damage dealt
+		// Damage taken
+		// Zombies killed
+		// Miles walked
+		// Accuracy
+
+		blank(canvasColor)
+
+		// Logo shape
+		polygon(canvas.width / 5, canvas.height / 10 * 2, canvas.height / 12, playerColor)
+		polygon(canvas.width / 5, canvas.height / 10 * 4, canvas.height / 12, playerColor)
+		polygon(canvas.width / 5, canvas.height / 10 * 6, canvas.height / 12, playerColor)
+		polygon(canvas.width / 5, canvas.height / 10 * 8, canvas.height / 12, playerColor)
 	}
 	else if (gameScreen == 'game')
 	{

@@ -1,3 +1,11 @@
+var musMenu = document.createElement('audio')
+	musMenu.src = 'sounds/music/menu.mp3'
+	musMenu.preload = true
+	musMenu.loop = true
+	musMenu.volume = 1
+	musMenu.load()
+	document.body.appendChild(musMenu)
+
 var sfxEmpty = document.createElement('audio')
 	sfxEmpty.src = 'sounds/guns/nineteen/empty.mp3'
 	sfxEmpty.preload = true
@@ -27,6 +35,12 @@ var sfxSweep = document.createElement('audio')
 	sfxSweep.load()
 	document.body.appendChild(sfxSweep)
 
+var sfxWalk = document.createElement('audio')
+	sfxWalk.src = 'sounds/zombie/walk.mp3'
+	sfxWalk.preload = true
+	sfxWalk.loop = false
+	sfxWalk.volume = 1
+	sfxWalk.load()
 var sfxGroan = document.createElement('audio')
 	sfxGroan.src = 'sounds/zombie/groan.mp3'
 	sfxGroan.preload = true
