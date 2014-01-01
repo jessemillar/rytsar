@@ -113,6 +113,10 @@ function line(x1, y1, x2, y2, color, alpha)
 	{
 		ctx.globalAlpha = alpha
 	}
+	else
+	{
+		ctx.globalAlpha = 1
+	}
 
 	ctx.strokeStyle = color
 
@@ -129,6 +133,10 @@ function rectangle(x, y, width, height, color, alpha)
 	{
 		ctx.globalAlpha = alpha
 	}
+	else
+	{
+		ctx.globalAlpha = 1
+	}
 
 	ctx.fillStyle = color
 	ctx.fillRect(x, y, width, height)
@@ -139,6 +147,10 @@ function rounded(x, y, width, height, roundness, color, alpha)
 	if (alpha)
 	{
 		ctx.globalAlpha = alpha
+	}
+	else
+	{
+		ctx.globalAlpha = 1
 	}
 
 	ctx.beginPath()
@@ -161,6 +173,10 @@ function polygon(x, y, size, color, alpha)
 	{
 		ctx.globalAlpha = alpha
 	}
+	else
+	{
+		ctx.globalAlpha = 1
+	}
 
 	ctx.beginPath()
 	ctx.moveTo(x, y - size)
@@ -177,6 +193,10 @@ function circle(x, y, radius, color, alpha)
 	if (alpha)
 	{
 		ctx.globalAlpha = alpha
+	}
+	else
+	{
+		ctx.globalAlpha = 1
 	}
 
 	ctx.beginPath()

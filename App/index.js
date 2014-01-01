@@ -1,7 +1,3 @@
-var canvas = document.getElementById('canvas')
-	canvas.MSAAEnabled = true
-	canvas.MSAASamples = 2
-
 var ctx = canvas.getContext('2d')
 var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variable we'll use to keep track of the server
 
@@ -61,6 +57,7 @@ var debugColor = '#61737e'
 var enemyColor = '#db4105'
 var deadColor = '#61737e'
 var playerColor = '#fff8e3'
+var itemColor = '#9fb4cc'
 var sweepColor = '#fff8e3'
 var sweepHeight = 4 // ...in pixels
 var ammoColor = '#fff8e3'
@@ -71,6 +68,15 @@ var indicatorSpacing = 5
 var playerSize = 15
 var otherPlayerSize = 15
 var enemySize = 15
+var menuSize = canvas.width / 4.5
+var menuSpacing = 3.5
+var menuGlyphWidth = menuSize / 3.5
+var menuGlyphHeight = menuGlyphWidth * 1.6
+var menuGlyphSpacing = menuSize / 24
+var menuGlyphColor = canvasColor
+var menuEnemyCount = 10
+var menuEnemies = new Array()
+var menuEnemySpeed = 0.01
 
 // Radar sweep variables
 var sweepTick = 0
@@ -143,9 +149,74 @@ setInterval(function() // Main game loop
 {
 	if (gameScreen == 'menu')
 	{
+		var xStats = xCenter - menuSize / 2 - menuSpacing
+		var yStats = yCenter - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
+		var xSingle = xCenter + menuSize / 2 + menuSpacing
+		var ySingle = yCenter - menuSize / 2 - menuSpacing
+		var xMulti = xCenter - menuSize / 2 - menuSpacing
+		var yMulti = yCenter + menuSize / 2 + menuSpacing
+		var xPrefs = xCenter + menuSize / 2 + menuSpacing
+		var yPrefs = yCenter + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 2
+
+		if (menuEnemies.length == 0) // Generate menu zombies if there are none
+		{
+			for (var i = 0; i < menuEnemyCount; i++)
+			{
+				var enemy = new Object()
+					enemy.x = Math.random() * canvas.width
+					enemy.y = Math.random() * canvas.height
+					enemy.xDestination = Math.random() * canvas.width
+					enemy.yDestination = Math.random() * canvas.height
+				menuEnemies.push(enemy)
+			}
+		}
+		else // Move the zombies toward their destination
+		{
+			/*
+			for (var i = 0; i < menuEnemies.length; i++)
+			{
+				menuEnemies[i].x += (menuEnemies[i].xDestination - menuEnemies[i].x) / menuEnemySpeed
+				menuEnemies[i].y += (menuEnemies[i].yDestination - menuEnemies[i].y) / menuEnemySpeed
+			}
+			*/
+		}
+
 		blank(canvasColor)
-		polygon(xCenter, yCenter, enemySize, enemyColor, 0.3)
-		rounded(15, 15, canvas.width - 30, 70, iosRadius, sweepColor)
+
+		for (var i = 0; i < menuEnemies.length; i++)
+		{
+			polygon(menuEnemies[i].x, menuEnemies[i].y, enemySize, enemyColor)
+		}
+
+		// Logo shape
+		polygon(xStats, yStats, menuSize, playerColor)
+		polygon(xSingle, ySingle, menuSize, playerColor)
+		polygon(xMulti, yMulti, menuSize, playerColor)
+		polygon(xPrefs, yPrefs, menuSize, playerColor)
+
+		// Stats
+		rectangle(xMulti - menuGlyphWidth - menuGlyphSpacing * 2 - menuGlyphWidth / 2, yStats - menuGlyphHeight / 2 - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight + menuGlyphSpacing + menuGlyphWidth, menuGlyphColor)
+		rectangle(xStats - menuGlyphWidth / 2, yStats - menuGlyphHeight / 2 - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight + menuGlyphSpacing + menuGlyphWidth, menuGlyphColor)
+		rectangle(xMulti + menuGlyphSpacing * 2 + menuGlyphWidth / 2, yStats - menuGlyphHeight / 2 - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight + menuGlyphSpacing + menuGlyphWidth, menuGlyphColor)
+		rectangle(xMulti - menuGlyphWidth - menuGlyphSpacing * 2 - menuGlyphWidth / 2, yStats - menuGlyphHeight / 2 - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphSpacing + menuGlyphWidth, playerColor) // Mask
+		rectangle(xMulti + menuGlyphSpacing * 2 + menuGlyphWidth / 2, yStats - menuGlyphHeight / 2 - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphSpacing * 4, playerColor) // Mask
+
+		// Single player
+		polygon(xSingle, ySingle - menuGlyphSpacing * 2 - menuGlyphWidth / 2 - menuGlyphSpacing, menuGlyphWidth / 2, menuGlyphColor)
+		rectangle(xSingle - menuGlyphWidth / 2, ySingle - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight, menuGlyphColor)
+
+		// Multiplayer
+		polygon(xMulti - menuGlyphWidth - menuGlyphSpacing * 2, yMulti - menuGlyphSpacing * 2 - menuGlyphWidth / 2 - menuGlyphSpacing, menuGlyphWidth / 2, menuGlyphColor)
+		rectangle(xMulti - menuGlyphWidth - menuGlyphSpacing * 2 - menuGlyphWidth / 2, yMulti - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight, menuGlyphColor)
+		polygon(xMulti, yMulti - menuGlyphSpacing - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth / 2, menuGlyphColor)
+		rectangle(xMulti - menuGlyphWidth / 2, yMulti - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight, menuGlyphColor)
+		polygon(xMulti + menuGlyphWidth + menuGlyphSpacing * 2, yMulti - menuGlyphSpacing * 2 - menuGlyphWidth / 2 - menuGlyphSpacing, menuGlyphWidth / 2, menuGlyphColor)
+		rectangle(xMulti + menuGlyphSpacing * 2 + menuGlyphWidth / 2, yMulti - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight, menuGlyphColor)
+
+		// Prefs
+		polygon(xPrefs, yPrefs - menuGlyphWidth / 2 - menuGlyphSpacing, menuGlyphWidth, menuGlyphColor)
+		rectangle(xPrefs - menuGlyphWidth / 2, yPrefs - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight, menuGlyphColor)
+		rectangle(xPrefs - menuGlyphWidth * 0.6 / 2, yPrefs - menuGlyphWidth / 2 - menuGlyphSpacing - menuGlyphWidth, menuGlyphWidth * 0.6, menuGlyphWidth, playerColor) // Mask
 	}
 	else if (gameScreen == 'game')
 	{
