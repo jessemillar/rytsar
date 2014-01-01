@@ -107,8 +107,13 @@ function bearing(latitude, longitude)
 	return (bearing.toDeg() + 360) % 360
 }
 
-function line(x1, y1, x2, y2, color)
+function line(x1, y1, x2, y2, color, alpha)
 {
+	if (alpha)
+	{
+		ctx.globalAlpha = alpha
+	}
+
 	ctx.strokeStyle = color
 
 	ctx.beginPath()
@@ -118,14 +123,45 @@ function line(x1, y1, x2, y2, color)
 	ctx.stroke()
 }
 
-function rectangle(x, y, width, height, color)
+function rectangle(x, y, width, height, color, alpha)
 {
+	if (alpha)
+	{
+		ctx.globalAlpha = alpha
+	}
+
 	ctx.fillStyle = color
 	ctx.fillRect(x, y, width, height)
 }
 
-function polygon(x, y, size, color)
+function rounded(x, y, width, height, roundness, color, alpha)
 {
+	if (alpha)
+	{
+		ctx.globalAlpha = alpha
+	}
+
+	ctx.beginPath()
+	ctx.moveTo(x + roundness, y)
+	ctx.lineTo(x + width - roundness, y)
+	ctx.quadraticCurveTo(x + width, y, x + width, y + roundness)
+	ctx.lineTo(x + width, y + height - roundness)
+	ctx.quadraticCurveTo(x + width, y + height, x + width - roundness, y + height)
+	ctx.lineTo(x + roundness, y + height)
+	ctx.quadraticCurveTo(x, y + height, x, y + height - roundness)
+	ctx.lineTo(x, y + roundness)
+	ctx.quadraticCurveTo(x, y, x + roundness, y)
+	ctx.fillStyle = color
+	ctx.fill()
+}
+
+function polygon(x, y, size, color, alpha)
+{
+	if (alpha)
+	{
+		ctx.globalAlpha = alpha
+	}
+
 	ctx.beginPath()
 	ctx.moveTo(x, y - size)
 	ctx.lineTo(x + size, y)
@@ -136,8 +172,13 @@ function polygon(x, y, size, color)
 	ctx.fill()
 }
 
-function circle(x, y, radius, color)
+function circle(x, y, radius, color, alpha)
 {
+	if (alpha)
+	{
+		ctx.globalAlpha = alpha
+	}
+
 	ctx.beginPath()
 	ctx.arc(x, y, radius, 0, 2 * Math.PI, false)
 	ctx.lineWidth = 1

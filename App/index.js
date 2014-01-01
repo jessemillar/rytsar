@@ -1,3 +1,7 @@
+var canvas = document.getElementById('canvas')
+	canvas.MSAAEnabled = true
+	canvas.MSAASamples = 2
+
 var ctx = canvas.getContext('2d')
 var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variable we'll use to keep track of the server
 
@@ -50,7 +54,7 @@ var playerMaxHealth = 5
 // UI values
 var xCenter = canvas.width / 2
 var yCenter = canvas.height / 2
-var menuPolygonSpacing = 4
+var iosRadius = 9
 var canvasColor = '#33322d'
 var flashColor = '#fff8e3'
 var debugColor = '#61737e'
@@ -139,7 +143,9 @@ setInterval(function() // Main game loop
 {
 	if (gameScreen == 'menu')
 	{
-		// Menu stuff
+		blank(canvasColor)
+		polygon(xCenter, yCenter, enemySize, enemyColor, 0.3)
+		rounded(15, 15, canvas.width - 30, 70, iosRadius, sweepColor)
 	}
 	else if (gameScreen == 'game')
 	{
