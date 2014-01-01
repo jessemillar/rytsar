@@ -1,10 +1,12 @@
-var debug = true // Can be toggled by tapping the screen
+var ctx = canvas.getContext('2d')
+var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variable we'll use to keep track of the server
 
 ejecta.include('backend.js')
 ejecta.include('sounds/sounds.js')
 
-var ctx = canvas.getContext('2d')
-var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variable we'll use to keep track of the server
+var debug = true // Can be toggled by tapping the screen
+
+var gameScreen = 'menu'
 
 var self = new Array() // The array we push to the server with data about the player/client
 	self[0] = 'player'
@@ -46,6 +48,9 @@ var shotDamage = 2 // How much damage a bullet deals (change this later to be mo
 var playerMaxHealth = 5
 
 // UI values
+var xCenter = canvas.width / 2
+var yCenter = canvas.height / 2
+var menuPolygonSpacing = 4
 var canvasColor = '#33322d'
 var flashColor = '#fff8e3'
 var debugColor = '#61737e'
@@ -60,8 +65,8 @@ var indicatorWidth = 15
 var indicatorHeight = 7
 var indicatorSpacing = 5
 var playerSize = 15
-var otherPlayerSize = 12
-var enemySize = 10
+var otherPlayerSize = 15
+var enemySize = 15
 
 // Radar sweep variables
 var sweepTick = 0
@@ -74,7 +79,7 @@ document.addEventListener('pagehide', function() // Close the connection to the 
 
 document.addEventListener('pageshow', function() // Reconnect to the server upon resuming the app
 {
-	enemies.length = 1 // Wipe the zombie database and don't reopen the connection
+	enemies.length = 0 // Wipe the zombie database and don't reopen the connection
 })
 
 document.addEventListener('touchstart', function(ev) // Monitor touches
@@ -96,7 +101,7 @@ socket.addEventListener('message', function(message) // Keep track of messages c
 	}
 })
 
-function init() // Run once by the GPS function once we have a lock
+function init() // Run once by the GPS function when we have a location lock
 {
 	self[1] = new Object()
 
@@ -114,109 +119,119 @@ function init() // Run once by the GPS function once we have a lock
 	self[1].longitude = gps.longitude
 	self[1].health = playerMaxHealth
 
-	socket.send(JSON.stringify(self)) // Tell the server where the player is
+	// socket.send(JSON.stringify(self)) // Tell the server where the player is
 }
 
 setInterval(function() // Server update loop
 {
-	enemyAttack() // Potentially hurt the player if a zombie is close enough
-	socket.send(JSON.stringify(self)) // Tell the server on a regular basis where the player is	
-	if (proximity.length > 1)
+	if (gameScreen == 'game')
 	{
-		socket.send(JSON.stringify(proximity)) // Tell the server which zombies are close to us
+		enemyAttack() // Potentially hurt the player if a zombie is close enough
+		socket.send(JSON.stringify(self)) // Tell the server on a regular basis where the player is	
+		if (proximity.length > 1)
+		{
+			socket.send(JSON.stringify(proximity)) // Tell the server which zombies are close to us
+		}
 	}
 }, 2000) // Update once every two seconds
 
 setInterval(function() // Main game loop
 {
-	proximity.length = 1 // Wipe the proximity array so we can send fresh data
-	vision.length = 0 // Clear the field of view array on each pass so we get fresh results
+	if (gameScreen == 'menu')
+	{
+		// Menu stuff
+	}
+	else if (gameScreen == 'game')
+	{
+		proximity.length = 1 // Wipe the proximity array so we can send fresh data
+		vision.length = 0 // Clear the field of view array on each pass so we get fresh results
 
-    for (var i = 1; i < enemies.length; i++) // Do stuff with the zombies
-    {
-    	if (enemies[i].distance < renderDistance)
-    	{
-    		enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
-			enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
-    	}
+	    for (var i = 1; i < enemies.length; i++) // Do stuff with the zombies
+	    {
+	    	if (enemies[i].distance < renderDistance)
+	    	{
+	    		enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
+				enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
+	    	}
 
-    	if (enemies[i].distance < renderDistance)
-    	{
-    		enemies[i].target = localStorage.getItem('id') // Add the user's ID so the server knows which player to move the zombies toward
-    		proximity.push(enemies[i])
-    	}
+	    	if (enemies[i].distance < renderDistance)
+	    	{
+	    		enemies[i].target = localStorage.getItem('id') // Add the user's ID so the server knows which player to move the zombies toward
+	    		proximity.push(enemies[i])
+	    	}
 
-        if ((compass - fieldOfView) < enemies[i].bearing && enemies[i].bearing < (compass + fieldOfView))
-        {
-            if (enemies[i].distance > minShotDistance && enemies[i].distance < maxShotDistance && enemies[i].health > 0)
-            {
-            	vision.push(enemies[i])
-	            // sfxSweep.play()
-            }
-        }
-    }
+	        if ((compass - fieldOfView) < enemies[i].bearing && enemies[i].bearing < (compass + fieldOfView))
+	        {
+	            if (enemies[i].distance > minShotDistance && enemies[i].distance < maxShotDistance && enemies[i].health > 0)
+	            {
+	            	vision.push(enemies[i])
+		            // sfxSweep.play()
+	            }
+	        }
+	    }
 
-    for (var i = 1; i < players.length; i++) // Do stuff with the players
-    {
-    	if (players[i].distance < renderDistance)
-    	{
-    		players[i].bearing = bearing(players[i].latitude, players[i].longitude)
-			players[i].distance = distance(players[i].latitude, players[i].longitude)
-    	}
-    }
+	    for (var i = 1; i < players.length; i++) // Do stuff with the players
+	    {
+	    	if (players[i].distance < renderDistance)
+	    	{
+	    		players[i].bearing = bearing(players[i].latitude, players[i].longitude)
+				players[i].distance = distance(players[i].latitude, players[i].longitude)
+	    	}
+	    }
 
-    if (vision.length > 0) // If we're looking at at least one zombie...
-    {
-		vision.sort(function(a, b) // Sort the vision array to find the zombie that's closest to us
-		{
-			return a.distance - b.distance
-		})
-
-		if (debug)
-		{
-			console.log(gps.latitude, gps.longitude, vision[0].name, vision[0].latitude, vision[0].longitude, vision[0].distance, vision[0].health)
-		}
-    }
-
-    blank(canvasColor) // Place draw calls after this
-
-    if (debug) // Draw the aiming cone for debugging purposes
-    {
-    	line((canvas.width / 2) - (canvas.height / 2 * Math.tan(fieldOfView.toRad())), 0, canvas.width / 2, canvas.height / 2, debugColor)
-    	line(canvas.width / 2, canvas.height / 2, (canvas.width / 2) + (canvas.height / 2 * Math.tan(fieldOfView.toRad())), 0, debugColor)
-		circle(canvas.width / 2, canvas.height / 2, maxShotDistance * metersToPixels, debugColor)
-		circle(canvas.width / 2, canvas.height / 2, minShotDistance * metersToPixels, debugColor)
-		circle(canvas.width / 2, canvas.height / 2, damageDistance * metersToPixels, debugColor)
-    }
-
-    polygon(canvas.width / 2, canvas.height / 2, playerSize, playerColor) // Draw the player
-	drawEnemies() // Duh
-	drawPlayers() // Draw the other players
-
-    if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
-    {
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // Things are only set up for right handed users right now
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        if (-rotation.y > rotateRequiredReload) // Reload
-        {
-            reload()
-        }
-
-        if (-rotation.z > rotateRequiredShoot) // Fire
-        {
-            fire() // Fire regardless of whether we're looking at a zombie
-            if (vision.length > 0) // If we're looking at at least one zombie...
+	    if (vision.length > 0) // If we're looking at at least one zombie...
+	    {
+			vision.sort(function(a, b) // Sort the vision array to find the zombie that's closest to us
 			{
-				shootZombie(vision[0].name, shotDamage) // Shoot the closest zombie
-			}
-        }
-    }
+				return a.distance - b.distance
+			})
 
-    drawHealth() // Give a visual on current health level
-    drawAmmo() // Give us a visual on how much ammo we have left
-    sweep() // Put this last so it draws on top of everything
+			if (debug)
+			{
+				console.log(gps.latitude, gps.longitude, vision[0].name, vision[0].latitude, vision[0].longitude, vision[0].distance, vision[0].health)
+			}
+	    }
+
+	    blank(canvasColor) // Place draw calls after this
+
+	    if (debug) // Draw the aiming cone for debugging purposes
+	    {
+	    	line((xCenter) - (yCenter * Math.tan(fieldOfView.toRad())), 0, xCenter, yCenter, debugColor)
+	    	line(xCenter, yCenter, (xCenter) + (yCenter * Math.tan(fieldOfView.toRad())), 0, debugColor)
+			circle(xCenter, yCenter, maxShotDistance * metersToPixels, debugColor)
+			circle(xCenter, yCenter, minShotDistance * metersToPixels, debugColor)
+			circle(xCenter, yCenter, damageDistance * metersToPixels, debugColor)
+	    }
+
+	    polygon(xCenter, yCenter, playerSize, playerColor) // Draw the player
+		drawEnemies() // Duh
+		drawPlayers() // Draw the other players
+
+	    if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
+	    {
+	        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	        // Things are only set up for right handed users right now
+	        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	        if (-rotation.y > rotateRequiredReload) // Reload
+	        {
+	            reload()
+	        }
+
+	        if (-rotation.z > rotateRequiredShoot) // Fire
+	        {
+	            fire() // Fire regardless of whether we're looking at a zombie
+	            if (vision.length > 0) // If we're looking at at least one zombie...
+				{
+					shootZombie(vision[0].name, shotDamage) // Shoot the closest zombie
+				}
+	        }
+	    }
+
+	    drawHealth() // Give a visual on current health level
+	    drawAmmo() // Give us a visual on how much ammo we have left
+	    sweep() // Put this last so it draws on top of everything
+	}
 }, 1000 / 60) // FPS
 
 function reload()
@@ -326,8 +341,8 @@ function drawEnemies()
     {
     	if (enemies[i].distance < renderDistance) // This is the bit that helps with framerate
     	{
-		    var x = (canvas.width / 2) + (Math.cos(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
-		    var y = (canvas.height / 2) + (Math.sin(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
+		    var x = (xCenter) + (Math.cos(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
+		    var y = (yCenter) + (Math.sin(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
 
 		    if (debug) // Write the zombie's name next to its marker if we're in debug mode
 		    {
@@ -353,8 +368,8 @@ function drawPlayers()
     {
     	if (players[i].distance < renderDistance && players[i].id !== localStorage.getItem('id')) // This is the bit that helps with framerate
     	{
-		    var x = (canvas.width / 2) + (Math.cos(((players[i].bearing - compass) + 270).toRad()) * (players[i].distance * metersToPixels))
-		    var y = (canvas.height / 2) + (Math.sin(((players[i].bearing - compass) + 270).toRad()) * (players[i].distance * metersToPixels))
+		    var x = (xCenter) + (Math.cos(((players[i].bearing - compass) + 270).toRad()) * (players[i].distance * metersToPixels))
+		    var y = (yCenter) + (Math.sin(((players[i].bearing - compass) + 270).toRad()) * (players[i].distance * metersToPixels))
 
 		    polygon(x, y, otherPlayerSize, playerColor) // Draw the player in question
 		}
@@ -387,7 +402,7 @@ function drawAmmo()
 
 function sweep()
 {
-	rectangle(0, Math.sin(sweepTick / sweepSpeed) * canvas.height / 2 + canvas.height / 2 - sweepHeight / 2, canvas.width, sweepHeight, sweepColor) // Draw the sweep
+	rectangle(0, Math.sin(sweepTick / sweepSpeed) * yCenter + yCenter - sweepHeight / 2, canvas.width, sweepHeight, sweepColor) // Draw the sweep
 	sweepTick++ // Increase the seed we use to run the sin function and make the sweep animate smoothly
 
 	if (Math.sin(Math.sin(sweepTick / sweepSpeed)) < -0.8) // Beep only at the top of the screen
