@@ -201,8 +201,8 @@ setInterval(function() // Main game loop
 				var enemy = new Object()
 					enemy.x = Math.random() * canvas.width
 					enemy.y = Math.random() * canvas.height
-					enemy.xDestination = random(canvas.width - menuEnemySandbox, canvas.width + menuEnemySandbox)
-					enemy.yDestination = random(canvas.height - menuEnemySandbox, canvas.height + menuEnemySandbox)
+					enemy.xDestination = random(0 - menuEnemySandbox, canvas.width + menuEnemySandbox)
+					enemy.yDestination = random(0 - menuEnemySandbox, canvas.height + menuEnemySandbox)
 				menuEnemies.push(enemy)
 			}
 		}
@@ -230,8 +230,8 @@ setInterval(function() // Main game loop
 
 				if (Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination) && Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination)) // Pick a new destination once we arrive
 				{
-					menuEnemies[i].xDestination = random(canvas.width - menuEnemySandbox, canvas.width + menuEnemySandbox)
-					menuEnemies[i].yDestination = random(canvas.height - menuEnemySandbox, canvas.height + menuEnemySandbox)
+					menuEnemies[i].xDestination = random(0 - menuEnemySandbox, canvas.width + menuEnemySandbox)
+					menuEnemies[i].yDestination = random(0 - menuEnemySandbox, canvas.height + menuEnemySandbox)
 				}
 			}
 		}
