@@ -21,12 +21,12 @@ var proximity = new Array() // The zombies close enough to see us
 	proximity[0] = 'proximity'
 var vision = new Array() // The things in our field of view
 
-var renderDistance = 15 // Distance in "meters"
-var maxShotDistance = 5 // Distance in "meters"
-var minShotDistance = 2 // Distance in "meters"
-var damageDistance = 1 // Distance in "meters"
+var renderDistance = 65 // Distance in meters
+var maxShotDistance = 35 // Distance in meters
+var minShotDistance = 5 // Distance in meters
+var damageDistance = 2 // Distance in meters
 var fieldOfView = 22 // In degrees
-var metersToPixels = 20 // ...pixels equals ~0.65 meters
+var metersToPixels = 4 // ...pixels equals a meter
 
 // How much motion is required for certain actions
 var rotateRequiredShoot = 400
@@ -60,25 +60,32 @@ var playerColor = '#fff8e3'
 var itemColor = '#9fb4cc'
 var sweepColor = '#fff8e3'
 var sweepHeight = 4 // ...in pixels
-var ammoColor = '#fff8e3'
-var healthColor = '#9fb4cc'
+var ammoColor = '#9fb4cc'
+var healthColor = '#db4105'
 var indicatorWidth = 15
 var indicatorHeight = 7
 var indicatorSpacing = 5
-var playerSize = 15
-var otherPlayerSize = 15
-var enemySize = 15
+var playerSize = 10
+var otherPlayerSize = 7
+var enemySize = 10
 var menuSize = canvas.width / 4.5
 var menuSpacing = 3.5
 var menuGlyphWidth = menuSize / 3.5
 var menuGlyphHeight = menuGlyphWidth * 1.6
 var menuGlyphSpacing = menuSize / 24
 var menuGlyphColor = canvasColor
-var menuEnemyCount = 35
+var menuEnemyCount = 25
 var menuEnemies = new Array()
 var menuEnemySpeed = 0.05
+var menuEnemySandbox = 50 // The amount of pixels outside the screen that the menu zombies are allowed to go to as a destination
 var menuMusicPlaying = false
 var menuSfx = 1
+
+var diamondStats = new Array()
+var diamondSingle = new Array()
+var diamondMulti = new Array()
+var diamondPrefs = new Array()
+
 var xStats = xCenter - menuSize / 2 - menuSpacing
 var yStats = yCenter - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
 var xSingle = xCenter + menuSize / 2 + menuSpacing
@@ -104,21 +111,22 @@ document.addEventListener('pageshow', function() // Reconnect to the server upon
 
 document.addEventListener('touchstart', function(ev) // Monitor touches
 {
+	var x = ev.touches[0].pageX
+	var y = ev.touches[0].pageY
+
 	if (gameScreen == 'game')
 	{
 		debug = !debug // Toggle debug mode for framerate increase
 	}
 	else if (gameScreen == 'menu')
 	{
-		if (debug)
+		if (Math.abs(xStats - x) * Math.abs(xStats - x) + Math.abs(yStats - y) * Math.abs(yStats - y) < menuSize * menuSize)
 		{
-			var x = ev.touches[0].pageX
-			var y = ev.touches[0].pageY
-			
-			if (Math.abs(xStats - x) * Math.abs(xStats - x) + Math.abs(yStats - y) * Math.abs(yStats - y) < menuSize * menuSize)
-			{
-				gameScreen = 'stats'
-			}
+			gameScreen = 'stats'
+		}
+		else if (Math.abs(xMulti - x) * Math.abs(xMulti - x) + Math.abs(yMulti - y) * Math.abs(yMulti - y) < menuSize * menuSize)
+		{
+			gameScreen = 'game'
 		}
 	}
 })
@@ -193,8 +201,8 @@ setInterval(function() // Main game loop
 				var enemy = new Object()
 					enemy.x = Math.random() * canvas.width
 					enemy.y = Math.random() * canvas.height
-					enemy.xDestination = Math.random() * canvas.width
-					enemy.yDestination = Math.random() * canvas.height
+					enemy.xDestination = random(canvas.width - menuEnemySandbox, canvas.width + menuEnemySandbox)
+					enemy.yDestination = random(canvas.height - menuEnemySandbox, canvas.height + menuEnemySandbox)
 				menuEnemies.push(enemy)
 			}
 		}
@@ -222,8 +230,8 @@ setInterval(function() // Main game loop
 
 				if (Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination) && Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination)) // Pick a new destination once we arrive
 				{
-					menuEnemies[i].xDestination = Math.random() * canvas.width
-					menuEnemies[i].yDestination = Math.random() * canvas.height
+					menuEnemies[i].xDestination = random(canvas.width - menuEnemySandbox, canvas.width + menuEnemySandbox)
+					menuEnemies[i].yDestination = random(canvas.height - menuEnemySandbox, canvas.height + menuEnemySandbox)
 				}
 			}
 		}
@@ -289,11 +297,8 @@ setInterval(function() // Main game loop
 
 	    for (var i = 1; i < enemies.length; i++) // Do stuff with the zombies
 	    {
-	    	if (enemies[i].distance < renderDistance)
-	    	{
-	    		enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
-				enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
-	    	}
+	    	enemies[i].bearing = bearing(enemies[i].latitude, enemies[i].longitude)
+			enemies[i].distance = distance(enemies[i].latitude, enemies[i].longitude)
 
 	    	if (enemies[i].distance < renderDistance)
 	    	{
@@ -313,11 +318,8 @@ setInterval(function() // Main game loop
 
 	    for (var i = 1; i < players.length; i++) // Do stuff with the players
 	    {
-	    	if (players[i].distance < renderDistance)
-	    	{
-	    		players[i].bearing = bearing(players[i].latitude, players[i].longitude)
-				players[i].distance = distance(players[i].latitude, players[i].longitude)
-	    	}
+	    	players[i].bearing = bearing(players[i].latitude, players[i].longitude)
+			players[i].distance = distance(players[i].latitude, players[i].longitude)
 	    }
 
 	    if (vision.length > 0) // If we're looking at at least one zombie...
@@ -329,7 +331,7 @@ setInterval(function() // Main game loop
 
 			if (debug)
 			{
-				console.log(gps.latitude, gps.longitude, vision[0].name, vision[0].latitude, vision[0].longitude, vision[0].distance, vision[0].health)
+				// console.log(gps.latitude, gps.longitude, vision[0].name, vision[0].latitude, vision[0].longitude, vision[0].distance, vision[0].health)
 			}
 	    }
 

@@ -10,10 +10,10 @@ var players = new Array()
 
 var proximity = new Array() // The array we'll use to move zombies closer to appropriate players
 
-var enemyCount = 30 // 100 "seems to be" the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
+var enemyCount = 200 // 100 "seems to be" the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
 var spawnRadiusLatitude = 0.015 // 0.015 is about a half mile in the latitude plane (in San Antonio, TX)
 var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude plane (in San Antonio, TX)
-var enemySpeed = 0.15 // The ratio to divide the distance of the zombie to the target player by
+var enemySpeed = 1.5 // ...meters per two seconds
 var enemyMaxHealth = 4
 
 report() // Give a bit of feedback to show that the server started
@@ -207,11 +207,27 @@ function make(markerKind, markerName, markerLatitude, markerLongitude, markerHea
     }	
 }
 
-function distance(latitude1, longitude1, latitude2, longitude2)
+Number.prototype.toRad = function()
 {
-    var km = 6371 // Radius of the earth in kilometers
-    var distance = Math.acos(Math.sin(latitude1) * Math.sin(latitude2) + 
-                   Math.cos(latitude1) * Math.cos(latitude2) *
-                   Math.cos(longitude2 - longitude1)) * km
-    return distance
+    return this * Math.PI / 180
+}
+
+Number.prototype.toDeg = function()
+{
+    return this * 180 / Math.PI
+}
+
+function distance(lat1, lon1, lat2, lon2) // Returns distance in meters
+{
+    var radius = 6371000
+    var dLat = (lat2 - lat1).toRad()
+    var dLon = (lon2 - lon1).toRad()
+    var lat1 = lat1.toRad()
+    var lat2 = lat2.toRad()
+
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2)
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    var d = radius * c
+    return d
 }

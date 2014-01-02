@@ -74,6 +74,11 @@ function error(error)
     }
 }
 
+function random(min, max)
+{
+	return Math.random() * (max - min) + min
+}
+
 Number.prototype.toRad = function()
 {
 	return this * Math.PI / 180
@@ -84,13 +89,19 @@ Number.prototype.toDeg = function()
 	return this * 180 / Math.PI
 }
 
-function distance(latitude, longitude)
+function distance(lat2, lon2) // Returns distance in meters
 {
-	var km = 6378 // Radius of the earth in meters
-	var distance = Math.acos(Math.sin(gps.latitude) * Math.sin(latitude) + 
-                   Math.cos(gps.latitude) * Math.cos(latitude) *
-            	   Math.cos(longitude - gps.longitude)) * km
-	return distance
+	var radius = 6371000
+	var dLat = (lat2 - gps.latitude).toRad()
+	var dLon = (lon2 - gps.longitude).toRad()
+	var lat1 = gps.latitude.toRad()
+	var lat2 = lat2.toRad()
+
+	var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+			Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2)
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+	var d = radius * c
+	return d
 }
 
 function bearing(latitude, longitude)
