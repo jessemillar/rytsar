@@ -35,8 +35,9 @@ var rotateRequiredReload = 500 // Set higher than needed to prevent accidental r
 // Keep the sound effects in line by setting their "length"
 var canShoot = true
 var canShootServer = true
-var timeShoot = 200
-var timeReload = 300 // canShoot manages timeReload
+var timeFire = 300
+var timeReload = 1100 // canShoot manages timeReload
+var timeCock = 450
 var canScan = true
 var timeScan = 1000 // Set higher than needed for safety
 
@@ -74,7 +75,7 @@ var menuGlyphWidth = menuSize / 3.5
 var menuGlyphHeight = menuGlyphWidth * 1.6
 var menuGlyphSpacing = menuSize / 24
 var menuGlyphColor = canvasColor
-var menuEnemyCount = 25
+var menuEnemyCount = 30
 var menuEnemies = new Array()
 var menuEnemySpeed = 0.05
 var menuEnemySandbox = 50 // The amount of pixels outside the screen that the menu zombies are allowed to go to as a destination
@@ -126,6 +127,7 @@ document.addEventListener('touchstart', function(ev) // Monitor touches
 		}
 		else if (Math.abs(xMulti - x) * Math.abs(xMulti - x) + Math.abs(yMulti - y) * Math.abs(yMulti - y) < menuSize * menuSize)
 		{
+			musMenu.pause()
 			gameScreen = 'game'
 		}
 	}
@@ -373,7 +375,7 @@ setInterval(function() // Main game loop
 
 	    drawHealth() // Give a visual on current health level
 	    drawAmmo() // Give us a visual on how much ammo we have left
-	    sweep() // Put this last so it draws on top of everything
+	    // sweep() // Put this last so it draws on top of everything
 	}
 }, 1000 / 60) // FPS
 
@@ -389,8 +391,13 @@ function reload()
 
 	        setTimeout(function()
 	        {
-	            canShoot = true
+	        	sfxCock.play()
 	        }, timeReload)
+
+	        setTimeout(function()
+	        {
+	            canShoot = true
+	        }, timeCock + timeReload)
 	    }
 	}
 }
@@ -405,22 +412,22 @@ function fire()
 	        magazine-- // Remove a bullet
 	        sfxFire.play()
 	        canShoot = false
-
-	        setTimeout(function()
-	        {
-	            canShoot = true
-	        }, timeShoot)
 	    }
 	    else
 	    {
 	        sfxEmpty.play()
 	        canShoot = false
-
-	        setTimeout(function()
-	        {
-	            canShoot = true
-	        }, timeShoot)
 	    }
+
+	    setTimeout(function()
+        {
+        	sfxCock.play()
+        }, timeFire)
+
+        setTimeout(function()
+        {
+            canShoot = true
+        }, timeFire + timeCock)
 	}
 }
 
@@ -448,7 +455,7 @@ function shootZombie(zombieName, damageAmount)
 	        setTimeout(function()
 	        {
 	            canShootServer = true
-	        }, timeShoot)
+	        }, timeFire)
 	    }
 	}
 }

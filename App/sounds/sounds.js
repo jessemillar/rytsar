@@ -7,20 +7,27 @@ var musMenu = document.createElement('audio')
 	document.body.appendChild(musMenu)
 
 var sfxEmpty = document.createElement('audio')
-	sfxEmpty.src = 'sounds/guns/nineteen/empty.mp3'
+	sfxEmpty.src = 'sounds/guns/revolver/empty.mp3'
 	sfxEmpty.preload = true
 	sfxEmpty.loop = false
 	sfxEmpty.volume = 1
 	sfxEmpty.load()
+var sfxCock = document.createElement('audio')
+	sfxCock.src = 'sounds/guns/revolver/cock.mp3'
+	sfxCock.preload = true
+	sfxCock.loop = false
+	sfxCock.volume = 1
+	sfxCock.load()
+	document.body.appendChild(sfxCock)
 var sfxFire = document.createElement('audio')
-	sfxFire.src = 'sounds/guns/nineteen/fire.mp3'
+	sfxFire.src = 'sounds/guns/revolver/fire.mp3'
 	sfxFire.preload = true
 	sfxFire.loop = false
 	sfxFire.volume = 1
 	sfxFire.load()
 	document.body.appendChild(sfxFire)
 var sfxReload = document.createElement('audio')
-	sfxReload.src = 'sounds/guns/nineteen/reload.mp3'
+	sfxReload.src = 'sounds/guns/revolver/reload.mp3'
 	sfxReload.preload = true
 	sfxReload.loop = false
 	sfxReload.volume = 1
