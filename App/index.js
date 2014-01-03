@@ -21,8 +21,8 @@ var proximity = new Array() // The zombies close enough to see us
 	proximity[0] = 'proximity'
 var vision = new Array() // The things in our field of view
 
-var renderDistance = 65 // Distance in meters
-var maxShotDistance = 35 // Distance in meters
+var renderDistance = 35 // Distance in meters
+var maxShotDistance = 20 // Distance in meters
 var minShotDistance = 5 // Distance in meters
 var damageDistance = 2.5 // Distance in meters
 var fieldOfView = 22 // In degrees
@@ -43,7 +43,8 @@ var timeScan = 1000 // Set higher than needed for safety
 
 // General gun variables
 var capacity = 6
-var magazine = capacity
+var magazine = random(2, capacity - 2)
+var extraAmmo = random(1, 3)
 var shotDamage = 2 // How much damage a bullet deals (change this later to be more dynamic)
 
 var playerMaxHealth = 4
@@ -59,8 +60,6 @@ var enemyColor = '#db4105'
 var deadColor = '#61737e'
 var playerColor = '#fff8e3'
 var itemColor = '#9fb4cc'
-var sweepColor = '#fff8e3'
-var sweepHeight = 4 // ...in pixels
 var ammoColor = '#9fb4cc'
 var healthColor = '#db4105'
 var indicatorWidth = 15
@@ -95,10 +94,6 @@ var xMulti = xCenter - menuSize / 2 - menuSpacing
 var yMulti = yCenter + menuSize / 2 + menuSpacing
 var xPrefs = xCenter + menuSize / 2 + menuSpacing
 var yPrefs = yCenter + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 2
-
-// Radar sweep variables
-var sweepTick = 0
-var sweepSpeed = 20 // Lower values result in a faster sweep
 
 document.addEventListener('pagehide', function() // Close the connection to the server upon leaving the app
 {
@@ -188,12 +183,14 @@ setInterval(function() // Server update loop
 
 setInterval(function() // Main game loop
 {
-	if (gameScreen == 'prefs')
+	if (gameScreen == 'prefs') // The preferences button acts as a nuke for the moment
 	{
+		socket.send(JSON.stringify(self)) // Tell the server on a regular basis where the player is	
 		var message = new Array()
 			message[0] = 'genocide'
 		socket.send(JSON.stringify(message)) // Temporary genocide for testing purposes
-		gameScreen = 'menu'
+		blank(enemyColor)
+		gameScreen = 'game'
 	}
 	else if (gameScreen == 'menu')
 	{
@@ -358,6 +355,7 @@ setInterval(function() // Main game loop
 			circle(xCenter, yCenter, maxShotDistance * metersToPixels, debugColor)
 			circle(xCenter, yCenter, minShotDistance * metersToPixels, debugColor)
 			circle(xCenter, yCenter, damageDistance * metersToPixels, debugColor)
+			text('GPS currently accurate within ' + gps.accuracy + ' meters', 3 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
 	    }
 
 	    polygon(xCenter, yCenter, playerSize, playerColor) // Draw the player
@@ -387,7 +385,6 @@ setInterval(function() // Main game loop
 
 	    drawHealth() // Give a visual on current health level
 	    drawAmmo() // Give us a visual on how much ammo we have left
-	    // sweep() // Put this last so it draws on top of everything
 	}
 }, 1000 / 60) // FPS
 
@@ -395,9 +392,13 @@ function reload()
 {
 	if (canShoot) // Prevent reloading during the playback of sound effects
     {
-	    if (magazine < capacity) // Don't reload if we already have a full magazine
+	    if (magazine < capacity && extraAmmo > 0) // Don't reload if we already have a full magazine or if we don't have ammo to reload with
 	    {
-	        magazine = capacity // Fill the magazine to capacity
+	        while (magazine < capacity && extraAmmo > 0) // Fill the magazine with our extra ammo
+	        {
+	        	magazine += 1
+	        	extraAmmo -=1 
+	        }
 	        sfxReload.play()
 	        canShoot = false
 
@@ -556,28 +557,13 @@ function drawAmmo()
     // Things are only set up for right handed users right now
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	for (var i = 0; i < magazine + 1; i++)
+	for (var i = 0; i < magazine + 1; i++) // Draw the ammo in our gun
 	{
 		rectangle(canvas.width - indicatorSpacing - indicatorWidth, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, ammoColor)
 	}
-}
 
-function sweep()
-{
-	rectangle(0, Math.sin(sweepTick / sweepSpeed) * yCenter + yCenter - sweepHeight / 2, canvas.width, sweepHeight, sweepColor) // Draw the sweep
-	sweepTick++ // Increase the seed we use to run the sin function and make the sweep animate smoothly
-
-	if (Math.sin(Math.sin(sweepTick / sweepSpeed)) < -0.8) // Beep only at the top of the screen
+	for (var i = 0; i < extraAmmo + 1; i++) // Draw our extraAmmo
 	{
-		if (canScan) // Don't play the beep more than once
-		{
-			sfxSweep.play()
-			canScan = false
-
-			setTimeout(function()
-			{
-				canScan = true
-			}, timeScan)
-		}
+		rectangle(indicatorSpacing, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, itemColor)
 	}
 }

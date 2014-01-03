@@ -11,7 +11,7 @@ var players = new Array()
 var proximity = new Array() // The array we'll use to move zombies closer to appropriate players
 
 var enemyCount = 100 // 100 "seems to be" the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
-var spawnRadius = 750 // ...meters
+var spawnRadius = 250 // ...meters
 var enemySpeed = 1 // ...meter(s) per second
 var enemyMaxHealth = 4
 

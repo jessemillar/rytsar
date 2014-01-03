@@ -153,31 +153,6 @@ function rectangle(x, y, width, height, color, alpha)
 	ctx.fillRect(x, y, width, height)
 }
 
-function rounded(x, y, width, height, roundness, color, alpha)
-{
-	if (alpha)
-	{
-		ctx.globalAlpha = alpha
-	}
-	else
-	{
-		ctx.globalAlpha = 1
-	}
-
-	ctx.beginPath()
-	ctx.moveTo(x + roundness, y)
-	ctx.lineTo(x + width - roundness, y)
-	ctx.quadraticCurveTo(x + width, y, x + width, y + roundness)
-	ctx.lineTo(x + width, y + height - roundness)
-	ctx.quadraticCurveTo(x + width, y + height, x + width - roundness, y + height)
-	ctx.lineTo(x + roundness, y + height)
-	ctx.quadraticCurveTo(x, y + height, x, y + height - roundness)
-	ctx.lineTo(x, y + roundness)
-	ctx.quadraticCurveTo(x, y, x + roundness, y)
-	ctx.fillStyle = color
-	ctx.fill()
-}
-
 function polygon(x, y, size, color, alpha)
 {
 	if (alpha)
@@ -215,4 +190,19 @@ function circle(x, y, radius, color, alpha)
 	ctx.lineWidth = 1
 	ctx.strokeStyle = color
 	ctx.stroke()
+}
+
+function text(message, x, y, color, alpha)
+{
+	if (alpha)
+	{
+		ctx.globalAlpha = alpha
+	}
+	else
+	{
+		ctx.globalAlpha = 1
+	}
+
+	ctx.fillStyle = color
+	ctx.fillText(message, x, y + 7)
 }
