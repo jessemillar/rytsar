@@ -10,41 +10,35 @@ var players = new Array()
 
 var proximity = new Array() // The array we'll use to move zombies closer to appropriate players
 
-var enemyCount = 200 // 100 "seems to be" the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
-var spawnRadiusLatitude = 0.015 // 0.015 is about a half mile in the latitude plane (in San Antonio, TX)
-var spawnRadiusLongitude = 0.017 // 0.017 is about a half mile in the longitude plane (in San Antonio, TX)
-var enemySpeed = 1.5 // ...meters per two seconds
+var enemyCount = 100 // 100 "seems to be" the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
+var spawnRadius = 750 // ...meters
+var enemySpeed = 1 // ...meter(s) per second
 var enemyMaxHealth = 4
 
-report() // Give a bit of feedback to show that the server started
+console.log('Server started')
 
-setInterval(function() // Post a general update every two seconds and move zombies closer to appropriate players
+setInterval(function() // Post a general update every second and move zombies closer to appropriate players
 {
-    report()
-    if (proximity.length > 1) // Only advance the enemies if there's a player in range to advance to
+    report() // Post some information to the debug console
+    if (proximity.length > 1 && players.length > 1) // Only advance the enemies if there's a player in range to advance to
     {
         advanceEnemies()
     }
-}, 2000)
+}, 1000)
 
-wss.on('connection', function(socket) {
-	if (enemies.length > 1) // If there are zombies, send the data to each new client when it connects
-	{
-		socket.send(JSON.stringify(enemies)) // Initially send the enemies array to the clients
-        socket.send(JSON.stringify(players)) // Initially send the players array to the clients
-	}
-
-    socket.on('message', function(message) // Do the following whenever the server receives a message
+wss.on('connection', function(socket) // Monitors connections for each client that connects...?
+{
+    socket.on('message', function(message) // Do the following whenever the server receives a message...
     {
-    	var data = JSON.parse(message) // Change the data from JSON to an object
+    	var data = JSON.parse(message) // Ejecta only sends data as strings so change the string to an object
 
         if (data == 'genocide')
         {
-            enemies.length = 1
-            updateEnemies()
-            console.log('Somebody dropped a nuke')
+            enemies.length = 1 // Wipe the zombie "database"
+            console.log('Every zombie just died...')
+            spawnEnemies() // Respawn zombies if we have at least one player logged in
         }
-        else if (data[0] == 'player')
+        else if (data[0] == 'player') // If the message type is data about a player...
         {
             if (players.length == 1) // Log the first player on the server
             {
@@ -55,7 +49,7 @@ wss.on('connection', function(socket) {
             {
                 for (var i = 1; i < players.length; i++)
                 {
-                    if (data[1].id == players[i].id) // Don't duplicate the player
+                    if (data[1].id == players[i].id) // Don't duplicate players
                     {
                         break
                     }
@@ -68,11 +62,11 @@ wss.on('connection', function(socket) {
                 }
             }
         }
-        else if (data[0] == 'proximity')
+        else if (data[0] == 'proximity') // If a client is sending data about which zombies are close to him...
         {
             proximity = data
         }
-        else if (data[0] == 'damage')
+        else if (data[0] == 'damage') // If a player shot a zombie...
         {
             for (var i = 1; i < enemies.length; i++)
             {
@@ -102,12 +96,19 @@ wss.on('connection', function(socket) {
             }
         }
 
-        updateEnemies()
-		socket.send(JSON.stringify(enemies)) // Send the enemy array to the clients
-        socket.send(JSON.stringify(players)) // Send the updated player array to the clients
+        if (players.length > 1) // If we have players...
+        {
+            if (enemies.length == 1) // Spawn zombies if we have none
+            {
+                spawnEnemies()
+            }
+
+            socket.send(JSON.stringify(enemies)) // Send the enemy array to the clients
+            socket.send(JSON.stringify(players)) // Send the updated player array to the clients
+        }
     })
 
-    socket.on('error', function(message) // Do the following whenever the server receives an error message
+    socket.on('error', function(message) // Do the following whenever the server receives an "error" message
     {
         players.length = 1
         console.log('Recovering from an "error"')
@@ -136,21 +137,51 @@ function report()
 	console.log((players.length - 1) + ' player(s) connected in a world with ' + liveEnemies + ' zombie(s) at ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ' on ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear())
 }
 
-function updateEnemies()
+function make(markerKind, markerName, markerLatitude, markerLongitude, markerHealth)
 {
-	if (enemies.length == 1 && players.length > 1) // If we have players but no zombies...
+    // Make something from the function's values
+    var something = new Object()
+        something.name = markerName
+        something.latitude = markerLatitude
+        something.longitude = markerLongitude
+        something.health = markerHealth
+
+    // Push these values to the appropriate database array
+    if (markerKind == 'enemy')
+    {
+        enemies.push(something)
+    }
+    else if (markerKind == 'object')
+    {
+        objects.push(something)
+    }   
+}
+
+function spawnEnemies()
+{
+    var spawnLatitude = 0
+    var spawnLongitude = 0
+
+    while (spawnRadius > distance(players[1].latitude, players[1].longitude, players[1].latitude + spawnLatitude, players[1].longitude)) // Find spawnLatitude
+    {
+        spawnLatitude += 0.001
+    }
+
+    while (spawnRadius > distance(players[1].latitude, players[1].longitude, players[1].latitude, players[1].longitude + spawnLongitude)) // Find spawnLongitude
+    {
+        spawnLongitude += 0.001
+    }
+
+	for (var i = 1; i < enemyCount + 1; i++) // Spawn the number of zombies we defined at the top of the script
 	{
-		for (var i = 1; i < enemyCount + 1; i++) // Spawn the number of zombies we defined at the top of the script
-		{
-            // Spawn in relation to the first player that joined the server
-			var latitude = players[1].latitude + ((Math.random() * spawnRadiusLatitude) - (Math.random() * spawnRadiusLatitude))
-		    var longitude = players[1].longitude + ((Math.random() * spawnRadiusLongitude) - (Math.random() * spawnRadiusLongitude))
+        // Spawn in relation to the first player that joined the server
+		var lat = random(players[1].latitude - spawnLatitude, players[1].latitude + spawnLatitude)
+	    var lon = random(players[1].longitude - spawnLongitude, players[1].longitude + spawnLongitude)
 
-			make('enemy', 'zombie' + i, latitude, longitude, enemyMaxHealth)
-		}
-
-        console.log(enemyCount + ' zombie(s) have been spawned')
+		make('enemy', 'zombie' + i, lat, lon, enemyMaxHealth)
 	}
+
+    console.log(enemyCount + ' zombie(s) have been spawned')
 }
 
 function advanceEnemies()
@@ -158,10 +189,10 @@ function advanceEnemies()
     for (var i = 1; i < proximity.length; i++)
     {
         // Reset the pointer values on each pass
-        var enemyPointer = 0
-        var playerPointer = 0
+        var enemyPointer = 0 // Find the zombie in the enemy array
+        var playerPointer = 0 // Find the player in the player array
 
-        for (var y = 1; y < enemies.length; y++) // Find the zombie in question
+        for (var y = 1; y < enemies.length; y++) // Find the zombie
         {
             if (enemies[y].name == proximity[i].name)
             {
@@ -170,7 +201,7 @@ function advanceEnemies()
             }
         }
 
-        for (var y = 1; y < players.length; y++) // Find the player in question
+        for (var y = 1; y < players.length; y++) // Find the player
         {
             if (players[y].id == proximity[i].target)
             {
@@ -179,7 +210,7 @@ function advanceEnemies()
             }
         }
 
-        if (enemyPointer !== 0 && playerPointer !== 0 && proximity[i].health > 0)
+        if (proximity[i].health > 0)
         {
             var ratio = enemySpeed / distance(players[playerPointer].latitude, players[playerPointer].longitude, enemies[enemyPointer].latitude, enemies[enemyPointer].longitude)
 
@@ -190,27 +221,9 @@ function advanceEnemies()
     }
 }
 
-function make(markerKind, markerName, markerLatitude, markerLongitude, markerHealth)
+function random(min, max)
 {
-    // Make an object with the function's values
-	var object = new Object()
-
-    object.name = markerName
-    object.latitude = markerLatitude
-    object.longitude = markerLongitude
-    object.health = markerHealth
-    object.bearing = null
-    object.distance = null
-
-    // Push these values to the appropriate database array
-    if (markerKind == 'enemy')
-    {
-    	enemies.push(object)
-    }
-    else if (markerKind == 'object')
-    {
-    	objects.push(object)
-    }	
+    return Math.random() * (max - min) + min
 }
 
 Number.prototype.toRad = function()

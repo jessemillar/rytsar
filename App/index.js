@@ -24,7 +24,7 @@ var vision = new Array() // The things in our field of view
 var renderDistance = 65 // Distance in meters
 var maxShotDistance = 35 // Distance in meters
 var minShotDistance = 5 // Distance in meters
-var damageDistance = 2 // Distance in meters
+var damageDistance = 2.5 // Distance in meters
 var fieldOfView = 22 // In degrees
 var metersToPixels = 4 // ...pixels equals a meter
 
@@ -42,11 +42,11 @@ var canScan = true
 var timeScan = 1000 // Set higher than needed for safety
 
 // General gun variables
-var capacity = 8
+var capacity = 6
 var magazine = capacity
 var shotDamage = 2 // How much damage a bullet deals (change this later to be more dynamic)
 
-var playerMaxHealth = 5
+var playerMaxHealth = 4
 
 // UI values
 var xCenter = canvas.width / 2
@@ -139,6 +139,7 @@ document.addEventListener('touchstart', function(ev) // Monitor touches
 
 socket.addEventListener('message', function(message) // Keep track of messages coming from the server
 {
+	// console.log(message.data)
 	data = JSON.parse(message.data)
 
 	if (data[0] == 'enemies')
@@ -183,7 +184,7 @@ setInterval(function() // Server update loop
 			socket.send(JSON.stringify(proximity)) // Tell the server which zombies are close to us
 		}
 	}
-}, 2000) // Update once every two seconds
+}, 1000) // Update once every second
 
 setInterval(function() // Main game loop
 {
