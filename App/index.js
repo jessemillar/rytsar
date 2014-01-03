@@ -130,6 +130,10 @@ document.addEventListener('touchstart', function(ev) // Monitor touches
 			musMenu.pause()
 			gameScreen = 'game'
 		}
+		else if (Math.abs(xPrefs - x) * Math.abs(xPrefs - x) + Math.abs(yPrefs - y) * Math.abs(yPrefs - y) < menuSize * menuSize)
+		{
+			gameScreen = 'prefs'
+		}
 	}
 })
 
@@ -183,7 +187,14 @@ setInterval(function() // Server update loop
 
 setInterval(function() // Main game loop
 {
-	if (gameScreen == 'menu')
+	if (gameScreen == 'prefs')
+	{
+		var message = new Array()
+			message[0] = 'genocide'
+		socket.send(JSON.stringify(message)) // Temporary genocide for testing purposes
+		gameScreen = 'menu'
+	}
+	else if (gameScreen == 'menu')
 	{
 		if (!menuMusicPlaying)
 		{

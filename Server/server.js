@@ -38,7 +38,13 @@ wss.on('connection', function(socket) {
     {
     	var data = JSON.parse(message) // Change the data from JSON to an object
 
-        if (data[0] == 'player')
+        if (data == 'genocide')
+        {
+            enemies.length = 1
+            updateEnemies()
+            console.log('Somebody dropped a nuke')
+        }
+        else if (data[0] == 'player')
         {
             if (players.length == 1) // Log the first player on the server
             {
