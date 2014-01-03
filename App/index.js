@@ -14,17 +14,17 @@ var self = new Array() // The array we push to the server with data about the pl
 var data = new Array() // The array we'll use to parse the JSON the server will send to us
 
 var enemies = new Array() // Our array of zombies
-var objects = new Array() // Monitor the objects placed throughout the world
+var ammoPacks = new Array() // Monitor the objects placed throughout the world
 var players = new Array() // Keep track of connected players and their coordinates
 
 var proximity = new Array() // The zombies close enough to see us
 	proximity[0] = 'proximity'
 var vision = new Array() // The things in our field of view
 
-var renderDistance = 35 // Distance in meters
-var maxShotDistance = 20 // Distance in meters
-var minShotDistance = 5 // Distance in meters
-var damageDistance = 2.5 // Distance in meters
+var renderDistance = 50 // Distance in meters
+var maxShotDistance = 25 // Distance in meters
+var minShotDistance = 8 // Distance in meters
+var damageDistance = 5 // Distance in meters
 var fieldOfView = 22 // In degrees
 var metersToPixels = 4 // ...pixels equals a meter
 
@@ -43,8 +43,8 @@ var timeScan = 1000 // Set higher than needed for safety
 
 // General gun variables
 var capacity = 6
-var magazine = random(2, capacity - 2)
-var extraAmmo = random(1, 3)
+var magazine = random(0, capacity - 4)
+var extraAmmo = random(0, 2)
 var shotDamage = 2 // How much damage a bullet deals (change this later to be more dynamic)
 
 var playerMaxHealth = 4
@@ -67,6 +67,7 @@ var indicatorHeight = 7
 var indicatorSpacing = 5
 var playerSize = 10
 var otherPlayerSize = 7
+var ammoPackSize = 7
 var enemySize = 10
 var menuSize = canvas.width / 4.5
 var menuSpacing = 3.5
@@ -145,6 +146,10 @@ socket.addEventListener('message', function(message) // Keep track of messages c
 	{
 		players = data
 	}
+	else if (data[0] == 'ammo')
+	{
+		ammoPacks = data
+	}
 })
 
 function init() // Run once by the GPS function when we have a location lock
@@ -179,7 +184,7 @@ setInterval(function() // Server update loop
 			socket.send(JSON.stringify(proximity)) // Tell the server which zombies are close to us
 		}
 	}
-}, 1000) // Update once every second
+}, 250) // Update once every second
 
 setInterval(function() // Main game loop
 {
@@ -190,6 +195,7 @@ setInterval(function() // Main game loop
 			message[0] = 'genocide'
 		socket.send(JSON.stringify(message)) // Temporary genocide for testing purposes
 		blank(enemyColor)
+		musMenu.pause()
 		gameScreen = 'game'
 	}
 	else if (gameScreen == 'menu')
@@ -333,6 +339,12 @@ setInterval(function() // Main game loop
 			players[i].distance = distance(players[i].latitude, players[i].longitude)
 	    }
 
+	    for (var i = 1; i < ammoPacks.length; i++) // Do stuff with the ammo packs
+	    {
+	    	ammoPacks[i].bearing = bearing(ammoPacks[i].latitude, ammoPacks[i].longitude)
+			ammoPacks[i].distance = distance(ammoPacks[i].latitude, ammoPacks[i].longitude)
+	    }
+
 	    if (vision.length > 0) // If we're looking at at least one zombie...
 	    {
 			vision.sort(function(a, b) // Sort the vision array to find the zombie that's closest to us
@@ -355,12 +367,12 @@ setInterval(function() // Main game loop
 			circle(xCenter, yCenter, maxShotDistance * metersToPixels, debugColor)
 			circle(xCenter, yCenter, minShotDistance * metersToPixels, debugColor)
 			circle(xCenter, yCenter, damageDistance * metersToPixels, debugColor)
-			text('GPS currently accurate within ' + gps.accuracy + ' meters', 3 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
+			text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
 	    }
 
-	    polygon(xCenter, yCenter, playerSize, playerColor) // Draw the player
-		drawEnemies() // Duh
-		drawPlayers() // Draw the other players
+	    draw()
+
+	    pickup()
 
 	    if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
 	    {
@@ -382,11 +394,18 @@ setInterval(function() // Main game loop
 				}
 	        }
 	    }
-
-	    drawHealth() // Give a visual on current health level
-	    drawAmmo() // Give us a visual on how much ammo we have left
 	}
 }, 1000 / 60) // FPS
+
+function draw()
+{
+	drawAmmoPacks() // Draw the ammo packs
+	polygon(xCenter, yCenter, playerSize, playerColor) // Draw the player
+	drawEnemies() // Duh
+	drawPlayers() // Draw the other players
+	drawHealth() // Give a visual on current health level
+    drawAmmo() // Give us a visual on how much ammo we have left
+}
 
 function reload()
 {
@@ -444,6 +463,26 @@ function fire()
 	}
 }
 
+function pickup()
+{
+	for (var i = 1; i < ammoPacks.length; i++)
+	{
+		if (ammoPacks[i].distance < minShotDistance && ammoPacks[i].health > 0)
+		{
+			extraAmmo += ammoPacks[i].health
+			ammoPacks[i].health = 0
+			sfxReload.play()
+
+			var something = new Object()
+				something[0] = 'pickup'
+				something[1] = ammoPacks[i]
+
+			socket.send(JSON.stringify(something))
+			break
+		}
+	}
+}
+
 function shootZombie(zombieName, damageAmount)
 {
 	if (canShootServer)
@@ -477,7 +516,7 @@ function enemyAttack()
 {
 	for (var i = 1; i < enemies.length; i++)
 	{
-		if (enemies[i].distance < damageDistance && self[1].health > 0)
+		if (enemies[i].distance < damageDistance && enemies[i].health > 0 && self[1].health > 0)
 		{
 			self[1].health -= 1
 			if (self[1].health > 0)
@@ -521,6 +560,20 @@ function drawEnemies()
 		    {
 		    	polygon(x, y, enemySize, deadColor) // He's dead, Jim
 		    }
+		}
+	}
+}
+
+function drawAmmoPacks()
+{
+	for (var i = 1; i < ammoPacks.length; i++)
+    {
+    	if (ammoPacks[i].distance < renderDistance) // This is the bit that helps with framerate
+    	{
+		    var x = (xCenter) + (Math.cos(((ammoPacks[i].bearing - compass) + 270).toRad()) * (ammoPacks[i].distance * metersToPixels))
+		    var y = (yCenter) + (Math.sin(((ammoPacks[i].bearing - compass) + 270).toRad()) * (ammoPacks[i].distance * metersToPixels))
+
+		    polygon(x, y, ammoPackSize, itemColor) // Draw the item in question
 		}
 	}
 }

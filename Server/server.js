@@ -3,17 +3,23 @@ var wss = new WebSocketServer({port: 8787})
 
 var enemies = new Array()
     enemies[0] = 'enemies'
-var objects = new Array()
-    objects[0] = 'objects'
+var ammoPacks = new Array()
+    ammoPacks[0] = 'ammo'
 var players = new Array()
     players[0] = 'players'
 
 var proximity = new Array() // The array we'll use to move zombies closer to appropriate players
 
-var enemyCount = 100 // 100 "seems to be" the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
-var spawnRadius = 250 // ...meters
-var enemySpeed = 1 // ...meter(s) per second
+var enemyCount = 10 // 100 "seems to be" the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
+var enemySpeed = 0.25 // ...meter(s) per 1/4 second
 var enemyMaxHealth = 4
+
+var spawnRadius = 200 // ...meters
+var spawnLatitude = 0 // Set later on
+var spawnLongitude = 0 // Set later on
+
+var ammoPackCount = 800
+var maxAmmoDrop = 4
 
 console.log('Server started')
 
@@ -24,7 +30,7 @@ setInterval(function() // Post a general update every second and move zombies cl
     {
         advanceEnemies()
     }
-}, 1000)
+}, 250)
 
 wss.on('connection', function(socket) // Monitors connections for each client that connects...?
 {
@@ -34,9 +40,12 @@ wss.on('connection', function(socket) // Monitors connections for each client th
 
         if (data == 'genocide')
         {
-            enemies.length = 1 // Wipe the zombie "database"
-            console.log('Every zombie just died...')
-            spawnEnemies() // Respawn zombies if we have at least one player logged in
+            if (enemies.length > 1)
+            {
+                enemies.length = 1 // Wipe the zombie "database"
+                console.log('Every zombie just died')
+                spawn() // Respawn zombies if we have at least one player logged in
+            }
         }
         else if (data[0] == 'player') // If the message type is data about a player...
         {
@@ -65,6 +74,18 @@ wss.on('connection', function(socket) // Monitors connections for each client th
         else if (data[0] == 'proximity') // If a client is sending data about which zombies are close to him...
         {
             proximity = data
+        }
+        else if (data[0] == 'pickup') // If a client is sending data about which zombies are close to him...
+        {
+            for (var i = 1; i < ammoPacks.length; i++)
+            {
+                if (ammoPacks[i].name == data[1].name)
+                {
+                    ammoPacks.splice(i, 1)
+                    console.log('An ammo pack has been picked up')
+                    break
+                }
+            }
         }
         else if (data[0] == 'damage') // If a player shot a zombie...
         {
@@ -100,11 +121,12 @@ wss.on('connection', function(socket) // Monitors connections for each client th
         {
             if (enemies.length == 1) // Spawn zombies if we have none
             {
-                spawnEnemies()
+                spawn()
             }
 
-            socket.send(JSON.stringify(enemies)) // Send the enemy array to the clients
-            socket.send(JSON.stringify(players)) // Send the updated player array to the clients
+            socket.send(JSON.stringify(enemies)) // Send the enemy array to the client
+            socket.send(JSON.stringify(ammoPacks)) // Send the ammo pack locations and amounts to the client
+            socket.send(JSON.stringify(players)) // Send the updated player array to the client
         }
     })
 
@@ -134,7 +156,7 @@ function report()
     }
 
     var date = new Date()
-	console.log((players.length - 1) + ' player(s) connected in a world with ' + liveEnemies + ' zombie(s) at ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ' on ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear())
+	console.log((players.length - 1) + ' player(s) connected in a world with ' + liveEnemies + ' zombie(s) and ' + (ammoPacks.length - 1) + ' ammo pack(s) at ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + ' on ' + (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear())
 }
 
 function make(markerKind, markerName, markerLatitude, markerLongitude, markerHealth)
@@ -145,22 +167,22 @@ function make(markerKind, markerName, markerLatitude, markerLongitude, markerHea
         something.latitude = markerLatitude
         something.longitude = markerLongitude
         something.health = markerHealth
-
+        
     // Push these values to the appropriate database array
     if (markerKind == 'enemy')
     {
         enemies.push(something)
     }
-    else if (markerKind == 'object')
+    else if (markerKind == 'ammo')
     {
-        objects.push(something)
+        ammoPacks.push(something)
     }   
 }
 
-function spawnEnemies()
+function spawn() // Spawn stuff in relation to the first player that joined the server
 {
-    var spawnLatitude = 0
-    var spawnLongitude = 0
+    spawnLatitude = 0
+    spawnLongitude = 0
 
     while (spawnRadius > distance(players[1].latitude, players[1].longitude, players[1].latitude + spawnLatitude, players[1].longitude)) // Find spawnLatitude
     {
@@ -172,15 +194,22 @@ function spawnEnemies()
         spawnLongitude += 0.001
     }
 
+    for (var i = 1; i < ammoPackCount + 1; i++) // Spawn the number of ammo packs we defined at the top of the script
+    {
+        var lat = random(players[1].latitude - spawnLatitude, players[1].latitude + spawnLatitude)
+        var lon = random(players[1].longitude - spawnLongitude, players[1].longitude + spawnLongitude)
+
+        make('ammo', 'pack' + i, lat, lon, random(1, maxAmmoDrop))
+    }
+    console.log(ammoPackCount + ' ammo packs(s) have been spawned')
+
 	for (var i = 1; i < enemyCount + 1; i++) // Spawn the number of zombies we defined at the top of the script
 	{
-        // Spawn in relation to the first player that joined the server
 		var lat = random(players[1].latitude - spawnLatitude, players[1].latitude + spawnLatitude)
 	    var lon = random(players[1].longitude - spawnLongitude, players[1].longitude + spawnLongitude)
 
 		make('enemy', 'zombie' + i, lat, lon, enemyMaxHealth)
 	}
-
     console.log(enemyCount + ' zombie(s) have been spawned')
 }
 
