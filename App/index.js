@@ -4,7 +4,7 @@ var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variab
 ejecta.include('backend.js')
 ejecta.include('sounds/sounds.js')
 
-var debug = true // Can be toggled by tapping the screen
+var debug = true // Can be toggled by tapping the screen in game mode
 
 var gameScreen = 'menu'
 
@@ -38,8 +38,8 @@ var canShootServer = true
 var timeFire = 300
 var timeReload = 1100 // canShoot manages timeReload
 var timeCock = 450
-var canScan = true
-var timeScan = 1000 // Set higher than needed for safety
+var canPickup = true
+var timePickup = 1000
 
 // General gun variables
 var capacity = 6
@@ -172,19 +172,6 @@ function init() // Run once by the GPS function when we have a location lock
 
 	// socket.send(JSON.stringify(self)) // Tell the server where the player is
 }
-
-setInterval(function() // Server update loop
-{
-	if (gameScreen == 'game')
-	{
-		enemyAttack() // Potentially hurt the player if a zombie is close enough
-		socket.send(JSON.stringify(self)) // Tell the server on a regular basis where the player is	
-		if (proximity.length > 1)
-		{
-			socket.send(JSON.stringify(proximity)) // Tell the server which zombies are close to us
-		}
-	}
-}, 250) // Update once every second
 
 setInterval(function() // Main game loop
 {
@@ -358,6 +345,13 @@ setInterval(function() // Main game loop
 			}
 	    }
 
+	    enemyAttack() // Potentially hurt the player if a zombie is close enough
+		socket.send(JSON.stringify(self)) // Tell the server on a regular basis where the player is	
+		if (proximity.length > 1)
+		{
+			socket.send(JSON.stringify(proximity)) // Tell the server which zombies are close to us
+		}
+
 	    blank(canvasColor) // Place draw calls after this
 
 	    if (debug) // Draw the aiming cone for debugging purposes
@@ -413,10 +407,10 @@ function reload()
     {
 	    if (magazine < capacity && extraAmmo > 0) // Don't reload if we already have a full magazine or if we don't have ammo to reload with
 	    {
-	        while (magazine < capacity && extraAmmo > 0) // Fill the magazine with our extra ammo
+	        while (magazine < capacity - 1 && extraAmmo > 0) // Fill the magazine with our extra ammo
 	        {
 	        	magazine += 1
-	        	extraAmmo -=1 
+	        	extraAmmo -= 1
 	        }
 	        sfxReload.play()
 	        canShoot = false
@@ -467,10 +461,11 @@ function pickup()
 {
 	for (var i = 1; i < ammoPacks.length; i++)
 	{
-		if (ammoPacks[i].distance < minShotDistance && ammoPacks[i].health > 0)
+		if (ammoPacks[i].distance < minShotDistance && ammoPacks[i].health > 0 && canPickup)
 		{
 			extraAmmo += ammoPacks[i].health
 			ammoPacks[i].health = 0
+			canPickup = false
 			sfxReload.play()
 
 			var something = new Object()
@@ -478,6 +473,11 @@ function pickup()
 				something[1] = ammoPacks[i]
 
 			socket.send(JSON.stringify(something))
+
+			setTimeout(function()
+	        {
+	            canPickup = true
+	        }, timePickup)
 			break
 		}
 	}
