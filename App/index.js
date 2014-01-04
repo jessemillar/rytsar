@@ -20,6 +20,7 @@ var players = new Array() // Keep track of connected players and their coordinat
 var proximity = new Array() // The zombies close enough to see us
 	proximity[0] = 'proximity'
 var vision = new Array() // The things in our field of view
+var melee = new Array()
 
 var renderDistance = 50 // Distance in meters
 var maxShotDistance = 25 // Distance in meters
@@ -31,6 +32,11 @@ var metersToPixels = 4 // ...pixels equals a meter
 // How much motion is required for certain actions
 var rotateRequiredShoot = 400
 var rotateRequiredReload = 500 // Set higher than needed to prevent accidental reloading
+
+var accelRequiredMelee = 35
+var canMelee = true
+var timeMelee = 350
+var meleeDamage = 10
 
 // Keep the sound effects in line by setting their "length"
 var canShoot = true
@@ -310,6 +316,11 @@ setInterval(function() // Main game loop
 	    		proximity.push(enemies[i])
 	    	}
 
+	    	if (enemies[i].distance < minShotDistance)
+	    	{
+	    		melee.push(enemies[i])
+	    	}
+
 	        if ((compass - fieldOfView) < enemies[i].bearing && enemies[i].bearing < (compass + fieldOfView))
 	        {
 	            if (enemies[i].distance > minShotDistance && enemies[i].distance < maxShotDistance && enemies[i].health > 0)
@@ -330,6 +341,19 @@ setInterval(function() // Main game loop
 	    {
 	    	ammoPacks[i].bearing = bearing(ammoPacks[i].latitude, ammoPacks[i].longitude)
 			ammoPacks[i].distance = distance(ammoPacks[i].latitude, ammoPacks[i].longitude)
+	    }
+
+	    if (melee.length > 0) // If there's at least one zombie in melee range
+	    {
+			melee.sort(function(a, b) // Sort the vision array to find the zombie that's closest to us
+			{
+				return a.distance - b.distance
+			})
+
+			if (debug)
+			{
+				// console.log(gps.latitude, gps.longitude, vision[0].name, vision[0].latitude, vision[0].longitude, vision[0].distance, vision[0].health)
+			}
 	    }
 
 	    if (vision.length > 0) // If we're looking at at least one zombie...
@@ -367,6 +391,26 @@ setInterval(function() // Main game loop
 	    draw()
 
 	    pickup()
+
+	    if (acceleration.total > accelRequiredMelee)
+		{
+			if (canMelee)
+			{
+				sfxPunch.play()
+
+				if (melee.length > 0) // If we're looking at at least one zombie...
+				{
+					shootZombie(melee[0].name, meleeDamage) // Punch the closest zombie
+				}
+				
+				canMelee = false
+
+				setTimeout(function()
+		        {
+		        	canMelee = true
+		        }, timeMelee)
+			}
+		}
 
 	    if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
 	    {

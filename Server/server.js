@@ -10,27 +10,31 @@ var players = new Array()
 
 var proximity = new Array() // The array we'll use to move zombies closer to appropriate players
 
-var enemyCount = 10 // 100 "seems to be" the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
-var enemySpeed = 0.25 // ...meter(s) per 1/4 second
+var enemyCount = 75 // 100 "seems to be" the max if I want ~60 FPS on the clients when not in debug mode (which is slower)
+var enemySpeed = 0.1 // ...meter(s) per 1/10 second
 var enemyMaxHealth = 4
 
-var spawnRadius = 200 // ...meters
+var spawnRadius = 150 // ...meters
 var spawnLatitude = 0 // Set later on
 var spawnLongitude = 0 // Set later on
 
-var ammoPackCount = 800
+var ammoPackCount = 20
 var maxAmmoDrop = 4
 
 console.log('Server started')
 
-setInterval(function() // Post a general update every second and move zombies closer to appropriate players
+setInterval(function()
 {
     report() // Post some information to the debug console
+}, 1000)
+
+setInterval(function() // Post a general update every second and move zombies closer to appropriate players
+{
     if (proximity.length > 1 && players.length > 1) // Only advance the enemies if there's a player in range to advance to
     {
         advanceEnemies()
     }
-}, 250)
+}, 100)
 
 wss.on('connection', function(socket) // Monitors connections for each client that connects...?
 {
@@ -186,12 +190,12 @@ function spawn() // Spawn stuff in relation to the first player that joined the 
 
     while (spawnRadius > distance(players[1].latitude, players[1].longitude, players[1].latitude + spawnLatitude, players[1].longitude)) // Find spawnLatitude
     {
-        spawnLatitude += 0.001
+        spawnLatitude += 0.00001
     }
 
     while (spawnRadius > distance(players[1].latitude, players[1].longitude, players[1].latitude, players[1].longitude + spawnLongitude)) // Find spawnLongitude
     {
-        spawnLongitude += 0.001
+        spawnLongitude += 0.00001
     }
 
     for (var i = 1; i < ammoPackCount + 1; i++) // Spawn the number of ammo packs we defined at the top of the script

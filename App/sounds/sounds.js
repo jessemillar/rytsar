@@ -6,6 +6,14 @@ var musMenu = document.createElement('audio')
 	musMenu.load()
 	document.body.appendChild(musMenu)
 
+var sfxPunch = document.createElement('audio')
+	sfxPunch.src = 'sounds/punch.mp3'
+	sfxPunch.preload = true
+	sfxPunch.loop = false
+	sfxPunch.volume = 1
+	sfxPunch.load()
+	document.body.appendChild(sfxPunch)
+
 var sfxEmpty = document.createElement('audio')
 	sfxEmpty.src = 'sounds/guns/revolver/empty.mp3'
 	sfxEmpty.preload = true

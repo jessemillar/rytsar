@@ -11,6 +11,7 @@ var acceleration = new Object()
 	acceleration.x = 0
 	acceleration.y = 0
 	acceleration.z = 0
+	acceleration.total = 0
 var gps = new Object()
 	gps.latitude = 0
 	gps.longitude = 0
@@ -35,6 +36,7 @@ document.addEventListener('devicemotion', function(motion)
 	acceleration.x = motion.acceleration.x
 	acceleration.y = motion.acceleration.y
 	acceleration.z = motion.acceleration.z
+	acceleration.total = Math.abs(acceleration.x + acceleration.y + acceleration.z)
 }, true)
 
 navigator.geolocation.watchPosition(geolocation, error) // For GPS and compass
