@@ -2,6 +2,7 @@ var ctx = canvas.getContext('2d')
 var socket = new WebSocket('ws://www.jessemillar.com:8787') // The global variable we'll use to keep track of the server
 
 ejecta.include('backend.js')
+ejecta.include('images/images.js')
 ejecta.include('sounds/sounds.js')
 
 var debug = true // Can be toggled by tapping the screen in game mode
@@ -23,8 +24,8 @@ var vision = new Array() // The things in our field of view
 var melee = new Array()
 
 var renderDistance = 50 // Distance in meters
-var maxShotDistance = 25 // Distance in meters
-var minShotDistance = 8 // Distance in meters
+var maxShotDistance = 30 // Distance in meters
+var minShotDistance = 10 // Distance in meters
 var damageDistance = 5 // Distance in meters
 var fieldOfView = 22 // In degrees
 var metersToPixels = 4 // ...pixels equals a meter
@@ -53,7 +54,7 @@ var magazine = random(0, capacity - 4)
 var extraAmmo = random(0, 2)
 var shotDamage = 2 // How much damage a bullet deals (change this later to be more dynamic)
 
-var playerMaxHealth = 4
+var playerMaxHealth = 5
 
 // UI values
 var xCenter = canvas.width / 2
@@ -81,9 +82,9 @@ var menuGlyphWidth = menuSize / 3.5
 var menuGlyphHeight = menuGlyphWidth * 1.6
 var menuGlyphSpacing = menuSize / 24
 var menuGlyphColor = canvasColor
-var menuEnemyCount = 30
+var menuEnemyCount = 35
 var menuEnemies = new Array()
-var menuEnemySpeed = 0.05
+var menuEnemySpeed = 0.25
 var menuEnemySandbox = 50 // The amount of pixels outside the screen that the menu zombies are allowed to go to as a destination
 var menuMusicPlaying = false
 var menuSfx = 1
@@ -158,6 +159,21 @@ socket.addEventListener('message', function(message) // Keep track of messages c
 	}
 })
 
+setInterval(function()
+{
+	for (var i = 0; i < menuEnemies.length; i++)
+	{
+		if (menuEnemies[i].frame == 0)
+		{
+			menuEnemies[i].frame = 1
+		}
+		else
+		{
+			menuEnemies[i].frame = 0
+		}
+	}
+}, 500)
+
 function init() // Run once by the GPS function when we have a location lock
 {
 	self[1] = new Object()
@@ -213,6 +229,7 @@ setInterval(function() // Main game loop
 					enemy.y = Math.random() * canvas.height
 					enemy.xDestination = random(0 - menuEnemySandbox, canvas.width + menuEnemySandbox)
 					enemy.yDestination = random(0 - menuEnemySandbox, canvas.height + menuEnemySandbox)
+					enemy.frame = random(0, 1)
 				menuEnemies.push(enemy)
 			}
 		}
@@ -250,7 +267,34 @@ setInterval(function() // Main game loop
 
 		for (var i = 0; i < menuEnemies.length; i++)
 		{
-			polygon(menuEnemies[i].x, menuEnemies[i].y, enemySize, enemyColor)
+			// polygon(menuEnemies[i].x, menuEnemies[i].y, enemySize, enemyColor)
+			menuEnemies.sort(function(a, b) // Order the zombies for proper depth
+			{
+				return a.y - b.y
+			})
+			
+			if (menuEnemies[i].xDestination > menuEnemies[i].x)
+			{
+				if (menuEnemies[i].frame == 0)
+				{
+					image(imgZombie, menuEnemies[i].x, menuEnemies[i].y)
+				}
+				else
+				{
+					image(imgZombie2, menuEnemies[i].x, menuEnemies[i].y)
+				}
+			}
+			else
+			{
+				if (menuEnemies[i].frame == 0)
+				{
+					image(imgZombieLeft, menuEnemies[i].x, menuEnemies[i].y)
+				}
+				else
+				{
+					image(imgZombieLeft2, menuEnemies[i].x, menuEnemies[i].y)
+				}
+			}
 		}
 
 		// Logo shape
@@ -302,6 +346,7 @@ setInterval(function() // Main game loop
 	}
 	else if (gameScreen == 'game')
 	{
+		melee.length = 0
 		proximity.length = 1 // Wipe the proximity array so we can send fresh data
 		vision.length = 0 // Clear the field of view array on each pass so we get fresh results
 
@@ -316,7 +361,7 @@ setInterval(function() // Main game loop
 	    		proximity.push(enemies[i])
 	    	}
 
-	    	if (enemies[i].distance < minShotDistance)
+	    	if (enemies[i].distance < minShotDistance && enemies[i].health > 0)
 	    	{
 	    		melee.push(enemies[i])
 	    	}
@@ -562,15 +607,18 @@ function enemyAttack()
 	{
 		if (enemies[i].distance < damageDistance && enemies[i].health > 0 && self[1].health > 0)
 		{
-			self[1].health -= 1
-			if (self[1].health > 0)
+			setTimeout(function()
 			{
-				sfxHurt.play()
-			}
-			else
-			{
-				sfxFlatline.play()
-			}
+				self[1].health -= 1
+				if (self[1].health > 0)
+				{
+					sfxHurt.play()
+				}
+				else
+				{
+					sfxFlatline.play()
+				}
+			}, 1000)
 		}	
 	}
 }

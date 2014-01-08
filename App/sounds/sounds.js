@@ -1,5 +1,5 @@
 var musMenu = document.createElement('audio')
-	musMenu.src = 'sounds/music/menu.mp3'
+	musMenu.src = 'sounds/music/menu.wav'
 	musMenu.preload = true
 	musMenu.loop = true
 	musMenu.volume = 1

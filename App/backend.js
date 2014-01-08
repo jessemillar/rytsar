@@ -43,15 +43,6 @@ navigator.geolocation.watchPosition(geolocation, error) // For GPS and compass
 
 function geolocation(position)
 {
-	if (!genesis)
-	{
-		if (gps.latitude && gps.longitude)
-		{
-			init()
-			genesis = true
-		}
-	}
-
 	gps.latitude = position.coords.latitude
 	gps.longitude = position.coords.longitude
 	gps.accuracy = position.coords.accuracy
@@ -64,6 +55,15 @@ function geolocation(position)
     {
     	compass = position.coords.heading
     }
+
+    if (!genesis)
+	{
+		if (gps.latitude && gps.longitude && compass)
+		{
+			init()
+			genesis = true
+		}
+	}
 }
 
 function error(error)
@@ -120,26 +120,7 @@ function bearing(latitude, longitude)
 	return (bearing.toDeg() + 360) % 360
 }
 
-function line(x1, y1, x2, y2, color, alpha)
-{
-	if (alpha)
-	{
-		ctx.globalAlpha = alpha
-	}
-	else
-	{
-		ctx.globalAlpha = 1
-	}
-
-	ctx.strokeStyle = color
-
-	ctx.beginPath()
-	ctx.moveTo(x1, y1)
-	ctx.lineTo(x2, y2)
-	ctx.lineWidth = 1
-	ctx.stroke()
-}
-
+// Kill this when I move the menu to all images
 function rectangle(x, y, width, height, color, alpha)
 {
 	if (alpha)
@@ -176,24 +157,6 @@ function polygon(x, y, size, color, alpha)
 	ctx.fill()
 }
 
-function circle(x, y, radius, color, alpha)
-{
-	if (alpha)
-	{
-		ctx.globalAlpha = alpha
-	}
-	else
-	{
-		ctx.globalAlpha = 1
-	}
-
-	ctx.beginPath()
-	ctx.arc(x, y, radius, 0, 2 * Math.PI, false)
-	ctx.lineWidth = 1
-	ctx.strokeStyle = color
-	ctx.stroke()
-}
-
 function text(message, x, y, color, alpha)
 {
 	if (alpha)
@@ -207,4 +170,18 @@ function text(message, x, y, color, alpha)
 
 	ctx.fillStyle = color
 	ctx.fillText(message, x, y + 7)
+}
+
+function image(image, x, y, alpha)
+{
+	if (alpha)
+	{
+		ctx.globalAlpha = alpha
+	}
+	else
+	{
+		ctx.globalAlpha = 1
+	}
+
+	ctx.drawImage(image, x, y)
 }
