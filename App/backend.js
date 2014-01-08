@@ -120,6 +120,12 @@ function bearing(latitude, longitude)
 	return (bearing.toDeg() + 360) % 360
 }
 
+function blank(color)
+{
+	ctx.fillStyle = color
+	ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
+
 // Kill this when I move the menu to all images
 function rectangle(x, y, width, height, color, alpha)
 {
@@ -184,4 +190,16 @@ function image(image, x, y, alpha)
 	}
 
 	ctx.drawImage(image, x, y)
+}
+
+function moveToward(thingy, x, y, speed) // Move a thingy toward a specific pixel coordinate at a constant speed
+{
+	var destinationX = x - thingy.x
+	var destinationY = y - thingy.y
+	var hypotenuse = Math.sqrt(destinationX * destinationX + destinationY * destinationY)
+	var radians = Math.atan2(destinationY, destinationX)
+	var angle = radians / Math.PI * 180
+
+	thingy.x += (destinationX / hypotenuse) * speed
+	thingy.y += (destinationY / hypotenuse) * speed
 }
