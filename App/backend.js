@@ -167,7 +167,7 @@ function text(message, x, y, color, alpha)
 	ctx.fillText(message, x, y + 7)
 }
 
-function image(image, x, y, alpha)
+function image(image, x, y, anchor, alpha)
 {
 	if (alpha)
 	{
@@ -178,7 +178,18 @@ function image(image, x, y, alpha)
 		ctx.globalAlpha = 1
 	}
 
-	ctx.drawImage(image, x, y)
+	if (anchor == 'normal')
+	{
+		ctx.drawImage(image, x, y)
+	}
+	else if (anchor == 'center')
+	{
+		ctx.drawImage(image, image.width / 2 - x, image.height / 2 - y)
+	}
+	else if (anchor == 'anchor')
+	{
+		ctx.drawImage(image, image.anchorX - x, image.anchorY - y)
+	}
 }
 
 function moveToward(thingy, x, y, speed) // Move a thingy toward a specific pixel coordinate at a constant speed

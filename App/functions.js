@@ -1,30 +1,3 @@
-function reload()
-{
-	if (canShoot) // Prevent reloading during the playback of sound effects
-    {
-	    if (magazine < capacity && extraAmmo > 0) // Don't reload if we already have a full magazine or if we don't have ammo to reload with
-	    {
-	        while (magazine < capacity - 1 && extraAmmo > 0) // Fill the magazine with our extra ammo
-	        {
-	        	magazine += 1
-	        	extraAmmo -= 1
-	        }
-	        sfxReload.play()
-	        canShoot = false
-
-	        setTimeout(function()
-	        {
-	        	sfxCock.play()
-	        }, timeReload)
-
-	        setTimeout(function()
-	        {
-	            canShoot = true
-	        }, timeCock + timeReload)
-	    }
-	}
-}
-
 function fire()
 {
 	if (canShoot)
@@ -54,6 +27,47 @@ function fire()
 	}
 }
 
+function shootZombie(zombieName, damageAmount)
+{
+	if (canShootServer)
+	{
+		if (magazine > 0) // Don't fire if we don't have ammo
+	    {
+		    setTimeout(function() // Add a timeout so the zombie doesn't groan instantly
+		    {
+		    	sfxGroan.play()
+		    }, 200)
+	    }
+	}
+}
+
+function reload()
+{
+	if (canShoot) // Prevent reloading during the playback of sound effects
+    {
+	    if (magazine < capacity && extraAmmo > 0) // Don't reload if we already have a full magazine or if we don't have ammo to reload with
+	    {
+	        while (magazine < capacity - 1 && extraAmmo > 0) // Fill the magazine with our extra ammo
+	        {
+	        	magazine += 1
+	        	extraAmmo -= 1
+	        }
+	        sfxReload.play()
+	        canShoot = false
+
+	        setTimeout(function()
+	        {
+	        	sfxCock.play()
+	        }, timeReload)
+
+	        setTimeout(function()
+	        {
+	            canShoot = true
+	        }, timeCock + timeReload)
+	    }
+	}
+}
+
 function pickup()
 {
 	for (var i = 1; i < ammoPacks.length; i++)
@@ -71,20 +85,6 @@ function pickup()
 	        }, timePickup)
 			break
 		}
-	}
-}
-
-function shootZombie(zombieName, damageAmount)
-{
-	if (canShootServer)
-	{
-		if (magazine > 0) // Don't fire if we don't have ammo
-	    {
-		    setTimeout(function() // Add a timeout so the zombie doesn't groan instantly
-		    {
-		    	sfxGroan.play()
-		    }, 200)
-	    }
 	}
 }
 

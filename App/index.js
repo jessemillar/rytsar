@@ -1,11 +1,11 @@
-var ctx = canvas.getContext('2d')
-var xCenter = canvas.width / 2
-var yCenter = canvas.height / 2
-
 ejecta.include('functions.js')
 ejecta.include('backend.js')
 ejecta.include('images/images.js')
 ejecta.include('sounds/sounds.js')
+
+var ctx = canvas.getContext('2d')
+var xCenter = canvas.width / 2
+var yCenter = canvas.height / 2
 
 var debug = true // Can be toggled by tapping the screen in game mode
 
@@ -13,7 +13,6 @@ var currentScreen = 'menu'
 
 var enemies = new Array() // Our local array of zombies
 var ammoPacks = new Array() // Locally monitor the objects placed throughout the world
-
 var vision = new Array() // The things in our field of view
 var melee = new Array() // The zombies close enough to be punched
 
@@ -48,13 +47,14 @@ var magazine = random(0, capacity - 4)
 var extraAmmo = random(0, 2)
 var shotDamage = 2 // How much damage a bullet deals (change this later to be more dynamic)
 
-// UI values
+// Color scheme
 var white = '#fff8e3'
 var green = '#cccc9f'
 var black = '#33322d'
 var blue = '#9fb4cc'
 var red = '#db4105'
 
+// UI values
 var canvasColor = black
 var flashColor = red
 var debugColor = blue
@@ -72,7 +72,6 @@ var menuEnemies = new Array()
 var menuEnemyCount = 35
 var menuEnemySpeed = 0.5
 var menuEnemySandbox = 25 // The amount of pixels outside the screen that the menu zombies are allowed to go to as a destination
-var menuMusicPlaying = false
 
 var xStats = xCenter - menuSize / 2 - menuSpacing
 var yStats = yCenter - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
@@ -108,7 +107,7 @@ document.addEventListener('touchstart', function(ev) // Monitor touches througho
 	{
 		if (Math.abs(xMulti - x) * Math.abs(xMulti - x) + Math.abs(yMulti - y) * Math.abs(yMulti - y) < menuSize * menuSize)
 		{
-			musMenu.pause()
+			musMenu.pause() // Kill the menu music before moving into the game screen
 			currentScreen = 'game'
 		}
 	}
@@ -118,29 +117,10 @@ setInterval(function() // Main game loop
 {
 	if (currentScreen == 'menu')
 	{
-		setInterval(function() // Animate the menu zombies
-		{
-			for (var i = 0; i < menuEnemies.length; i++)
-			{
-				if (menuEnemies[i].frame == 0)
-				{
-					menuEnemies[i].frame = 1
-				}
-				else
-				{
-					menuEnemies[i].frame = 0
-				}
-			}
-		}, 500)
-
-		if (!menuMusicPlaying)
+		if (menuEnemies.length == 0) // If there are no zombies, then this is the first time through the menu code
 		{
 			musMenu.play()
-			menuMusicPlaying = true
-		}
 
-		if (menuEnemies.length == 0) // Generate menu zombies if there are none
-		{
 			for (var i = 0; i < menuEnemyCount; i++)
 			{
 				var enemy = new Object()
@@ -151,18 +131,31 @@ setInterval(function() // Main game loop
 					enemy.frame = random(0, 1)
 				menuEnemies.push(enemy)
 			}
-		}
-		else // Move the zombies toward their destination
-		{
-			for (var i = 0; i < menuEnemies.length; i++)
-			{
-				moveToward(menuEnemies[i], menuEnemies[i].xDestination, menuEnemies[i].yDestination, menuEnemySpeed)
 
-				if (Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination) && Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination)) // Pick a new destination once we arrive
+			setInterval(function() // Animate the menu zombies
+			{
+				for (var i = 0; i < menuEnemies.length; i++)
 				{
-					menuEnemies[i].xDestination = random(0 - menuEnemySandbox, canvas.width + menuEnemySandbox)
-					menuEnemies[i].yDestination = random(0 - menuEnemySandbox, canvas.height + menuEnemySandbox)
+					if (menuEnemies[i].frame == 0)
+					{
+						menuEnemies[i].frame = 1
+					}
+					else
+					{
+						menuEnemies[i].frame = 0
+					}
 				}
+			}, 500)
+		}
+		
+		for (var i = 0; i < menuEnemies.length; i++)
+		{
+			moveToward(menuEnemies[i], menuEnemies[i].xDestination, menuEnemies[i].yDestination, menuEnemySpeed)
+
+			if (Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination) && Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination)) // Pick a new destination once we arrive
+			{
+				menuEnemies[i].xDestination = random(0 - menuEnemySandbox, canvas.width + menuEnemySandbox)
+				menuEnemies[i].yDestination = random(0 - menuEnemySandbox, canvas.height + menuEnemySandbox)
 			}
 		}
 
@@ -239,27 +232,8 @@ setInterval(function() // Main game loop
 	    }
 
 	    enemyAttack() // Potentially hurt the player if a zombie is close enough
-		socket.send(JSON.stringify(self)) // Tell the server on a regular basis where the player is	
-		if (proximity.length > 1)
-		{
-			socket.send(JSON.stringify(proximity)) // Tell the server which zombies are close to us
-		}
 
-	    blank(canvasColor) // Place draw calls after this
-
-	    if (debug) // Draw the aiming cone for debugging purposes
-	    {
-	    	line((xCenter) - (yCenter * Math.tan(fieldOfView.toRad())), 0, xCenter, yCenter, debugColor)
-	    	line(xCenter, yCenter, (xCenter) + (yCenter * Math.tan(fieldOfView.toRad())), 0, debugColor)
-			circle(xCenter, yCenter, maxShotDistance * metersToPixels, debugColor)
-			circle(xCenter, yCenter, minShotDistance * metersToPixels, debugColor)
-			circle(xCenter, yCenter, damageDistance * metersToPixels, debugColor)
-			text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
-	    }
-
-	    drawGame()
-
-	    pickup()
+		pickup()
 
 	    if (acceleration.total > accelRequiredMelee)
 		{
@@ -281,7 +255,7 @@ setInterval(function() // Main game loop
 			}
 		}
 
-	    if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
+	    if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Watch for gun orientation
 	    {
 	        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	        // Things are only set up for right handed users right now
@@ -301,6 +275,20 @@ setInterval(function() // Main game loop
 				}
 	        }
 	    }
+
+	    blank(canvasColor) // Place draw calls after this
+
+	    if (debug) // Draw the aiming cone for debugging purposes
+	    {
+	    	line((xCenter) - (yCenter * Math.tan(fieldOfView.toRad())), 0, xCenter, yCenter, debugColor)
+	    	line(xCenter, yCenter, (xCenter) + (yCenter * Math.tan(fieldOfView.toRad())), 0, debugColor)
+			circle(xCenter, yCenter, maxShotDistance * metersToPixels, debugColor)
+			circle(xCenter, yCenter, minShotDistance * metersToPixels, debugColor)
+			circle(xCenter, yCenter, damageDistance * metersToPixels, debugColor)
+			text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
+	    }
+
+	    drawGame()
 	}
 }, 1000 / 60) // FPS
 
@@ -319,22 +307,22 @@ function drawMenu()
 		{
 			if (menuEnemies[i].frame == 0)
 			{
-				image(imgZombie, menuEnemies[i].x, menuEnemies[i].y)
+				image(imgZombie, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
 			}
 			else
 			{
-				image(imgZombie2, menuEnemies[i].x, menuEnemies[i].y)
+				image(imgZombie2, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
 			}
 		}
 		else
 		{
 			if (menuEnemies[i].frame == 0)
 			{
-				image(imgZombieLeft, menuEnemies[i].x, menuEnemies[i].y)
+				image(imgZombieLeft, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
 			}
 			else
 			{
-				image(imgZombieLeft2, menuEnemies[i].x, menuEnemies[i].y)
+				image(imgZombieLeft2, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
 			}
 		}
 	}

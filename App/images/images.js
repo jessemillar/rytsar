@@ -1,9 +1,25 @@
 var imgZombie = new Image()
 	imgZombie.src = 'images/zombie.png'
+	imgZombie.width = 75
+	imgZombie.height = 75
+	imgZombie.anchorX = imgZombie.width / 2
+	imgZombie.anchorY = 70
 var imgZombie2 = new Image()
 	imgZombie2.src = 'images/zombie2.png'
+	imgZombie2.width = 75
+	imgZombie2.height = 75
+	imgZombie2.anchorX = imgZombie2.width / 2
+	imgZombie2.anchorY = 70
 
 var imgZombieLeft = new Image()
 	imgZombieLeft.src = 'images/zombie-left.png'
+	imgZombieLeft.width = 75
+	imgZombieLeft.height = 75
+	imgZombieLeft.anchorX = imgZombieLeft.width / 2
+	imgZombieLeft.anchorY = 70
 var imgZombieLeft2 = new Image()
 	imgZombieLeft2.src = 'images/zombie-left2.png'
+	imgZombieLeft2.width = 75
+	imgZombieLeft2.height = 75
+	imgZombieLeft2.anchorX = imgZombieLeft2.width / 2
+	imgZombieLeft2.anchorY = 70
