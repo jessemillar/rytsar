@@ -1,8 +1,87 @@
-ejecta.include('variables.js')
+var ctx = canvas.getContext('2d')
+var xCenter = canvas.width / 2
+var yCenter = canvas.height / 2
+
 ejecta.include('functions.js')
 ejecta.include('backend.js')
 ejecta.include('images/images.js')
 ejecta.include('sounds/sounds.js')
+
+var debug = true // Can be toggled by tapping the screen in game mode
+
+var currentScreen = 'menu'
+
+var enemies = new Array() // Our local array of zombies
+var ammoPacks = new Array() // Locally monitor the objects placed throughout the world
+
+var vision = new Array() // The things in our field of view
+var melee = new Array() // The zombies close enough to be punched
+
+var playerMaxHealth = 5
+var renderDistance = 50 // Distance in meters
+var maxShotDistance = 30 // Distance in meters
+var minShotDistance = 10 // Distance in meters
+var damageDistance = 5 // Distance in meters
+var fieldOfView = 22 // In degrees
+var metersToPixels = 4 // ...pixels equals a meter
+
+// How much motion is required for certain actions
+var rotateRequiredShoot = 400
+var rotateRequiredReload = 500 // Set higher than needed to prevent accidental reloading
+var accelRequiredMelee = 35
+
+// Keep the sound effects in line by setting their "length"
+var canShoot = true
+var canShootServer = true
+var timeFire = 300
+var timeReload = 1100 // canShoot manages timeReload
+var timeCock = 450
+var canMelee = true
+var timeMelee = 350
+var meleeDamage = 10
+var canPickup = true
+var timePickup = 1000
+
+// General gun variables
+var capacity = 6 // Since we have a revolver right now
+var magazine = random(0, capacity - 4)
+var extraAmmo = random(0, 2)
+var shotDamage = 2 // How much damage a bullet deals (change this later to be more dynamic)
+
+// UI values
+var white = '#fff8e3'
+var green = '#cccc9f'
+var black = '#33322d'
+var blue = '#9fb4cc'
+var red = '#db4105'
+
+var canvasColor = black
+var flashColor = red
+var debugColor = blue
+
+// Remove once I pixel out indicator images
+var indicatorWidth = 15
+var indicatorHeight = 7
+var indicatorSpacing = 5
+
+// Remove when I move the menu to just images
+var menuSize = canvas.width / 4.5
+var menuSpacing = 3.5
+
+var menuEnemies = new Array()
+var menuEnemyCount = 35
+var menuEnemySpeed = 0.5
+var menuEnemySandbox = 25 // The amount of pixels outside the screen that the menu zombies are allowed to go to as a destination
+var menuMusicPlaying = false
+
+var xStats = xCenter - menuSize / 2 - menuSpacing
+var yStats = yCenter - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
+var xSingle = xCenter + menuSize / 2 + menuSpacing
+var ySingle = yCenter - menuSize / 2 - menuSpacing
+var xMulti = xCenter - menuSize / 2 - menuSpacing
+var yMulti = yCenter + menuSize / 2 + menuSpacing
+var xPrefs = xCenter + menuSize / 2 + menuSpacing
+var yPrefs = yCenter + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 2
 
 /*
 document.addEventListener('pagehide', function() // Close the connection to the server upon leaving the app
@@ -47,18 +126,10 @@ function init() // Run once by the GPS function when we have a location lock
 		}
 		else if (currentScreen == 'menu')
 		{
-			if (Math.abs(xStats - x) * Math.abs(xStats - x) + Math.abs(yStats - y) * Math.abs(yStats - y) < menuSize * menuSize)
-			{
-				currentScreen = 'stats'
-			}
-			else if (Math.abs(xMulti - x) * Math.abs(xMulti - x) + Math.abs(yMulti - y) * Math.abs(yMulti - y) < menuSize * menuSize)
+			if (Math.abs(xMulti - x) * Math.abs(xMulti - x) + Math.abs(yMulti - y) * Math.abs(yMulti - y) < menuSize * menuSize)
 			{
 				musMenu.pause()
 				currentScreen = 'game'
-			}
-			else if (Math.abs(xPrefs - x) * Math.abs(xPrefs - x) + Math.abs(yPrefs - y) * Math.abs(yPrefs - y) < menuSize * menuSize)
-			{
-				currentScreen = 'prefs'
 			}
 		}
 	})
@@ -100,27 +171,12 @@ function init() // Run once by the GPS function when we have a location lock
 
 setInterval(function() // Main game loop
 {
-	if (currentScreen == 'prefs') // The preferences button acts as a nuke for the moment
-	{
-		socket.send(JSON.stringify(self)) // Tell the server on a regular basis where the player is	
-		var message = new Array()
-			message[0] = 'genocide'
-		socket.send(JSON.stringify(message)) // Temporary genocide for testing purposes
-		blank(enemyColor)
-		musMenu.pause()
-		currentScreen = 'game'
-	}
-	else if (currentScreen == 'menu')
+	if (currentScreen == 'menu')
 	{
 		if (!menuMusicPlaying)
 		{
 			musMenu.play()
 			menuMusicPlaying = true
-		}
-
-		if (Math.random() > 0.999) // Play random zombie sounds
-		{
-			sfxGroan.play()
 		}
 
 		if (menuEnemies.length == 0) // Generate menu zombies if there are none
@@ -140,7 +196,7 @@ setInterval(function() // Main game loop
 		{
 			for (var i = 0; i < menuEnemies.length; i++)
 			{
-				moveToward(menuEnemies[i], menuEnemies[i].xDestination, menuEnemies[i].yDestination, 1)
+				moveToward(menuEnemies[i], menuEnemies[i].xDestination, menuEnemies[i].yDestination, menuEnemySpeed)
 
 				if (Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination) && Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination)) // Pick a new destination once we arrive
 				{
@@ -150,86 +206,7 @@ setInterval(function() // Main game loop
 			}
 		}
 
-		blank(canvasColor)
-
-		for (var i = 0; i < menuEnemies.length; i++)
-		{
-			// polygon(menuEnemies[i].x, menuEnemies[i].y, enemySize, enemyColor)
-			menuEnemies.sort(function(a, b) // Order the zombies for proper depth
-			{
-				return a.y - b.y
-			})
-			
-			if (menuEnemies[i].xDestination > menuEnemies[i].x)
-			{
-				if (menuEnemies[i].frame == 0)
-				{
-					image(imgZombie, menuEnemies[i].x, menuEnemies[i].y)
-				}
-				else
-				{
-					image(imgZombie2, menuEnemies[i].x, menuEnemies[i].y)
-				}
-			}
-			else
-			{
-				if (menuEnemies[i].frame == 0)
-				{
-					image(imgZombieLeft, menuEnemies[i].x, menuEnemies[i].y)
-				}
-				else
-				{
-					image(imgZombieLeft2, menuEnemies[i].x, menuEnemies[i].y)
-				}
-			}
-		}
-
-		// Logo shape
-		polygon(xStats, yStats, menuSize, playerColor)
-		polygon(xSingle, ySingle, menuSize, playerColor)
-		polygon(xMulti, yMulti, menuSize, playerColor)
-		polygon(xPrefs, yPrefs, menuSize, playerColor)
-
-		// Stats
-		rectangle(xMulti - menuGlyphWidth - menuGlyphSpacing * 2 - menuGlyphWidth / 2, yStats - menuGlyphHeight / 2 - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight + menuGlyphSpacing + menuGlyphWidth, menuGlyphColor)
-		rectangle(xStats - menuGlyphWidth / 2, yStats - menuGlyphHeight / 2 - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight + menuGlyphSpacing + menuGlyphWidth, menuGlyphColor)
-		rectangle(xMulti + menuGlyphSpacing * 2 + menuGlyphWidth / 2, yStats - menuGlyphHeight / 2 - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight + menuGlyphSpacing + menuGlyphWidth, menuGlyphColor)
-		rectangle(xMulti - menuGlyphWidth - menuGlyphSpacing * 2 - menuGlyphWidth / 2, yStats - menuGlyphHeight / 2 - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphSpacing + menuGlyphWidth, playerColor) // Mask
-		rectangle(xMulti + menuGlyphSpacing * 2 + menuGlyphWidth / 2, yStats - menuGlyphHeight / 2 - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphSpacing * 4, playerColor) // Mask
-
-		// Single player
-		polygon(xSingle, ySingle - menuGlyphSpacing * 2 - menuGlyphWidth / 2 - menuGlyphSpacing, menuGlyphWidth / 2, menuGlyphColor)
-		rectangle(xSingle - menuGlyphWidth / 2, ySingle - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight, menuGlyphColor)
-
-		// Multiplayer
-		polygon(xMulti - menuGlyphWidth - menuGlyphSpacing * 2, yMulti - menuGlyphSpacing * 2 - menuGlyphWidth / 2 - menuGlyphSpacing, menuGlyphWidth / 2, menuGlyphColor)
-		rectangle(xMulti - menuGlyphWidth - menuGlyphSpacing * 2 - menuGlyphWidth / 2, yMulti - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight, menuGlyphColor)
-		polygon(xMulti, yMulti - menuGlyphSpacing - menuGlyphWidth / 2 - menuGlyphSpacing * 2, menuGlyphWidth / 2, menuGlyphColor)
-		rectangle(xMulti - menuGlyphWidth / 2, yMulti - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight, menuGlyphColor)
-		polygon(xMulti + menuGlyphWidth + menuGlyphSpacing * 2, yMulti - menuGlyphSpacing * 2 - menuGlyphWidth / 2 - menuGlyphSpacing, menuGlyphWidth / 2, menuGlyphColor)
-		rectangle(xMulti + menuGlyphSpacing * 2 + menuGlyphWidth / 2, yMulti - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight, menuGlyphColor)
-
-		// Prefs
-		polygon(xPrefs, yPrefs - menuGlyphWidth / 2 - menuGlyphSpacing, menuGlyphWidth, menuGlyphColor)
-		rectangle(xPrefs - menuGlyphWidth / 2, yPrefs - menuGlyphSpacing * 2, menuGlyphWidth, menuGlyphHeight, menuGlyphColor)
-		rectangle(xPrefs - menuGlyphWidth * 0.6 / 2, yPrefs - menuGlyphWidth / 2 - menuGlyphSpacing - menuGlyphWidth, menuGlyphWidth * 0.6, menuGlyphWidth, playerColor) // Mask
-	}
-	else if (currentScreen == 'stats')
-	{
-		// Shots fired
-		// Damage dealt
-		// Damage taken
-		// Zombies killed
-		// Miles walked
-		// Accuracy
-
-		blank(canvasColor)
-
-		// Logo shape
-		polygon(canvas.width / 5, canvas.height / 10 * 2, canvas.height / 12, playerColor)
-		polygon(canvas.width / 5, canvas.height / 10 * 4, canvas.height / 12, playerColor)
-		polygon(canvas.width / 5, canvas.height / 10 * 6, canvas.height / 12, playerColor)
-		polygon(canvas.width / 5, canvas.height / 10 * 8, canvas.height / 12, playerColor)
+		drawMenu()
 	}
 	else if (currentScreen == 'game')
 	{
@@ -366,3 +343,45 @@ setInterval(function() // Main game loop
 	    }
 	}
 }, 1000 / 60) // FPS
+
+function drawMenu()
+{
+	blank(canvasColor)
+
+	for (var i = 0; i < menuEnemies.length; i++) // Sort and draw the menu zombies
+	{
+		menuEnemies.sort(function(a, b) // Order the zombies for proper depth
+		{
+			return a.y - b.y
+		})
+		
+		if (menuEnemies[i].xDestination > menuEnemies[i].x)
+		{
+			if (menuEnemies[i].frame == 0)
+			{
+				image(imgZombie, menuEnemies[i].x, menuEnemies[i].y)
+			}
+			else
+			{
+				image(imgZombie2, menuEnemies[i].x, menuEnemies[i].y)
+			}
+		}
+		else
+		{
+			if (menuEnemies[i].frame == 0)
+			{
+				image(imgZombieLeft, menuEnemies[i].x, menuEnemies[i].y)
+			}
+			else
+			{
+				image(imgZombieLeft2, menuEnemies[i].x, menuEnemies[i].y)
+			}
+		}
+	}
+
+	// Logo shape
+	polygon(xStats, yStats, menuSize, white)
+	polygon(xSingle, ySingle, menuSize, white)
+	polygon(xMulti, yMulti, menuSize, white)
+	polygon(xPrefs, yPrefs, menuSize, white)
+}
