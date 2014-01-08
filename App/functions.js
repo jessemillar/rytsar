@@ -1,13 +1,3 @@
-function draw()
-{
-	drawAmmoPacks() // Draw the ammo packs
-	polygon(xCenter, yCenter, playerSize, playerColor) // Draw the player
-	drawEnemies() // Duh
-	drawPlayers() // Draw the other players
-	drawHealth() // Give a visual on current health level
-    drawAmmo() // Give us a visual on how much ammo we have left
-}
-
 function reload()
 {
 	if (canShoot) // Prevent reloading during the playback of sound effects
@@ -75,12 +65,6 @@ function pickup()
 			canPickup = false
 			sfxReload.play()
 
-			var something = new Object()
-				something[0] = 'pickup'
-				something[1] = ammoPacks[i]
-
-			socket.send(JSON.stringify(something))
-
 			setTimeout(function()
 	        {
 	            canPickup = true
@@ -96,25 +80,10 @@ function shootZombie(zombieName, damageAmount)
 	{
 		if (magazine > 0) // Don't fire if we don't have ammo
 	    {
-			var shot = new Array()
-				shot[0] = 'damage'
-				shot[1] = new Object()
-				shot[1].name = zombieName // Tell the server the name of the zombie and it'll find it's location in the array and do the rest
-				shot[1].damage = damageAmount
-
-			socket.send(JSON.stringify(shot))
-
 		    setTimeout(function() // Add a timeout so the zombie doesn't groan instantly
 		    {
 		    	sfxGroan.play()
 		    }, 200)
-
-		    canShootServer = false
-
-	        setTimeout(function()
-	        {
-	            canShootServer = true
-	        }, timeFire)
 	    }
 	}
 }
@@ -178,20 +147,6 @@ function drawAmmoPacks()
 		    var y = (yCenter) + (Math.sin(((ammoPacks[i].bearing - compass) + 270).toRad()) * (ammoPacks[i].distance * metersToPixels))
 
 		    polygon(x, y, ammoPackSize, itemColor) // Draw the item in question
-		}
-	}
-}
-
-function drawPlayers()
-{
-	for (var i = 1; i < players.length; i++)
-    {
-    	if (players[i].distance < renderDistance && players[i].id !== localStorage.getItem('id')) // This is the bit that helps with framerate
-    	{
-		    var x = (xCenter) + (Math.cos(((players[i].bearing - compass) + 270).toRad()) * (players[i].distance * metersToPixels))
-		    var y = (yCenter) + (Math.sin(((players[i].bearing - compass) + 270).toRad()) * (players[i].distance * metersToPixels))
-
-		    polygon(x, y, otherPlayerSize, playerColor) // Draw the player in question
 		}
 	}
 }

@@ -95,84 +95,44 @@ document.addEventListener('pageshow', function() // Reconnect to the server upon
 })
 */
 
-function init() // Run once by the GPS function when we have a location lock
+document.addEventListener('touchstart', function(ev) // Monitor touches throughout the game
 {
-	self[1] = new Object()
+	var x = ev.touches[0].pageX
+	var y = ev.touches[0].pageY
 
-	if (localStorage.getItem('id'))
+	if (currentScreen == 'game')
 	{
-		self[1].id = localStorage.getItem('id') // Reload the previous player ID if there is one
+		debug = !debug // Toggle debug mode for framerate increase
 	}
-	else
+	else if (currentScreen == 'menu')
 	{
-		self[1].id = Math.floor(Math.random() * 90000000000000) + 10000000000000 // Generate a fifteen-digit-long ID for this user
-		localStorage.setItem('id', self[1].id)
+		if (Math.abs(xMulti - x) * Math.abs(xMulti - x) + Math.abs(yMulti - y) * Math.abs(yMulti - y) < menuSize * menuSize)
+		{
+			musMenu.pause()
+			currentScreen = 'game'
+		}
 	}
-
-	self[1].latitude = gps.latitude
-	self[1].longitude = gps.longitude
-	self[1].health = playerMaxHealth
-
-	// socket.send(JSON.stringify(self)) // Tell the server where the player is
-
-	document.addEventListener('touchstart', function(ev) // Monitor touches
-	{
-		var x = ev.touches[0].pageX
-		var y = ev.touches[0].pageY
-
-		if (currentScreen == 'game')
-		{
-			debug = !debug // Toggle debug mode for framerate increase
-		}
-		else if (currentScreen == 'menu')
-		{
-			if (Math.abs(xMulti - x) * Math.abs(xMulti - x) + Math.abs(yMulti - y) * Math.abs(yMulti - y) < menuSize * menuSize)
-			{
-				musMenu.pause()
-				currentScreen = 'game'
-			}
-		}
-	})
-
-	socket.addEventListener('message', function(message) // Keep track of messages coming from the server
-	{
-		// console.log(message.data)
-		data = JSON.parse(message.data)
-
-		if (data[0] == 'enemies')
-		{
-			enemies = data
-		}
-		else if (data[0] == 'players')
-		{
-			players = data
-		}
-		else if (data[0] == 'ammo')
-		{
-			ammoPacks = data
-		}
-	})
-
-	setInterval(function() // Animate the menu zombies
-	{
-		for (var i = 0; i < menuEnemies.length; i++)
-		{
-			if (menuEnemies[i].frame == 0)
-			{
-				menuEnemies[i].frame = 1
-			}
-			else
-			{
-				menuEnemies[i].frame = 0
-			}
-		}
-	}, 500)
-}
+})
 
 setInterval(function() // Main game loop
 {
 	if (currentScreen == 'menu')
 	{
+		setInterval(function() // Animate the menu zombies
+		{
+			for (var i = 0; i < menuEnemies.length; i++)
+			{
+				if (menuEnemies[i].frame == 0)
+				{
+					menuEnemies[i].frame = 1
+				}
+				else
+				{
+					menuEnemies[i].frame = 0
+				}
+			}
+		}, 500)
+
 		if (!menuMusicPlaying)
 		{
 			musMenu.play()
@@ -297,7 +257,7 @@ setInterval(function() // Main game loop
 			text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
 	    }
 
-	    draw()
+	    drawGame()
 
 	    pickup()
 
@@ -384,4 +344,13 @@ function drawMenu()
 	polygon(xSingle, ySingle, menuSize, white)
 	polygon(xMulti, yMulti, menuSize, white)
 	polygon(xPrefs, yPrefs, menuSize, white)
+}
+
+function drawGame()
+{
+	drawAmmoPacks() // Draw the ammo packs
+	polygon(xCenter, yCenter, playerSize, playerColor) // Draw the player
+	drawEnemies() // Duh
+	drawHealth() // Give a visual on current health level
+    drawAmmo() // Give us a visual on how much ammo we have left
 }

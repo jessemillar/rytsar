@@ -18,8 +18,6 @@ var gps = new Object()
 	gps.accuracy = 0
 var compass = 0
 
-var genesis = false // Whether or not things have kicked off so the game can start
-
 document.addEventListener('deviceorientation', function(orientation)
 {
 	tilt.x = orientation.beta
@@ -55,15 +53,6 @@ function geolocation(position)
     {
     	compass = position.coords.heading
     }
-
-    if (!genesis)
-	{
-		if (gps.latitude && gps.longitude && compass)
-		{
-			init()
-			genesis = true
-		}
-	}
 }
 
 function error(error)
