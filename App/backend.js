@@ -203,3 +203,18 @@ function moveToward(thingy, x, y, speed) // Move a thingy toward a specific pixe
 	thingy.x += (destinationX / hypotenuse) * speed
 	thingy.y += (destinationY / hypotenuse) * speed
 }
+
+function animate(thingy, time) // Use a function outside of the zombie generation to animate so the function can remember the name of the zombie that's animating
+{
+	setInterval(function()
+	{
+		if (thingy.frame == 0)
+		{
+			thingy.frame = 1
+		}
+		else
+		{
+			thingy.frame = 0
+		}
+	}, time)
+}

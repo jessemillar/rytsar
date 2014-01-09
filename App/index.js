@@ -69,8 +69,9 @@ var menuSize = canvas.width / 4.5
 var menuSpacing = 3.5
 
 var menuEnemies = new Array()
-var menuEnemyCount = 35
-var menuEnemySpeed = 0.5
+var menuEnemyCount = 50
+var menuEnemySpeedLow = 0.3
+var menuEnemySpeedHigh = 0.5
 var menuEnemySandbox = 25 // The amount of pixels outside the screen that the menu zombies are allowed to go to as a destination
 
 var xStats = xCenter - menuSize / 2 - menuSpacing
@@ -128,29 +129,16 @@ setInterval(function() // Main game loop
 					enemy.y = Math.random() * canvas.height
 					enemy.xDestination = random(0 - menuEnemySandbox, canvas.width + menuEnemySandbox)
 					enemy.yDestination = random(0 - menuEnemySandbox, canvas.height + menuEnemySandbox)
+					enemy.speed = random(menuEnemySpeedLow, menuEnemySpeedHigh)
 					enemy.frame = random(0, 1)
+					enemy.animate = animate(enemy, enemy.speed * 1000)
 				menuEnemies.push(enemy)
 			}
-
-			setInterval(function() // Animate the menu zombies
-			{
-				for (var i = 0; i < menuEnemies.length; i++)
-				{
-					if (menuEnemies[i].frame == 0)
-					{
-						menuEnemies[i].frame = 1
-					}
-					else
-					{
-						menuEnemies[i].frame = 0
-					}
-				}
-			}, 500)
 		}
 		
 		for (var i = 0; i < menuEnemies.length; i++)
 		{
-			moveToward(menuEnemies[i], menuEnemies[i].xDestination, menuEnemies[i].yDestination, menuEnemySpeed)
+			moveToward(menuEnemies[i], menuEnemies[i].xDestination, menuEnemies[i].yDestination, menuEnemies[i].speed)
 
 			if (Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination) && Math.floor(menuEnemies[i].x) == Math.floor(menuEnemies[i].xDestination)) // Pick a new destination once we arrive
 			{
@@ -303,26 +291,48 @@ function drawMenu()
 			return a.y - b.y
 		})
 		
-		if (menuEnemies[i].xDestination > menuEnemies[i].x)
+		if (menuEnemies[i].xDestination < menuEnemies[i].x && menuEnemies[i].yDestination < menuEnemies[i].y)
 		{
 			if (menuEnemies[i].frame == 0)
 			{
-				image(imgZombie, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
+				image(imgZombieUpLeft, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
 			}
 			else
 			{
-				image(imgZombie2, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
+				image(imgZombieUpLeft2, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
 			}
 		}
-		else
+		else if (menuEnemies[i].xDestination > menuEnemies[i].x && menuEnemies[i].yDestination < menuEnemies[i].y)
 		{
 			if (menuEnemies[i].frame == 0)
 			{
-				image(imgZombieLeft, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
+				image(imgZombieUpRight, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
 			}
 			else
 			{
-				image(imgZombieLeft2, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
+				image(imgZombieUpRight2, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
+			}
+		}
+		else if (menuEnemies[i].xDestination < menuEnemies[i].x && menuEnemies[i].yDestination > menuEnemies[i].y)
+		{
+			if (menuEnemies[i].frame == 0)
+			{
+				image(imgZombieDownLeft, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
+			}
+			else
+			{
+				image(imgZombieDownLeft2, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
+			}
+		}
+		else if (menuEnemies[i].xDestination > menuEnemies[i].x && menuEnemies[i].yDestination > menuEnemies[i].y)
+		{
+			if (menuEnemies[i].frame == 0)
+			{
+				image(imgZombieDownRight, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
+			}
+			else
+			{
+				image(imgZombieDownRight2, menuEnemies[i].x, menuEnemies[i].y, 'anchor')
 			}
 		}
 	}
