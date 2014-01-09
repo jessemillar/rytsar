@@ -1,3 +1,19 @@
+function findSpawnRadius() // Spawn stuff in relation to the player
+{
+    spawnSeedLatitude = 0
+    spawnSeedLongitude = 0
+
+    while (spawnRadius > distance(gps.latitude + spawnSeedLatitude, gps.longitude)) // Find spawnSeedLatitude
+    {
+        spawnSeedLatitude += 0.00001
+    }
+
+    while (spawnRadius > distance(gps.latitude, gps.longitude + spawnSeedLongitude)) // Find spawnSeedLongitude
+    {
+        spawnSeedLongitude += 0.00001
+    }
+}
+
 function fire()
 {
 	if (canShoot)
@@ -68,83 +84,19 @@ function reload()
 	}
 }
 
-function pickup()
-{
-	for (var i = 1; i < ammoPacks.length; i++)
-	{
-		if (ammoPacks[i].distance < minShotDistance && ammoPacks[i].health > 0 && canPickup)
-		{
-			extraAmmo += ammoPacks[i].health
-			ammoPacks[i].health = 0
-			canPickup = false
-			sfxReload.play()
-
-			setTimeout(function()
-	        {
-	            canPickup = true
-	        }, timePickup)
-			break
-		}
-	}
-}
-
-function enemyAttack()
-{
-	for (var i = 1; i < enemies.length; i++)
-	{
-		if (enemies[i].distance < damageDistance && enemies[i].health > 0 && self[1].health > 0)
-		{
-			setTimeout(function()
-			{
-				self[1].health -= 1
-				if (self[1].health > 0)
-				{
-					sfxHurt.play()
-				}
-				else
-				{
-					sfxFlatline.play()
-				}
-			}, 1000)
-		}	
-	}
-}
-
 function drawEnemies()
 {
-	for (var i = 1; i < enemies.length; i++)
-    {
-    	if (enemies[i].distance < renderDistance) // This is the bit that helps with framerate
-    	{
-		    var x = (xCenter) + (Math.cos(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
-		    var y = (yCenter) + (Math.sin(((enemies[i].bearing - compass) + 270).toRad()) * (enemies[i].distance * metersToPixels))
-
-		    if (debug) // Write the zombie's name next to its marker if we're in debug mode
-		    {
-		    	ctx.fillStyle = debugColor;
-	    		ctx.fillText(enemies[i].name, x + enemySize + 3, y)
-		    }
-
-		    if (enemies[i].health > 0)
-		    {
-		    	polygon(x, y, enemySize, enemyColor) // Draw the sucker normally
-		    }
-		    else
-		    {
-		    	polygon(x, y, enemySize, deadColor) // He's dead, Jim
-		    }
-		}
-	}
+	
 }
 
 function drawAmmoPacks()
 {
-	for (var i = 1; i < ammoPacks.length; i++)
+	for (var i = 1; i < ammo.length; i++)
     {
-    	if (ammoPacks[i].distance < renderDistance) // This is the bit that helps with framerate
+    	if (ammo[i].distance < renderDistance) // This is the bit that helps with framerate
     	{
-		    var x = (xCenter) + (Math.cos(((ammoPacks[i].bearing - compass) + 270).toRad()) * (ammoPacks[i].distance * metersToPixels))
-		    var y = (yCenter) + (Math.sin(((ammoPacks[i].bearing - compass) + 270).toRad()) * (ammoPacks[i].distance * metersToPixels))
+		    var x = (xCenter) + (Math.cos(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * metersToPixels))
+		    var y = (yCenter) + (Math.sin(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * metersToPixels))
 
 		    polygon(x, y, ammoPackSize, itemColor) // Draw the item in question
 		}
