@@ -188,7 +188,7 @@ function image(image, x, y, anchor, alpha)
 	}
 	else if (anchor == 'anchor')
 	{
-		ctx.drawImage(image, image.anchorX - x, image.anchorY - y)
+		ctx.drawImage(image, x - image.width / 2, y - image.height)
 	}
 }
 
@@ -198,7 +198,7 @@ function moveToward(thingy, x, y, speed) // Move a thingy toward a specific pixe
 	var destinationY = y - thingy.y
 	var hypotenuse = Math.sqrt(destinationX * destinationX + destinationY * destinationY)
 	var radians = Math.atan2(destinationY, destinationX)
-	var angle = radians / Math.PI * 180
+	var angle = radians.toDeg()
 
 	thingy.x += (destinationX / hypotenuse) * speed
 	thingy.y += (destinationY / hypotenuse) * speed
