@@ -17,19 +17,19 @@ var ammo = new Array() // Locally monitor the objects placed throughout the worl
 var vision = new Array() // The things in our field of view
 var melee = new Array() // The zombies close enough to be punched
 
-var pixelsToMeters = 15 // ...pixels equals a meter
+var pixelsToMeters = 10 // ...pixels equals a meter
 
 var spawnRadius = 100 // ...meters
 var spawnSeedLatitude = 0 // Set later by findSpawnRadius()
 var spawnSeedLongitude = 0 // Set later by findSpawnRadius()
 
-var renderDistance = 35 // ...in meters
-var maxShotDistance = 30 // ...in meters
-var minShotDistance = 8 // ...in meters
-var damageDistance = 4 // ...in meters
+var renderDistance = 20 // ...in meters
+var maxShotDistance = 15 // ...in meters
+var minShotDistance = 5 // ...in meters
+var damageDistance = 2 // ...in meters
 var fieldOfView = 22 // ...in degrees
 
-var totalZombies = 150
+var totalZombies = 100
 var totalAmmo = 20
 
 var playerMaxHealth = 5
@@ -182,6 +182,7 @@ setInterval(function() // Main game loop
 				for (var i = 0; i < totalZombies; i++)
 				{
 					var thingy = new Object()
+						thingy.name = 'zombie' + i
 						thingy.latitude = random(gps.latitude - spawnSeedLatitude, gps.latitude + spawnSeedLatitude)
 						thingy.longitude = random(gps.longitude - spawnSeedLongitude, gps.longitude + spawnSeedLongitude)
 						thingy.health = zombieMaxHealth
@@ -262,6 +263,8 @@ setInterval(function() // Main game loop
 				{
 					return a.distance - b.distance
 				})
+
+				console.log(vision[0].name)
 		    }
 
 		    /*
@@ -453,6 +456,13 @@ function drawGame()
 			zombies[i].x = centerX + Math.cos(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
 			zombies[i].y = centerY + Math.sin(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
 
+			if (debug)
+			{
+				text(zombies[i].name, zombies[i].x + 15, zombies[i].y - 10)
+			}
+
+			polygon(centerX, centerY, 10, white) // Draw the player
+
 		    if (zombies[i].health > 0)
 		    {	
 				if (centerX < zombies[i].x && centerY < zombies[i].y)
@@ -507,8 +517,24 @@ function drawGame()
 		}
 	}
 
-	// drawAmmo() // Draw the ammo packs
-	polygon(centerX, centerY, 10, white) // Draw the player
 	// drawHealth() // Give a visual on current health level
-    // drawAmmo() // Give us a visual on how much ammo we have left
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Things are only set up for right handed users right now
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    for (var i = 0; i < self[1].health; i++) // Draw out health
+	{
+		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, healthColor)
+	}
+
+	for (var i = 0; i < magazine + 1; i++) // Draw the ammo in our gun
+	{
+		rectangle(canvas.width - indicatorSpacing - indicatorWidth, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, ammoColor)
+	}
+
+	for (var i = 0; i < extraAmmo + 1; i++) // Draw our extraAmmo
+	{
+		rectangle(indicatorSpacing, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, itemColor)
+	}
 }

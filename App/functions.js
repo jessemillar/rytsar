@@ -102,32 +102,3 @@ function drawAmmoPacks()
 		}
 	}
 }
-
-function drawHealth()
-{
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Things are only set up for right handed users right now
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	for (var i = 0; i < self[1].health; i++)
-	{
-		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, healthColor)
-	}
-}
-
-function drawAmmo()
-{
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Things are only set up for right handed users right now
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	for (var i = 0; i < magazine + 1; i++) // Draw the ammo in our gun
-	{
-		rectangle(canvas.width - indicatorSpacing - indicatorWidth, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, ammoColor)
-	}
-
-	for (var i = 0; i < extraAmmo + 1; i++) // Draw our extraAmmo
-	{
-		rectangle(indicatorSpacing, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, itemColor)
-	}
-}
