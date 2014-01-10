@@ -1,3 +1,6 @@
+var imgDeadZombie = new Image(68, 68)
+	imgDeadZombie.src = 'images/dead-zombie.png'
+
 var imgZombieUpLeft = new Image(68, 68)
 	imgZombieUpLeft.src = 'images/zombie-up-left.png'
 var imgZombieUpLeft2 = new Image(68, 68)

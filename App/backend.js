@@ -152,6 +152,44 @@ function polygon(x, y, size, color, alpha)
 	ctx.fill()
 }
 
+function line(x1, y1, x2, y2, color, alpha)
+{
+	if (alpha)
+	{
+		ctx.globalAlpha = alpha
+	}
+	else
+	{
+		ctx.globalAlpha = 1
+	}
+
+	ctx.strokeStyle = color
+
+	ctx.beginPath()
+	ctx.moveTo(x1, y1)
+	ctx.lineTo(x2, y2)
+	ctx.lineWidth = 1
+	ctx.stroke()
+}
+
+function circle(x, y, radius, color, alpha)
+{
+	if (alpha)
+	{
+		ctx.globalAlpha = alpha
+	}
+	else
+	{
+		ctx.globalAlpha = 1
+	}
+
+	ctx.beginPath()
+	ctx.arc(x, y, radius, 0, 2 * Math.PI, false)
+	ctx.lineWidth = 1
+	ctx.strokeStyle = color
+	ctx.stroke()
+}
+
 function text(message, x, y, color, alpha)
 {
 	if (alpha)

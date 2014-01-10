@@ -4,10 +4,11 @@ ejecta.include('images/images.js')
 ejecta.include('sounds/sounds.js')
 
 var ctx = canvas.getContext('2d')
-var xCenter = canvas.width / 2
-var yCenter = canvas.height / 2
+var centerX = canvas.width / 2
+var centerY = canvas.height / 2
 
-var debug = false // Can be toggled by tapping the screen in game mode
+var fps = 60
+var debug = true // Can be toggled by tapping the screen in game mode
 
 var currentScreen = 'menu'
 
@@ -16,23 +17,26 @@ var ammo = new Array() // Locally monitor the objects placed throughout the worl
 var vision = new Array() // The things in our field of view
 var melee = new Array() // The zombies close enough to be punched
 
-var playerMaxHealth = 5
-var renderDistance = 50 // Distance in meters
-var maxShotDistance = 30 // Distance in meters
-var minShotDistance = 10 // Distance in meters
-var damageDistance = 5 // Distance in meters
-var fieldOfView = 22 // In degrees
-var pixelsToMeters = 4 // ...pixels equals a meter
+var pixelsToMeters = 15 // ...pixels equals a meter
 
-var totalZombies = 100
-var totalAmmo = 20
 var spawnRadius = 100 // ...meters
-var spawnSeedLatitude = 0 // Set later on
-var spawnSeedLongitude = 0 // Set later on
+var spawnSeedLatitude = 0 // Set later by findSpawnRadius()
+var spawnSeedLongitude = 0 // Set later by findSpawnRadius()
 
-// In meters per second
-var zombieSpeedLow = 0.3
-var zombieSpeedHigh = 1
+var renderDistance = 35 // ...in meters
+var maxShotDistance = 30 // ...in meters
+var minShotDistance = 8 // ...in meters
+var damageDistance = 4 // ...in meters
+var fieldOfView = 22 // ...in degrees
+
+var totalZombies = 150
+var totalAmmo = 20
+
+var playerMaxHealth = 5
+var zombieMaxHealth = 3
+
+var zombieSpeedLow = 0.3 // ...meters per second
+var zombieSpeedHigh = 1 // ...meters per second
 
 // How much ammo can be in a pack
 var ammoCountLow = 1
@@ -80,20 +84,17 @@ var indicatorSpacing = 5
 var menuSize = canvas.width / 4.5
 var menuSpacing = 3.5
 
-var menuZombies = new Array()
 var menuTotalZombies = 50
-var menuZombieSpeedLow = 0.3
-var menuZombieSpeedHigh = 0.5
 var menuZombieSandbox = 25 // The amount of pixels outside the screen that the menu zombies are allowed to go to as a destination
 
-var xStats = xCenter - menuSize / 2 - menuSpacing
-var yStats = yCenter - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
-var xSingle = xCenter + menuSize / 2 + menuSpacing
-var ySingle = yCenter - menuSize / 2 - menuSpacing
-var xMulti = xCenter - menuSize / 2 - menuSpacing
-var yMulti = yCenter + menuSize / 2 + menuSpacing
-var xPrefs = xCenter + menuSize / 2 + menuSpacing
-var yPrefs = yCenter + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 2
+var xStats = centerX - menuSize / 2 - menuSpacing
+var yStats = centerY - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
+var xSingle = centerX + menuSize / 2 + menuSpacing
+var ySingle = centerY - menuSize / 2 - menuSpacing
+var xMulti = centerX - menuSize / 2 - menuSpacing
+var yMulti = centerY + menuSize / 2 + menuSpacing
+var xPrefs = centerX + menuSize / 2 + menuSpacing
+var yPrefs = centerY + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 2
 
 /*
 document.addEventListener('pagehide', function() // Close the connection to the server upon leaving the app
@@ -121,6 +122,7 @@ document.addEventListener('touchstart', function(ev) // Monitor touches througho
 		if (Math.abs(xMulti - x) * Math.abs(xMulti - x) + Math.abs(yMulti - y) * Math.abs(yMulti - y) < menuSize * menuSize)
 		{
 			musMenu.pause() // Kill the menu music before moving into the game screen
+			zombies.length = 0 // Wipe the zombie database so we can start playing with "real" zombies
 			currentScreen = 'game'
 		}
 	}
@@ -130,7 +132,7 @@ setInterval(function() // Main game loop
 {
 	if (currentScreen == 'menu')
 	{
-		if (menuZombies.length == 0) // If there are no zombies, then this is the first time through the menu code
+		if (zombies.length == 0) // If there are no zombies, then this is the first time through the menu code
 		{
 			musMenu.play()
 
@@ -141,21 +143,21 @@ setInterval(function() // Main game loop
 					thingy.y = random(0, canvas.height)
 					thingy.xDestination = random(0 - menuZombieSandbox, canvas.width + menuZombieSandbox)
 					thingy.yDestination = random(0 - menuZombieSandbox, canvas.height + menuZombieSandbox)
-					thingy.speed = random(menuZombieSpeedLow, menuZombieSpeedHigh)
+					thingy.speed = random(zombieSpeedLow, zombieSpeedHigh) * (pixelsToMeters / fps)
 					thingy.frame = random(0, 1)
-					thingy.animate = animate(thingy, thingy.speed * 1000)
-				menuZombies.push(thingy)
+					thingy.animate = animate(thingy, zombieSpeedHigh * (pixelsToMeters / fps) / thingy.speed * 500)
+				zombies.push(thingy)
 			}
 		}
 		
-		for (var i = 0; i < menuZombies.length; i++)
+		for (var i = 0; i < zombies.length; i++)
 		{
-			moveToward(menuZombies[i], menuZombies[i].xDestination, menuZombies[i].yDestination, menuZombies[i].speed)
+			moveToward(zombies[i], zombies[i].xDestination, zombies[i].yDestination, zombies[i].speed)
 
-			if (Math.floor(menuZombies[i].x) == Math.floor(menuZombies[i].xDestination) && Math.floor(menuZombies[i].x) == Math.floor(menuZombies[i].xDestination)) // Pick a new destination once we arrive
+			if (Math.floor(zombies[i].x) == Math.floor(zombies[i].xDestination) && Math.floor(zombies[i].x) == Math.floor(zombies[i].xDestination)) // Pick a new destination once we arrive
 			{
-				menuZombies[i].xDestination = random(0 - menuZombieSandbox, canvas.width + menuZombieSandbox)
-				menuZombies[i].yDestination = random(0 - menuZombieSandbox, canvas.height + menuZombieSandbox)
+				zombies[i].xDestination = random(0 - menuZombieSandbox, canvas.width + menuZombieSandbox)
+				zombies[i].yDestination = random(0 - menuZombieSandbox, canvas.height + menuZombieSandbox)
 			}
 		}
 
@@ -182,22 +184,26 @@ setInterval(function() // Main game loop
 					var thingy = new Object()
 						thingy.latitude = random(gps.latitude - spawnSeedLatitude, gps.latitude + spawnSeedLatitude)
 						thingy.longitude = random(gps.longitude - spawnSeedLongitude, gps.longitude + spawnSeedLongitude)
-						thingy.speed = random(zombieSpeedLow, zombieSpeedHigh)
+						thingy.health = zombieMaxHealth
+						thingy.speed = random(zombieSpeedLow, zombieSpeedHigh) * (pixelsToMeters / fps)
 						thingy.frame = random(0, 1)
-						thingy.animate = animate(thingy, thingy.speed * 1000)
+						thingy.animate = animate(thingy, zombieSpeedHigh * (pixelsToMeters / fps) / thingy.speed * 500)
 					zombies.push(thingy)
 				}
 			}
 			else if (zombies.length > 0)
 			{
-				for (var i = 1; i < zombies.length; i++) // Do stuff with the zombies
+				for (var i = 0; i < zombies.length; i++) // Do stuff with the zombies
 			    {
 			    	zombies[i].bearing = bearing(zombies[i].latitude, zombies[i].longitude)
 					zombies[i].distance = distance(zombies[i].latitude, zombies[i].longitude)
 
-			    	if (zombies[i].distance < renderDistance)
+			    	if (zombies[i].distance < renderDistance) // Move zombies closer
 			    	{
-			    		// Move zombies closer
+			    		var ratio = zombies[i].speed / 10 / distance(zombies[i].latitude, zombies[i].longitude) // We have to change the meters-per-second speed to a decimal that can work with latitude/longitude coordinates
+
+						zombies[i].latitude = zombies[i].latitude + ((gps.latitude - zombies[i].latitude) * ratio)
+						zombies[i].longitude = zombies[i].longitude + ((gps.longitude - zombies[i].longitude) * ratio)
 			    	}
 
 			    	if (zombies[i].distance < minShotDistance && zombies[i].health > 0)
@@ -248,11 +254,6 @@ setInterval(function() // Main game loop
 				{
 					return a.distance - b.distance
 				})
-
-				if (debug)
-				{
-					// console.log(gps.latitude, gps.longitude, vision[0].name, vision[0].latitude, vision[0].longitude, vision[0].distance, vision[0].health)
-				}
 		    }
 
 		    if (vision.length > 0) // If we're looking at at least one zombie...
@@ -263,7 +264,8 @@ setInterval(function() // Main game loop
 				})
 		    }
 
-		    for (var i = 1; i < zombies.length; i++)
+		    /*
+		    for (var i = 1; i < zombies.length; i++) // Get hurt by a zombie
 			{
 				if (zombies[i].distance < damageDistance && zombies[i].health > 0 && self[1].health > 0)
 				{
@@ -282,7 +284,7 @@ setInterval(function() // Main game loop
 				}	
 			}
 
-			for (var i = 1; i < ammo.length; i++)
+			for (var i = 1; i < ammo.length; i++) // Pick up some ammo
 			{
 				if (ammo[i].distance < minShotDistance && ammo[i].health > 0 && canPickup)
 				{
@@ -298,6 +300,7 @@ setInterval(function() // Main game loop
 					break
 				}
 			}
+			*/
 
 			// ******************************
 			// Attack motions
@@ -355,61 +358,61 @@ setInterval(function() // Main game loop
 			console.log('Error: No GPS lock')
 		}
 	}
-}, 1000 / 60) // FPS
+}, 1000 / fps)
 
 function drawMenu()
 {
 	blank(canvasColor)
 
-	for (var i = 0; i < menuZombies.length; i++) // Sort and draw the menu zombies
+	for (var i = 0; i < zombies.length; i++) // Sort and draw the menu zombies
 	{
-		menuZombies.sort(function(a, b) // Order the zombies for proper depth
+		zombies.sort(function(a, b) // Order the zombies for proper depth
 		{
 			return a.y - b.y
 		})
 		
-		if (menuZombies[i].xDestination < menuZombies[i].x && menuZombies[i].yDestination < menuZombies[i].y)
+		if (zombies[i].xDestination < zombies[i].x && zombies[i].yDestination < zombies[i].y)
 		{
-			if (menuZombies[i].frame == 0)
+			if (zombies[i].frame == 0)
 			{
-				image(imgZombieUpLeft, menuZombies[i].x, menuZombies[i].y, 'anchor')
+				image(imgZombieUpLeft, zombies[i].x, zombies[i].y, 'anchor')
 			}
 			else
 			{
-				image(imgZombieUpLeft2, menuZombies[i].x, menuZombies[i].y, 'anchor')
+				image(imgZombieUpLeft2, zombies[i].x, zombies[i].y, 'anchor')
 			}
 		}
-		else if (menuZombies[i].xDestination > menuZombies[i].x && menuZombies[i].yDestination < menuZombies[i].y)
+		else if (zombies[i].xDestination > zombies[i].x && zombies[i].yDestination < zombies[i].y)
 		{
-			if (menuZombies[i].frame == 0)
+			if (zombies[i].frame == 0)
 			{
-				image(imgZombieUpRight, menuZombies[i].x, menuZombies[i].y, 'anchor')
+				image(imgZombieUpRight, zombies[i].x, zombies[i].y, 'anchor')
 			}
 			else
 			{
-				image(imgZombieUpRight2, menuZombies[i].x, menuZombies[i].y, 'anchor')
+				image(imgZombieUpRight2, zombies[i].x, zombies[i].y, 'anchor')
 			}
 		}
-		else if (menuZombies[i].xDestination < menuZombies[i].x && menuZombies[i].yDestination > menuZombies[i].y)
+		else if (zombies[i].xDestination < zombies[i].x && zombies[i].yDestination > zombies[i].y)
 		{
-			if (menuZombies[i].frame == 0)
+			if (zombies[i].frame == 0)
 			{
-				image(imgZombieDownLeft, menuZombies[i].x, menuZombies[i].y, 'anchor')
+				image(imgZombieDownLeft, zombies[i].x, zombies[i].y, 'anchor')
 			}
 			else
 			{
-				image(imgZombieDownLeft2, menuZombies[i].x, menuZombies[i].y, 'anchor')
+				image(imgZombieDownLeft2, zombies[i].x, zombies[i].y, 'anchor')
 			}
 		}
-		else if (menuZombies[i].xDestination > menuZombies[i].x && menuZombies[i].yDestination > menuZombies[i].y)
+		else if (zombies[i].xDestination > zombies[i].x && zombies[i].yDestination > zombies[i].y)
 		{
-			if (menuZombies[i].frame == 0)
+			if (zombies[i].frame == 0)
 			{
-				image(imgZombieDownRight, menuZombies[i].x, menuZombies[i].y, 'anchor')
+				image(imgZombieDownRight, zombies[i].x, zombies[i].y, 'anchor')
 			}
 			else
 			{
-				image(imgZombieDownRight2, menuZombies[i].x, menuZombies[i].y, 'anchor')
+				image(imgZombieDownRight2, zombies[i].x, zombies[i].y, 'anchor')
 			}
 		}
 	}
@@ -427,41 +430,85 @@ function drawGame()
 
     if (debug) // Draw the aiming cone for debugging purposes
     {
-    	line((xCenter) - (yCenter * Math.tan(fieldOfView.toRad())), 0, xCenter, yCenter, debugColor)
-    	line(xCenter, yCenter, (xCenter) + (yCenter * Math.tan(fieldOfView.toRad())), 0, debugColor)
-		circle(xCenter, yCenter, maxShotDistance * pixelsToMeters, debugColor)
-		circle(xCenter, yCenter, minShotDistance * pixelsToMeters, debugColor)
-		circle(xCenter, yCenter, damageDistance * pixelsToMeters, debugColor)
+    	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
+    	line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
+		circle(centerX, centerY, maxShotDistance * pixelsToMeters, debugColor)
+		circle(centerX, centerY, minShotDistance * pixelsToMeters, debugColor)
+		circle(centerX, centerY, damageDistance * pixelsToMeters, debugColor)
 		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
     }
 
+    /*
+    zombies.sort(function(a, b) // Order the zombies for proper depth
+	{
+		return a.y - b.y
+	})
+	*/
+
     // Draw the zombies
-    for (var i = 1; i < zombies.length; i++)
+    for (var i = 0; i < zombies.length; i++)
     {
     	if (zombies[i].distance < renderDistance) // This is the bit that helps with framerate
     	{
-		    var x = (xCenter) + (Math.cos(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters))
-		    var y = (yCenter) + (Math.sin(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters))
-
-		    if (debug) // Write the zombie's name next to its marker if we're in debug mode
-		    {
-		    	ctx.fillStyle = debugColor;
-	    		ctx.fillText(zombies[i].name, x + enemySize + 3, y)
-		    }
+			zombies[i].x = centerX + Math.cos(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
+			zombies[i].y = centerY + Math.sin(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
 
 		    if (zombies[i].health > 0)
-		    {
-		    	image(imgZombieUpLeft, x, y, 'anchor') // Draw the sucker normally
+		    {	
+				if (centerX < zombies[i].x && centerY < zombies[i].y)
+				{
+					if (zombies[i].frame == 0)
+					{
+						image(imgZombieUpLeft, zombies[i].x, zombies[i].y, 'anchor')
+					}
+					else
+					{
+						image(imgZombieUpLeft2, zombies[i].x, zombies[i].y, 'anchor')
+					}
+				}
+				else if (centerX > zombies[i].x && centerY < zombies[i].y)
+				{
+					if (zombies[i].frame == 0)
+					{
+						image(imgZombieUpRight, zombies[i].x, zombies[i].y, 'anchor')
+					}
+					else
+					{
+						image(imgZombieUpRight2, zombies[i].x, zombies[i].y, 'anchor')
+					}
+				}
+				else if (centerX < zombies[i].x && centerY > zombies[i].y)
+				{
+					if (zombies[i].frame == 0)
+					{
+						image(imgZombieDownLeft, zombies[i].x, zombies[i].y, 'anchor')
+					}
+					else
+					{
+						image(imgZombieDownLeft2, zombies[i].x, zombies[i].y, 'anchor')
+					}
+				}
+				else if (centerX > zombies[i].x && centerY > zombies[i].y)
+				{
+					if (zombies[i].frame == 0)
+					{
+						image(imgZombieDownRight, zombies[i].x, zombies[i].y, 'anchor')
+					}
+					else
+					{
+						image(imgZombieDownRight2, zombies[i].x, zombies[i].y, 'anchor')
+					}
+				}
 		    }
 		    else
 		    {
-		    	// polygon(x, y, enemySize, deadColor) // He's dead, Jim
+		    	image(imgDeadZombie, zombies[i].x, zombies[i].y, 'anchor')
 		    }
 		}
 	}
 
 	// drawAmmo() // Draw the ammo packs
-	// polygon(xCenter, yCenter, playerSize, playerColor) // Draw the player
+	polygon(centerX, centerY, 10, white) // Draw the player
 	// drawHealth() // Give a visual on current health level
     // drawAmmo() // Give us a visual on how much ammo we have left
 }
