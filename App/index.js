@@ -180,7 +180,7 @@ setInterval(function() // Main game loop
 	}
 	else if (currentScreen == 'game')
 	{
-		if (gps.latitude && gps.longitude && compass) // Only do stuff if we know where we are
+		if (gps.latitude && gps.longitude && compass && gps.accuracy < 15) // Only do stuff if we know where we are
 		{
 			// ******************************
 			// Run calculations
@@ -214,7 +214,7 @@ setInterval(function() // Main game loop
 			    	zombies[i].bearing = bearing(zombies[i].latitude, zombies[i].longitude)
 					zombies[i].distance = distance(zombies[i].latitude, zombies[i].longitude)
 
-			    	if (zombies[i].distance < renderDistance && zombies[i].health > 0) // Move zombies closer
+			    	if (zombies[i].distance < renderDistance && zombies[i].distance > (damageDistance / 2) && zombies[i].health > 0) // Move zombies closer
 			    	{
 			    		var ratio = zombies[i].speed / 10 / distance(zombies[i].latitude, zombies[i].longitude) // We have to change the meters-per-second speed to a decimal that can work with latitude/longitude coordinates
 
@@ -349,9 +349,15 @@ setInterval(function() // Main game loop
 
 		    drawGame()
 		}
-		else
+		else if (gps.accuracy > 0)
 		{
-			console.log('Waiting for GPS')
+			blank(blue)
+			text('Waiting for GPS lock', 3, 3, white)
+		}
+		else if (gps.accuracy > 15)
+		{
+			blank(red)
+			text('Current GPS accuracy of ' + gps.accuracy + ' meters is not accurate enough', 3, 3, white)
 		}
 	}
 }, 1000 / fps)

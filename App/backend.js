@@ -58,8 +58,6 @@ navigator.geolocation.watchPosition(function(position)
 			thingy.latitude = gps.latitude
 			thingy.longitude = gps.longitude
 		gps.history.push(thingy)
-		
-		console.log(gps.history.length + ' ' + JSON.stringify(gps.history))
 	}
 
 	if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
