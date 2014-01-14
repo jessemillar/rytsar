@@ -19,7 +19,7 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = true // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'game'
+var currentScreen = 'menu'
 
 var zombies = new Array() // Our local array of zombies
 var ammo = new Array() // Locally monitor the objects placed throughout the world
@@ -44,6 +44,8 @@ var totalAmmo = 20
 var zombieMaxHealth = 3
 var zombieSpeedLow = 0.3 // ...meters per second
 var zombieSpeedHigh = 1 // ...meters per second
+
+var slowestAnimation = 900 // The longest time possible between animation frames
 
 // How much ammo can be in a pack
 var ammoCountLow = 1
@@ -154,7 +156,7 @@ setInterval(function() // Main game loop
 					thingy.yDestination = random(0 - menuZombieSandbox, canvas.height + menuZombieSandbox)
 					thingy.speed = random(zombieSpeedLow, zombieSpeedHigh) * (pixelsToMeters / fps)
 					thingy.frame = random(0, 1)
-					thingy.animate = animate(thingy, zombieSpeedHigh * (pixelsToMeters / fps) / thingy.speed * 500)
+					thingy.animate = animate(thingy, slowestAnimation - thingy.speed * (slowestAnimation / 2))
 				zombies.push(thingy)
 			}
 		}
@@ -197,7 +199,7 @@ setInterval(function() // Main game loop
 						thingy.health = zombieMaxHealth
 						thingy.speed = random(zombieSpeedLow, zombieSpeedHigh) * (pixelsToMeters / fps)
 						thingy.frame = random(0, 1)
-						thingy.animate = animate(thingy, zombieSpeedHigh * (pixelsToMeters / fps) / thingy.speed * 500)
+						thingy.animate = animate(thingy, slowestAnimation - thingy.speed * (slowestAnimation / 2))
 					zombies.push(thingy)
 				}
 			}
