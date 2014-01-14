@@ -101,3 +101,197 @@ function reload()
 	    }
 	}
 }
+
+function drawMenu()
+{
+	blank(canvasColor)
+
+	for (var i = 0; i < zombies.length; i++) // Sort and draw the menu zombies
+	{
+		zombies.sort(function(a, b) // Order the zombies for proper depth
+		{
+			return a.y - b.y
+		})
+		
+		if (zombies[i].xDestination < zombies[i].x && zombies[i].yDestination < zombies[i].y)
+		{
+			if (zombies[i].frame == 0)
+			{
+				image(imgZombieUpLeft, zombies[i].x, zombies[i].y, 'anchor')
+			}
+			else
+			{
+				image(imgZombieUpLeft2, zombies[i].x, zombies[i].y, 'anchor')
+			}
+		}
+		else if (zombies[i].xDestination > zombies[i].x && zombies[i].yDestination < zombies[i].y)
+		{
+			if (zombies[i].frame == 0)
+			{
+				image(imgZombieUpRight, zombies[i].x, zombies[i].y, 'anchor')
+			}
+			else
+			{
+				image(imgZombieUpRight2, zombies[i].x, zombies[i].y, 'anchor')
+			}
+		}
+		else if (zombies[i].xDestination < zombies[i].x && zombies[i].yDestination > zombies[i].y)
+		{
+			if (zombies[i].frame == 0)
+			{
+				image(imgZombieDownLeft, zombies[i].x, zombies[i].y, 'anchor')
+			}
+			else
+			{
+				image(imgZombieDownLeft2, zombies[i].x, zombies[i].y, 'anchor')
+			}
+		}
+		else if (zombies[i].xDestination > zombies[i].x && zombies[i].yDestination > zombies[i].y)
+		{
+			if (zombies[i].frame == 0)
+			{
+				image(imgZombieDownRight, zombies[i].x, zombies[i].y, 'anchor')
+			}
+			else
+			{
+				image(imgZombieDownRight2, zombies[i].x, zombies[i].y, 'anchor')
+			}
+		}
+	}
+
+	// Logo shape
+	polygon(xStats, yStats, menuSize, white)
+	polygon(xSingle, ySingle, menuSize, white)
+	polygon(xMulti, yMulti, menuSize, white)
+	polygon(xPrefs, yPrefs, menuSize, white)
+}
+
+function drawGame()
+{
+	blank(canvasColor) // Place draw calls after this
+
+    if (debug) // Draw the aiming cone for debugging purposes
+    {
+    	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
+    	line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
+		circle(centerX, centerY, maxShotDistance * pixelsToMeters, debugColor)
+		circle(centerX, centerY, minShotDistance * pixelsToMeters, debugColor)
+		circle(centerX, centerY, damageDistance * pixelsToMeters, debugColor)
+		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
+    }
+
+    /*
+    zombies.sort(function(a, b) // Order the zombies for proper depth
+	{
+		return a.y - b.y
+	})
+	*/
+
+	polygon(centerX, centerY, 10, white) // Draw the player
+
+	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
+    {
+    	if (ammo[i].distance < renderDistance) // This is the bit that helps with framerate
+    	{
+		    var x = centerX + Math.cos(((ammo[i].bearing - compassBuffer) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
+			var y = centerY + Math.sin(((ammo[i].bearing - compassBuffer) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
+
+			if (ammo[i].count > 0)
+			{
+				image(imgAmmoPack, x, y, 'anchor')
+			}
+			else
+			{
+				image(imgEmptyAmmoPack, x, y, 'anchor')
+			}
+		}
+	}
+
+    // Draw the zombies
+    for (var i = 0; i < zombies.length; i++)
+    {
+    	if (zombies[i].distance < renderDistance) // This is the bit that helps with framerate
+    	{
+			zombies[i].x = centerX + Math.cos(((zombies[i].bearing - compassBuffer) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
+			zombies[i].y = centerY + Math.sin(((zombies[i].bearing - compassBuffer) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
+
+			if (debug)
+			{
+				text(zombies[i].name, zombies[i].x + 15, zombies[i].y - 10)
+			}
+
+		    if (zombies[i].health > 0) // Draw zombies facing in the right direction
+		    {	
+				if (centerX < zombies[i].x && centerY < zombies[i].y)
+				{
+					if (zombies[i].frame == 0)
+					{
+						image(imgZombieUpLeft, zombies[i].x, zombies[i].y, 'anchor')
+					}
+					else
+					{
+						image(imgZombieUpLeft2, zombies[i].x, zombies[i].y, 'anchor')
+					}
+				}
+				else if (centerX > zombies[i].x && centerY < zombies[i].y)
+				{
+					if (zombies[i].frame == 0)
+					{
+						image(imgZombieUpRight, zombies[i].x, zombies[i].y, 'anchor')
+					}
+					else
+					{
+						image(imgZombieUpRight2, zombies[i].x, zombies[i].y, 'anchor')
+					}
+				}
+				else if (centerX < zombies[i].x && centerY > zombies[i].y)
+				{
+					if (zombies[i].frame == 0)
+					{
+						image(imgZombieDownLeft, zombies[i].x, zombies[i].y, 'anchor')
+					}
+					else
+					{
+						image(imgZombieDownLeft2, zombies[i].x, zombies[i].y, 'anchor')
+					}
+				}
+				else if (centerX > zombies[i].x && centerY > zombies[i].y)
+				{
+					if (zombies[i].frame == 0)
+					{
+						image(imgZombieDownRight, zombies[i].x, zombies[i].y, 'anchor')
+					}
+					else
+					{
+						image(imgZombieDownRight2, zombies[i].x, zombies[i].y, 'anchor')
+					}
+				}
+		    }
+		    else
+		    {
+		    	image(imgDeadZombie, zombies[i].x, zombies[i].y, 'anchor') // Draw dead zombies
+		    }
+		}
+	}
+
+	// drawHealth() // Give a visual on current health level
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Things are only set up for right handed users right now
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    for (var i = 0; i < health; i++) // Draw out health
+	{
+		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, red)
+	}
+
+	for (var i = 0; i < magazine + 1; i++) // Draw the ammo in our gun
+	{
+		rectangle(canvas.width - indicatorSpacing - indicatorWidth, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, white)
+	}
+
+	for (var i = 0; i < extraAmmo + 1; i++) // Draw our extraAmmo
+	{
+		rectangle(indicatorSpacing, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, blue)
+	}
+}

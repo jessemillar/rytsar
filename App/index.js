@@ -1,11 +1,8 @@
-/*
+/* ------------------------------------------------------------------------------------------------------------------------------------------
 
-NOTES
------------------------
+// Maybe play a sound when a zombie gets within a certain radius to let the player know that something's coming
 
-Maybe play a sound when a zombie gets within a certain radius to let the player know that something's coming
-
-*/
+------------------------------------------------------------------------------------------------------------------------------------------ */
 
 ejecta.include('functions.js')
 ejecta.include('backend.js')
@@ -19,7 +16,12 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = true // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'menu'
+var currentScreen = 'game'
+
+var gpsRequiredAccuracy = 1000 // Normally set to 15
+
+var compassBuffer = 0 // Smooth out map rotation
+var compassBufferSpeed = 50 // Degrees per second of buffer rotation
 
 var zombies = new Array() // Our local array of zombies
 var ammo = new Array() // Locally monitor the objects placed throughout the world
@@ -32,7 +34,7 @@ var spawnRadius = 100 // ...meters
 var spawnSeedLatitude = 0 // Set later by findSpawnRadius()
 var spawnSeedLongitude = 0 // Set later by findSpawnRadius()
 
-var renderDistance = 20 // ...in meters
+var renderDistance = 22 // ...in meters
 var maxShotDistance = 15 // ...in meters
 var minShotDistance = 3.5 // ...in meters
 var damageDistance = 2 // ...in meters
@@ -46,7 +48,7 @@ var zombieMaxHealth = 5
 var zombieSpeedLow = 0.2 // ...meters per second
 var zombieSpeedHigh = 1 // ...meters per second
 
-var slowestAnimation = 900 // The longest time possible between animation frames
+var slowestAnimation = 1000 // The longest time possible between animation frames
 
 // How much ammo can be in a pack
 var ammoCountLow = 1
@@ -180,8 +182,43 @@ setInterval(function() // Main game loop
 	}
 	else if (currentScreen == 'game')
 	{
-		if (gps.latitude && gps.longitude && compass && gps.accuracy < 15) // Only do stuff if we know where we are
+		if (gps.latitude && gps.longitude && gps.accuracy < gpsRequiredAccuracy) // Only do stuff if we know where we are
 		{
+			if (compassBuffer != Math.floor(compass)) // Smooth out map rotation
+			{
+				if (Math.abs(compass - compassBuffer) < 180)
+				{
+					if (compassBuffer < compass)
+					{
+						compassBuffer += compassBufferSpeed / 60
+					}
+					else
+					{
+						compassBuffer -= compassBufferSpeed / 60
+					}
+				}
+				else
+				{
+					if (compassBuffer < compass) // If rotating opposite to computer logic is going to be faster, do it
+					{
+						compassBuffer -= compassBufferSpeed / 60
+					}
+					else
+					{
+						compassBuffer += compassBufferSpeed / 60
+					}
+
+					if (compassBuffer > 360) // Make the numbers loop
+					{
+						compassBuffer -= 360
+					}
+					else if (compassBuffer < 0)
+					{
+						compassBuffer += 360
+					}
+				}
+			}
+
 			// ******************************
 			// Run calculations
 			// ******************************
@@ -227,7 +264,7 @@ setInterval(function() // Main game loop
 			    		melee.push(zombies[i])
 			    	}
 
-			        if ((compass - fieldOfView) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView))
+			        if ((compassBuffer - fieldOfView) < zombies[i].bearing && zombies[i].bearing < (compassBuffer + fieldOfView))
 			        {
 			            if (zombies[i].distance > minShotDistance && zombies[i].distance < maxShotDistance && zombies[i].health > 0)
 			            {
@@ -351,200 +388,17 @@ setInterval(function() // Main game loop
 		}
 		else if (gps.accuracy > 0)
 		{
-			blank(blue)
+			blank(red)
 			text('Waiting for GPS lock', 3, 3, white)
+			text('Are you outside?', 3, 13, white)
+			text('Can you see the sky?', 3, 23, white)
 		}
 		else if (gps.accuracy > 15)
 		{
 			blank(red)
 			text('Current GPS accuracy of ' + gps.accuracy + ' meters is not accurate enough', 3, 3, white)
+			text('Are you outside?', 3, 13, white)
+			text('Can you see the sky?', 3, 23, white)
 		}
 	}
 }, 1000 / fps)
-
-function drawMenu()
-{
-	blank(canvasColor)
-
-	for (var i = 0; i < zombies.length; i++) // Sort and draw the menu zombies
-	{
-		zombies.sort(function(a, b) // Order the zombies for proper depth
-		{
-			return a.y - b.y
-		})
-		
-		if (zombies[i].xDestination < zombies[i].x && zombies[i].yDestination < zombies[i].y)
-		{
-			if (zombies[i].frame == 0)
-			{
-				image(imgZombieUpLeft, zombies[i].x, zombies[i].y, 'anchor')
-			}
-			else
-			{
-				image(imgZombieUpLeft2, zombies[i].x, zombies[i].y, 'anchor')
-			}
-		}
-		else if (zombies[i].xDestination > zombies[i].x && zombies[i].yDestination < zombies[i].y)
-		{
-			if (zombies[i].frame == 0)
-			{
-				image(imgZombieUpRight, zombies[i].x, zombies[i].y, 'anchor')
-			}
-			else
-			{
-				image(imgZombieUpRight2, zombies[i].x, zombies[i].y, 'anchor')
-			}
-		}
-		else if (zombies[i].xDestination < zombies[i].x && zombies[i].yDestination > zombies[i].y)
-		{
-			if (zombies[i].frame == 0)
-			{
-				image(imgZombieDownLeft, zombies[i].x, zombies[i].y, 'anchor')
-			}
-			else
-			{
-				image(imgZombieDownLeft2, zombies[i].x, zombies[i].y, 'anchor')
-			}
-		}
-		else if (zombies[i].xDestination > zombies[i].x && zombies[i].yDestination > zombies[i].y)
-		{
-			if (zombies[i].frame == 0)
-			{
-				image(imgZombieDownRight, zombies[i].x, zombies[i].y, 'anchor')
-			}
-			else
-			{
-				image(imgZombieDownRight2, zombies[i].x, zombies[i].y, 'anchor')
-			}
-		}
-	}
-
-	// Logo shape
-	polygon(xStats, yStats, menuSize, white)
-	polygon(xSingle, ySingle, menuSize, white)
-	polygon(xMulti, yMulti, menuSize, white)
-	polygon(xPrefs, yPrefs, menuSize, white)
-}
-
-function drawGame()
-{
-	blank(canvasColor) // Place draw calls after this
-
-    if (debug) // Draw the aiming cone for debugging purposes
-    {
-    	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
-    	line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
-		circle(centerX, centerY, maxShotDistance * pixelsToMeters, debugColor)
-		circle(centerX, centerY, minShotDistance * pixelsToMeters, debugColor)
-		circle(centerX, centerY, damageDistance * pixelsToMeters, debugColor)
-		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
-    }
-
-    /*
-    zombies.sort(function(a, b) // Order the zombies for proper depth
-	{
-		return a.y - b.y
-	})
-	*/
-
-	polygon(centerX, centerY, 10, white) // Draw the player
-
-	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
-    {
-    	if (ammo[i].distance < renderDistance && ammo[i].count > 0) // This is the bit that helps with framerate
-    	{
-		    var x = centerX + Math.cos(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
-			var y = centerY + Math.sin(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
-
-		    image(imgAmmoPack, x, y, 'anchor')
-		}
-	}
-
-    // Draw the zombies
-    for (var i = 0; i < zombies.length; i++)
-    {
-    	if (zombies[i].distance < renderDistance) // This is the bit that helps with framerate
-    	{
-			zombies[i].x = centerX + Math.cos(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
-			zombies[i].y = centerY + Math.sin(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
-
-			if (debug)
-			{
-				text(zombies[i].name, zombies[i].x + 15, zombies[i].y - 10)
-			}
-
-		    if (zombies[i].health > 0) // Draw zombies facing in the right direction
-		    {	
-				if (centerX < zombies[i].x && centerY < zombies[i].y)
-				{
-					if (zombies[i].frame == 0)
-					{
-						image(imgZombieUpLeft, zombies[i].x, zombies[i].y, 'anchor')
-					}
-					else
-					{
-						image(imgZombieUpLeft2, zombies[i].x, zombies[i].y, 'anchor')
-					}
-				}
-				else if (centerX > zombies[i].x && centerY < zombies[i].y)
-				{
-					if (zombies[i].frame == 0)
-					{
-						image(imgZombieUpRight, zombies[i].x, zombies[i].y, 'anchor')
-					}
-					else
-					{
-						image(imgZombieUpRight2, zombies[i].x, zombies[i].y, 'anchor')
-					}
-				}
-				else if (centerX < zombies[i].x && centerY > zombies[i].y)
-				{
-					if (zombies[i].frame == 0)
-					{
-						image(imgZombieDownLeft, zombies[i].x, zombies[i].y, 'anchor')
-					}
-					else
-					{
-						image(imgZombieDownLeft2, zombies[i].x, zombies[i].y, 'anchor')
-					}
-				}
-				else if (centerX > zombies[i].x && centerY > zombies[i].y)
-				{
-					if (zombies[i].frame == 0)
-					{
-						image(imgZombieDownRight, zombies[i].x, zombies[i].y, 'anchor')
-					}
-					else
-					{
-						image(imgZombieDownRight2, zombies[i].x, zombies[i].y, 'anchor')
-					}
-				}
-		    }
-		    else
-		    {
-		    	image(imgDeadZombie, zombies[i].x, zombies[i].y, 'anchor') // Draw dead zombies
-		    }
-		}
-	}
-
-	// drawHealth() // Give a visual on current health level
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Things are only set up for right handed users right now
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    for (var i = 0; i < health; i++) // Draw out health
-	{
-		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, red)
-	}
-
-	for (var i = 0; i < magazine + 1; i++) // Draw the ammo in our gun
-	{
-		rectangle(canvas.width - indicatorSpacing - indicatorWidth, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, white)
-	}
-
-	for (var i = 0; i < extraAmmo + 1; i++) // Draw our extraAmmo
-	{
-		rectangle(indicatorSpacing, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, blue)
-	}
-}

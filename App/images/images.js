@@ -1,3 +1,5 @@
+var imgEmptyAmmoPack = new Image(68, 68)
+	imgEmptyAmmoPack.src = 'images/empty-ammo-pack.png'
 var imgAmmoPack = new Image(68, 68)
 	imgAmmoPack.src = 'images/ammo-pack.png'
 
