@@ -71,6 +71,8 @@ var meleeDamage = 10
 // General player variables
 var playerMaxHealth = 5
 var health = playerMaxHealth
+var canBeHurt = true
+var timeHurt = 1000 // The amount of time between each damage "tick" when a zombie is close
 var capacity = 6 // Since we have a revolver right now
 var magazine = random(0, capacity - 4)
 var extraAmmo = random(0, 2)
@@ -278,43 +280,39 @@ setInterval(function() // Main game loop
 				})
 		    }
 
-		    /*
 		    for (var i = 1; i < zombies.length; i++) // Get hurt by a zombie
 			{
-				if (zombies[i].distance < damageDistance && zombies[i].health > 0 && self[1].health > 0)
+				if (zombies[i].distance < damageDistance && zombies[i].health > 0 && health > 0 && canBeHurt)
 				{
+					health -= 1
+
+					if (health > 0)
+					{
+						sfxHurt.play()
+					}
+					else
+					{
+						sfxFlatline.play()
+					}
+
+					canBeHurt = false
+
 					setTimeout(function()
 					{
-						self[1].health -= 1
-						if (self[1].health > 0)
-						{
-							sfxHurt.play()
-						}
-						else
-						{
-							sfxFlatline.play()
-						}
-					}, 1000)
+						canBeHurt = true
+					}, timeHurt)
 				}	
 			}
 
 			for (var i = 1; i < ammo.length; i++) // Pick up some ammo
 			{
-				if (ammo[i].distance < minShotDistance && ammo[i].health > 0 && canPickup)
+				if (ammo[i].distance < minShotDistance && ammo[i].count > 0)
 				{
-					extraAmmo += ammo[i].health
-					ammo[i].health = 0
-					canPickup = false
-					sfxReload.play()
-
-					setTimeout(function()
-			        {
-			            canPickup = true
-			        }, timePickup)
-					break
+					extraAmmo += ammo[i].count
+					ammo[i].count = 0
+					sfxReload.play() // Change this later
 				}
 			}
-			*/
 
 			// ******************************
 			// Attack motions
@@ -447,9 +445,8 @@ function drawGame()
 
 	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
     {
-    	if (ammo[i].distance < renderDistance) // This is the bit that helps with framerate
+    	if (ammo[i].distance < renderDistance && ammo[i].count > 0) // This is the bit that helps with framerate
     	{
-    		console.log(ammo[i].distance)
 		    var x = centerX + Math.cos(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
 			var y = centerY + Math.sin(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
 
