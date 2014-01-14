@@ -34,15 +34,16 @@ var spawnSeedLongitude = 0 // Set later by findSpawnRadius()
 
 var renderDistance = 20 // ...in meters
 var maxShotDistance = 15 // ...in meters
-var minShotDistance = 5 // ...in meters
+var minShotDistance = 3.5 // ...in meters
 var damageDistance = 2 // ...in meters
-var fieldOfView = 22 // ...in degrees
+var fieldOfView = 23 // ...in degrees
 
 var totalZombies = 100
 var totalAmmo = 20
 
-var zombieMaxHealth = 3
-var zombieSpeedLow = 0.3 // ...meters per second
+var zombieMinHealth = 2
+var zombieMaxHealth = 5
+var zombieSpeedLow = 0.2 // ...meters per second
 var zombieSpeedHigh = 1 // ...meters per second
 
 var slowestAnimation = 900 // The longest time possible between animation frames
@@ -64,6 +65,7 @@ var timeReload = 1100 // canShoot manages timeReload
 var timeCock = 450
 var canMelee = true
 var timeMelee = 350
+
 var meleeDamage = 10
 
 // General player variables
@@ -196,7 +198,7 @@ setInterval(function() // Main game loop
 						thingy.name = 'zombie' + i
 						thingy.latitude = random(gps.latitude - spawnSeedLatitude, gps.latitude + spawnSeedLatitude)
 						thingy.longitude = random(gps.longitude - spawnSeedLongitude, gps.longitude + spawnSeedLongitude)
-						thingy.health = zombieMaxHealth
+						thingy.health = random(zombieMinHealth, zombieMaxHealth)
 						thingy.speed = random(zombieSpeedLow, zombieSpeedHigh) * (pixelsToMeters / fps)
 						thingy.frame = random(0, 1)
 						thingy.animate = animate(thingy, slowestAnimation - thingy.speed * (slowestAnimation / 2))
@@ -322,19 +324,7 @@ setInterval(function() // Main game loop
 			{
 				if (canMelee)
 				{
-					sfxPunch.play()
-
-					if (melee.length > 0) // If we're looking at at least one zombie...
-					{
-						// shootZombie(melee[0].name, meleeDamage) // Punch the closest zombie
-					}
-					
-					canMelee = false
-
-					setTimeout(function()
-			        {
-			        	canMelee = true
-			        }, timeMelee)
+					punch()
 				}
 			}
 

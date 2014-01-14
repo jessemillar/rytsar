@@ -14,6 +14,28 @@ function findSpawnRadius() // Spawn stuff in relation to the player
     }
 }
 
+function punch()
+{
+	sfxPunch.play()
+
+	if (melee.length > 0) // If we're within range of at at least one zombie...
+	{
+		melee[0].health -= meleeDamage
+
+		setTimeout(function() // Add a timeout so the zombie doesn't groan instantly
+    	{
+    		sfxGroan.play()
+    	}, 200)
+	}
+
+	canMelee = false
+
+	setTimeout(function()
+    {
+    	canMelee = true
+    }, timeMelee)
+}
+
 function fire()
 {
 	if (canShoot)
@@ -27,7 +49,7 @@ function fire()
 
 	        if (vision.length > 0) // If we're looking at at least one zombie...
 			{
-				vision[0].health -= 5
+				vision[0].health -= shotDamage
 
 				setTimeout(function() // Add a timeout so the zombie doesn't groan instantly
 		    	{
