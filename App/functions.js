@@ -24,6 +24,16 @@ function fire()
 	        magazine-- // Remove a bullet
 	        sfxFire.play()
 	        canShoot = false
+
+	        if (vision.length > 0) // If we're looking at at least one zombie...
+			{
+				vision[0].health -= 5
+
+				setTimeout(function() // Add a timeout so the zombie doesn't groan instantly
+		    	{
+		    		sfxGroan.play()
+		    	}, 200)
+			}
 	    }
 	    else
 	    {
@@ -40,20 +50,6 @@ function fire()
         {
             canShoot = true
         }, timeFire + timeCock)
-	}
-}
-
-function shootZombie(zombieName, damageAmount)
-{
-	if (canShootServer)
-	{
-		if (magazine > 0) // Don't fire if we don't have ammo
-	    {
-		    setTimeout(function() // Add a timeout so the zombie doesn't groan instantly
-		    {
-		    	sfxGroan.play()
-		    }, 200)
-	    }
 	}
 }
 
@@ -82,11 +78,6 @@ function reload()
 	        }, timeCock + timeReload)
 	    }
 	}
-}
-
-function drawEnemies()
-{
-	
 }
 
 function drawAmmoPacks()

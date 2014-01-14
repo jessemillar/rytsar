@@ -1,3 +1,12 @@
+/*
+
+NOTES
+-----------------------
+
+Maybe play a sound when a zombie gets within a certain radius to let the player know that something's coming
+
+*/
+
 ejecta.include('functions.js')
 ejecta.include('backend.js')
 ejecta.include('images/images.js')
@@ -10,7 +19,7 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = true // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'menu'
+var currentScreen = 'game'
 
 var zombies = new Array() // Our local array of zombies
 var ammo = new Array() // Locally monitor the objects placed throughout the world
@@ -32,9 +41,7 @@ var fieldOfView = 22 // ...in degrees
 var totalZombies = 100
 var totalAmmo = 20
 
-var playerMaxHealth = 5
 var zombieMaxHealth = 3
-
 var zombieSpeedLow = 0.3 // ...meters per second
 var zombieSpeedHigh = 1 // ...meters per second
 
@@ -57,7 +64,9 @@ var canMelee = true
 var timeMelee = 350
 var meleeDamage = 10
 
-// General gun variables
+// General player variables
+var playerMaxHealth = 5
+var health = playerMaxHealth
 var capacity = 6 // Since we have a revolver right now
 var magazine = random(0, capacity - 4)
 var extraAmmo = random(0, 2)
@@ -199,7 +208,7 @@ setInterval(function() // Main game loop
 			    	zombies[i].bearing = bearing(zombies[i].latitude, zombies[i].longitude)
 					zombies[i].distance = distance(zombies[i].latitude, zombies[i].longitude)
 
-			    	if (zombies[i].distance < renderDistance) // Move zombies closer
+			    	if (zombies[i].distance < renderDistance && zombies[i].health > 0) // Move zombies closer
 			    	{
 			    		var ratio = zombies[i].speed / 10 / distance(zombies[i].latitude, zombies[i].longitude) // We have to change the meters-per-second speed to a decimal that can work with latitude/longitude coordinates
 
@@ -263,8 +272,6 @@ setInterval(function() // Main game loop
 				{
 					return a.distance - b.distance
 				})
-
-				console.log(vision[0].name)
 		    }
 
 		    /*
@@ -317,7 +324,7 @@ setInterval(function() // Main game loop
 
 					if (melee.length > 0) // If we're looking at at least one zombie...
 					{
-						shootZombie(melee[0].name, meleeDamage) // Punch the closest zombie
+						// shootZombie(melee[0].name, meleeDamage) // Punch the closest zombie
 					}
 					
 					canMelee = false
@@ -342,11 +349,7 @@ setInterval(function() // Main game loop
 
 		        if (-rotation.z > rotateRequiredShoot) // Fire
 		        {
-		            fire() // Fire regardless of whether we're looking at a zombie
-		            if (vision.length > 0) // If we're looking at at least one zombie...
-					{
-						shootZombie(vision[0].name, shotDamage) // Shoot the closest zombie
-					}
+		            fire()
 		        }
 		    }
 
@@ -358,7 +361,7 @@ setInterval(function() // Main game loop
 		}
 		else
 		{
-			console.log('Error: No GPS lock')
+			console.log('Waiting for GPS')
 		}
 	}
 }, 1000 / fps)
@@ -523,18 +526,18 @@ function drawGame()
     // Things are only set up for right handed users right now
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    for (var i = 0; i < self[1].health; i++) // Draw out health
+    for (var i = 0; i < health; i++) // Draw out health
 	{
-		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, healthColor)
+		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, red)
 	}
 
 	for (var i = 0; i < magazine + 1; i++) // Draw the ammo in our gun
 	{
-		rectangle(canvas.width - indicatorSpacing - indicatorWidth, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, ammoColor)
+		rectangle(canvas.width - indicatorSpacing - indicatorWidth, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, white)
 	}
 
 	for (var i = 0; i < extraAmmo + 1; i++) // Draw our extraAmmo
 	{
-		rectangle(indicatorSpacing, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, itemColor)
+		rectangle(indicatorSpacing, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, blue)
 	}
 }
