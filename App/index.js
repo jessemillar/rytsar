@@ -19,7 +19,7 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = true // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'game'
+var currentScreen = 'menu'
 
 var zombies = new Array() // Our local array of zombies
 var ammo = new Array() // Locally monitor the objects placed throughout the world
@@ -39,7 +39,7 @@ var damageDistance = 2 // ...in meters
 var fieldOfView = 23 // ...in degrees
 
 var totalZombies = 100
-var totalAmmo = 300
+var totalAmmo = 50
 
 var zombieMinHealth = 2
 var zombieMaxHealth = 5
@@ -74,8 +74,8 @@ var health = playerMaxHealth
 var canBeHurt = true
 var timeHurt = 1000 // The amount of time between each damage "tick" when a zombie is close
 var capacity = 6 // Since we have a revolver right now
-var magazine = random(0, capacity - 4)
-var extraAmmo = random(0, 2)
+var magazine = random(0, capacity - 3)
+var extraAmmo = random(0, 3)
 var shotDamage = 2 // How much damage a bullet deals (change this later to be more dynamic)
 
 // Color scheme
