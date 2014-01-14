@@ -19,7 +19,7 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = true // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'menu'
+var currentScreen = 'game'
 
 var zombies = new Array() // Our local array of zombies
 var ammo = new Array() // Locally monitor the objects placed throughout the world
@@ -39,7 +39,7 @@ var damageDistance = 2 // ...in meters
 var fieldOfView = 23 // ...in degrees
 
 var totalZombies = 100
-var totalAmmo = 20
+var totalAmmo = 300
 
 var zombieMinHealth = 2
 var zombieMaxHealth = 5
@@ -443,6 +443,20 @@ function drawGame()
 	})
 	*/
 
+	polygon(centerX, centerY, 10, white) // Draw the player
+
+	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
+    {
+    	if (ammo[i].distance < renderDistance) // This is the bit that helps with framerate
+    	{
+    		console.log(ammo[i].distance)
+		    var x = centerX + Math.cos(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
+			var y = centerY + Math.sin(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
+
+		    image(imgAmmoPack, x, y, 'anchor')
+		}
+	}
+
     // Draw the zombies
     for (var i = 0; i < zombies.length; i++)
     {
@@ -456,9 +470,7 @@ function drawGame()
 				text(zombies[i].name, zombies[i].x + 15, zombies[i].y - 10)
 			}
 
-			polygon(centerX, centerY, 10, white) // Draw the player
-
-		    if (zombies[i].health > 0)
+		    if (zombies[i].health > 0) // Draw zombies facing in the right direction
 		    {	
 				if (centerX < zombies[i].x && centerY < zombies[i].y)
 				{
@@ -507,7 +519,7 @@ function drawGame()
 		    }
 		    else
 		    {
-		    	image(imgDeadZombie, zombies[i].x, zombies[i].y, 'anchor')
+		    	image(imgDeadZombie, zombies[i].x, zombies[i].y, 'anchor') // Draw dead zombies
 		    }
 		}
 	}

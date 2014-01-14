@@ -1,3 +1,6 @@
+var imgAmmoPack = new Image(68, 68)
+	imgAmmoPack.src = 'images/ammo-pack.png'
+
 var imgDeadZombie = new Image(68, 68)
 	imgDeadZombie.src = 'images/dead-zombie.png'
 

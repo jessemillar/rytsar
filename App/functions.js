@@ -101,17 +101,3 @@ function reload()
 	    }
 	}
 }
-
-function drawAmmoPacks()
-{
-	for (var i = 1; i < ammo.length; i++)
-    {
-    	if (ammo[i].distance < renderDistance) // This is the bit that helps with framerate
-    	{
-		    var x = (xCenter) + (Math.cos(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * metersToPixels))
-		    var y = (yCenter) + (Math.sin(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * metersToPixels))
-
-		    polygon(x, y, ammoPackSize, itemColor) // Draw the item in question
-		}
-	}
-}
