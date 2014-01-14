@@ -16,6 +16,7 @@ var gps = new Object()
 	gps.latitude = 0
 	gps.longitude = 0
 	gps.accuracy = 0
+	gps.history = new Array()
 var compass = 0
 
 document.addEventListener('deviceorientation', function(orientation)
@@ -37,33 +38,44 @@ document.addEventListener('devicemotion', function(motion)
 	acceleration.total = Math.abs(acceleration.x + acceleration.y + acceleration.z)
 }, true)
 
-navigator.geolocation.watchPosition(geolocation, error) // For GPS and compass
-
-function geolocation(position)
+// For GPS and compass
+navigator.geolocation.watchPosition(function(position)
 {
 	gps.latitude = position.coords.latitude
 	gps.longitude = position.coords.longitude
 	gps.accuracy = position.coords.accuracy
 
+	// Push the updated coordinates to the gps.history object
+	if (gps.history.length == 0)
+	{
+		gps.history[0] = new Object()
+		gps.history[0].latitude = gps.latitude
+		gps.history[0].longitude = gps.longitude
+	}
+	else if (gps.latitude != gps.history[gps.history.length - 1].latitude || gps.longitude != gps.history[gps.history.length - 1].longitude)
+	{
+		var thingy = new Object()
+			thingy.latitude = gps.latitude
+			thingy.longitude = gps.longitude
+		gps.history.push(thingy)
+		
+		console.log(gps.history.length + ' ' + JSON.stringify(gps.history))
+	}
+
 	if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
     {
     	compass = position.coords.heading - tilt.x // Compass value with compensation for holding the phone in gun orientation
+    
+    	if (compass < 0)
+    	{
+    		compass += 360
+    	}
     }
     else
     {
     	compass = position.coords.heading
     }
-}
-
-function error(error)
-{
-	console.log('error', error.code, error.message)
-
-    if (error.code === navigator.geolocation.PERMISSION_DENIED)
-    {
-        console.log('GPS permission denied')
-    }
-}
+})
 
 function random(min, max)
 {
