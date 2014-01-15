@@ -18,10 +18,7 @@ var debug = true // Can be toggled by tapping the screen in game mode
 
 var currentScreen = 'menu'
 
-var gpsRequiredAccuracy = 1000 // Normally set to 15
-
-var compassBuffer = 0 // Smooth out map rotation
-var compassBufferSpeed = 50 // Degrees per second of buffer rotation
+var gpsRequiredAccuracy = 15 // Normally set to 15
 
 var zombies = new Array() // Our local array of zombies
 var ammo = new Array() // Locally monitor the objects placed throughout the world
@@ -190,41 +187,6 @@ setInterval(function() // Main game loop
 	{
 		if (gps.latitude && gps.longitude && gps.accuracy < gpsRequiredAccuracy) // Only do stuff if we know where we are
 		{
-			if (Math.floor(compassBuffer) != Math.floor(compass)) // Smooth out map rotation
-			{
-				if (Math.abs(compass - compassBuffer) < 180)
-				{
-					if (compassBuffer < compass)
-					{
-						compassBuffer += compassBufferSpeed / 60
-					}
-					else if (compassBuffer > compass)
-					{
-						compassBuffer -= compassBufferSpeed / 60
-					}
-				}
-				else
-				{
-					if (compassBuffer < compass) // If rotating opposite to computer logic is going to be faster, do it
-					{
-						compassBuffer -= compassBufferSpeed / 60
-					}
-					else if (compassBuffer > compass)
-					{
-						compassBuffer += compassBufferSpeed / 60
-					}
-
-					if (compassBuffer > 360) // Make the numbers loop
-					{
-						compassBuffer -= 360
-					}
-					else if (compassBuffer < 0)
-					{
-						compassBuffer += 360
-					}
-				}
-			}
-
 			// ******************************
 			// Run calculations
 			// ******************************
@@ -270,7 +232,7 @@ setInterval(function() // Main game loop
 			    		melee.push(zombies[i])
 			    	}
 
-			        if ((compassBuffer - fieldOfView) < zombies[i].bearing && zombies[i].bearing < (compassBuffer + fieldOfView))
+			        if ((compass - fieldOfView) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView))
 			        {
 			            if (zombies[i].distance > minShotDistance && zombies[i].distance < maxShotDistance && zombies[i].health > 0)
 			            {

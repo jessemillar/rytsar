@@ -193,8 +193,8 @@ function drawGame()
     {
     	if (ammo[i].distance < renderDistance) // This is the bit that helps with framerate
     	{
-		    var x = centerX + Math.cos(((ammo[i].bearing - compassBuffer) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
-			var y = centerY + Math.sin(((ammo[i].bearing - compassBuffer) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
+		    var x = centerX + Math.cos(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
+			var y = centerY + Math.sin(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
 
 			if (ammo[i].count > 0)
 			{
@@ -212,8 +212,8 @@ function drawGame()
     {
     	if (zombies[i].distance < renderDistance) // This is the bit that helps with framerate
     	{
-			zombies[i].x = centerX + Math.cos(((zombies[i].bearing - compassBuffer) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
-			zombies[i].y = centerY + Math.sin(((zombies[i].bearing - compassBuffer) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
+			zombies[i].x = centerX + Math.cos(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
+			zombies[i].y = centerY + Math.sin(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
 
 			if (debug)
 			{
