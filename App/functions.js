@@ -161,7 +161,7 @@ function drawMenu()
 
 	// Logo shape
 	polygon(xStats, yStats, menuSize, white)
-	polygon(xSingle, ySingle, menuSize, white)
+	polygon(xSingle, ySingle, menuSize, blue)
 	polygon(xMulti, yMulti, menuSize, white)
 	polygon(xPrefs, yPrefs, menuSize, white)
 }

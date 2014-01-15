@@ -16,7 +16,7 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = true // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'game'
+var currentScreen = 'menu'
 
 var gpsRequiredAccuracy = 1000 // Normally set to 15
 
@@ -45,7 +45,7 @@ var totalAmmo = 50
 
 var zombieMinHealth = 2
 var zombieMaxHealth = 5
-var zombieSpeedLow = 0.2 // ...meters per second
+var zombieSpeedLow = 0.3 // ...meters per second
 var zombieSpeedHigh = 1 // ...meters per second
 
 var slowestAnimation = 1000 // The longest time possible between animation frames
@@ -130,18 +130,24 @@ document.addEventListener('touchstart', function(ev) // Monitor touches througho
 	var x = ev.touches[0].pageX
 	var y = ev.touches[0].pageY
 
-	if (currentScreen == 'game')
+	if (currentScreen == 'menu')
 	{
-		debug = !debug // Toggle debug mode for framerate increase
-	}
-	else if (currentScreen == 'menu')
-	{
-		if (Math.abs(xMulti - x) * Math.abs(xMulti - x) + Math.abs(yMulti - y) * Math.abs(yMulti - y) < menuSize * menuSize)
+		if (Math.abs(xSingle - x) * Math.abs(xSingle - x) + Math.abs(ySingle - y) * Math.abs(ySingle - y) < menuSize * menuSize)
 		{
 			musMenu.pause() // Kill the menu music before moving into the game screen
 			zombies.length = 0 // Wipe the zombie database so we can start playing with "real" zombies
 			currentScreen = 'game'
 		}
+	}
+	else if (currentScreen == 'game')
+	{
+		debug = !debug // Toggle debug mode for framerate increase
+	}
+	else if (currentScreen == 'gameover')
+	{
+		zombies.length = 0 // Wipe the zombie database so we can start playing with "real" zombies
+		ammo.length = 0 // Kill the ammo packs
+		currentScreen = 'game'
 	}
 })
 
@@ -184,7 +190,7 @@ setInterval(function() // Main game loop
 	{
 		if (gps.latitude && gps.longitude && gps.accuracy < gpsRequiredAccuracy) // Only do stuff if we know where we are
 		{
-			if (compassBuffer != Math.floor(compass)) // Smooth out map rotation
+			if (Math.floor(compassBuffer) != Math.floor(compass)) // Smooth out map rotation
 			{
 				if (Math.abs(compass - compassBuffer) < 180)
 				{
@@ -192,7 +198,7 @@ setInterval(function() // Main game loop
 					{
 						compassBuffer += compassBufferSpeed / 60
 					}
-					else
+					else if (compassBuffer > compass)
 					{
 						compassBuffer -= compassBufferSpeed / 60
 					}
@@ -203,7 +209,7 @@ setInterval(function() // Main game loop
 					{
 						compassBuffer -= compassBufferSpeed / 60
 					}
-					else
+					else if (compassBuffer > compass)
 					{
 						compassBuffer += compassBufferSpeed / 60
 					}
@@ -330,6 +336,7 @@ setInterval(function() // Main game loop
 					else
 					{
 						sfxFlatline.play()
+						currentScreen = 'gameover'
 					}
 
 					canBeHurt = false
@@ -400,5 +407,11 @@ setInterval(function() // Main game loop
 			text('Are you outside?', 3, 13, white)
 			text('Can you see the sky?', 3, 23, white)
 		}
+	}
+	else if (currentScreen == 'gameover')
+	{
+		blank(red)
+		text('GAMEOVER', 3, 3, white)
+		text('Tap to play again', 3, 13, white)
 	}
 }, 1000 / fps)
