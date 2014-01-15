@@ -37,11 +37,11 @@ var minShotDistance = 3.5 // ...in meters
 var damageDistance = 2 // ...in meters
 var fieldOfView = 23 // ...in degrees
 
-var totalZombies = 100
+var totalZombies = 175
 var totalAmmo = 50
 
 var zombieMinHealth = 2
-var zombieMaxHealth = 5
+var zombieMaxHealth = 3
 var zombieSpeedLow = 0.3 // ...meters per second
 var zombieSpeedHigh = 1 // ...meters per second
 
@@ -49,7 +49,7 @@ var slowestAnimation = 1000 // The longest time possible between animation frame
 
 // How much ammo can be in a pack
 var ammoCountLow = 1
-var ammoCountHigh = 4
+var ammoCountHigh = 3
 
 // How much motion is required for certain actions
 var rotateRequiredShoot = 400
@@ -73,9 +73,9 @@ var health = playerMaxHealth
 var canBeHurt = true
 var timeHurt = 1000 // The amount of time between each damage "tick" when a zombie is close
 var capacity = 6 // Since we have a revolver right now
-var magazine = random(0, capacity - 3)
-var extraAmmo = random(0, 3)
-var shotDamage = 2 // How much damage a bullet deals (change this later to be more dynamic)
+var magazine = random(0, capacity - 4)
+var extraAmmo = random(0, 2)
+var shotDamage = 3 // How much damage a bullet deals (change this later to be more dynamic)
 
 // Color scheme
 var white = '#fff8e3'
