@@ -240,6 +240,46 @@ function image(image, x, y, anchor, alpha)
 	}
 }
 
+function gridImage(image, column, row, anchor, alpha)
+{
+	for (var i = 0; i < grid.length; i++)
+	{
+		if (grid[i].column == column && grid[i].row == row)
+		{
+			if (alpha)
+			{
+				ctx.globalAlpha = alpha
+			}
+			else
+			{
+				ctx.globalAlpha = 1
+			}
+
+			ctx.save()
+			if (anchor == 'normal')
+			{
+				ctx.translate(grid[i].x, grid[i].y)
+				ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+				ctx.drawImage(image, 0, 0)
+			}
+			else if (anchor == 'center')
+			{
+				ctx.translate(grid[i].x + gridWidth / 2, grid[i].y + gridHeight / 2)
+				ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height / 2)
+			}
+			else if (anchor == 'anchor')
+			{
+				ctx.translate(grid[i].x + gridWidth / 2, grid[i].y + gridHeight / 2)
+				ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height)
+			}
+			ctx.restore()
+			break
+		}
+	}
+}
+
 function moveToward(thingy, x, y, speed) // Move a thingy toward a specific pixel coordinate at a constant speed
 {
 	var destinationX = x - thingy.x

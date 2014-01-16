@@ -18,10 +18,10 @@ var debug = true // Can be toggled by tapping the screen in game mode
 
 var currentScreen = 'game'
 
-// Make sure the gridsize is always an odd number
-var gridWidth = 21
-var gridHeight = 21
-var tileSize = 34
+var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
+var gridWidth = 15 // Make sure the gridsize is always an odd number
+var gridHeight = gridWidth
+var tileSize = 34 // Should be an even number...?
 
 var gpsRequiredAccuracy = 1000 // Normally set to 15
 

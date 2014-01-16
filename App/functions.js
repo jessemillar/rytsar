@@ -168,19 +168,38 @@ function drawMenu()
 
 function drawGame()
 {
+	grid.length = 0 // Wipe the database of pixel to grid coordinants to start fresh
+
 	blank(canvasColor) // Place draw calls after this
 
 	// Draw the grid
 	ctx.save()
 	ctx.translate(centerX, centerY)
-	ctx.rotate(-compass.toRad())
-	for (var y = 0; y < gridHeight; y++)
+	ctx.rotate(-compass.toRad()) // Things relating to the canvas expect radians
+	for (var y = 0; y < gridHeight + 1; y++)
 	{
-		for (var x = 0; x < gridWidth; x++)
+		for (var x = 0; x < gridWidth + 1; x++)
 		{
+			if (x < gridWidth && y < gridHeight)
+			{
+				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
+					thingy.column = x + 1
+					thingy.row = y + 1
+					thingy.x = (x * tileSize - 1) + (tileSize / 2) - (tileSize * gridWidth / 2 + 2)
+					thingy.y = (y * tileSize - 1) + (tileSize / 2) - (tileSize * gridHeight / 2 + 2)
+				grid.push(thingy)
+
+				if (debug)
+				{
+					text(grid.length + ',' + grid[grid.length - 1].column + ',' + grid[grid.length - 1].row, grid[grid.length - 1].x, grid[grid.length - 1].y, debugColor)
+				}
+			}
+
 			image(imgGrid, (x * tileSize - 1) - (tileSize * gridWidth / 2 + 2), (y * tileSize - 1) - (tileSize * gridHeight / 2 + 2), 'normal')
 		}
 	}
+
+	gridImage(imgZombieDownRight, 2, 2, 'anchor')
 	ctx.restore()
 
     if (debug) // Draw the aiming cone for debugging purposes
