@@ -105,18 +105,12 @@ function distance(lat2, lon2) // Returns distance in meters
 	return d
 }
 
-function bearing(latitude, longitude)
+function bearing(firstObject, secondObject)
 {
-	var lat1 = gps.latitude.toRad()
-	var lat2 = latitude.toRad()
-	var dLon = (longitude - gps.longitude).toRad()
-
-	var y = Math.sin(dLon) * Math.cos(lat2)
-	var x = Math.cos(lat1) * Math.sin(lat2) -
-			Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon)
-	var bearing = Math.atan2(y, x)
-
-	return (bearing.toDeg() + 360) % 360
+	var differenceX = firstObject.column - secondObject.column
+	var differenceY = firstObject.row - secondObject - row
+	
+	// Find an angle or summat
 }
 
 function blank(color)
@@ -248,15 +242,11 @@ function gridCheck(object, value)
 		{
 			if (value == 'x')
 			{
-				return grid[i].x
-				console.log(grid[i].x)
-				break
+				return grid[i].x + centerX
 			}
-			else
+			else if (value == 'y')
 			{
-				return grid[i].y
-				console.log(grid[i].y)
-				break
+				return grid[i].y + centerY
 			}
 		}
 	}
