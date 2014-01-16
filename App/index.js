@@ -27,6 +27,7 @@ var gpsRequiredAccuracy = 1000 // Normally set to 15
 
 var zombies = new Array() // Our local array of zombies
 var ammo = new Array() // Locally monitor the objects placed throughout the world
+var reeds = new Array() // Keep track of the reeds (plants) in the environment
 var vision = new Array() // The things in our field of view
 var melee = new Array() // The zombies close enough to be punched
 
@@ -43,8 +44,9 @@ var damageDistance = 2 // ...in meters
 var fieldOfView = 23 // ...in degrees
 
 // Percent of the grid covered
-var totalZombies = 12
+var totalZombies = 20
 var totalAmmo = totalZombies / 3
+var totalReeds = totalZombies * 3
 
 var zombieMinHealth = 2
 var zombieMaxHealth = 3
@@ -200,6 +202,17 @@ setInterval(function() // Main game loop
 			// Clear the various arrays on each pass so we get fresh results
 			melee.length = 0
 			vision.length = 0
+
+			if (reeds.length == 0) // Spawn reeds if we have none currently
+			{
+				for (var i = 0; i < totalReeds; i++)
+				{
+					var thingy = new Object()
+						thingy.column = Math.floor(random(1, gridWidth))
+						thingy.row = Math.floor(random(1, gridHeight))
+					reeds.push(thingy)
+				}
+			}
 
 			if (zombies.length == 0) // Spawn zombies if we have none currently
 			{

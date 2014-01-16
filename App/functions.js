@@ -212,6 +212,11 @@ function drawGame()
 		}
 	}
 
+	for (var i = 0; i < reeds.length; i++)
+	{
+		gridImage(imgReed, reeds[i].column, reeds[i].row, 'anchor')
+	}
+
 	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
     {
 		if (ammo[i].count > 0)
@@ -224,8 +229,7 @@ function drawGame()
 		}
 	}
 
-	// Draw the zombies
-    for (var i = 0; i < zombies.length; i++)
+    for (var i = 0; i < zombies.length; i++) // Draw the zombies
     {
 		if (debug)
 		{
