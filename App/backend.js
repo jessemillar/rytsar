@@ -256,7 +256,7 @@ function gridImage(image, column, row, anchor, alpha)
 {
 	for (var i = 0; i < grid.length; i++)
 	{
-		if (grid[i].column == column && grid[i].row == row)
+		if (grid[i].column == column && grid[i].row == row) // Find the right grid tile
 		{
 			if (alpha)
 			{
@@ -276,15 +276,15 @@ function gridImage(image, column, row, anchor, alpha)
 			}
 			else if (anchor == 'center')
 			{
-				ctx.translate(grid[i].x + gridWidth / 2, grid[i].y + gridHeight / 2)
+				ctx.translate(grid[i].x, grid[i].y)
 				ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
 				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height / 2)
 			}
 			else if (anchor == 'anchor')
 			{
-				ctx.translate(grid[i].x + gridWidth / 2, grid[i].y + gridHeight / 2)
+				ctx.translate(grid[i].x, grid[i].y)
 				ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
-				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height * 0.9) // Don't quite anchor all the way at the bottom of the image
+				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height) // Don't quite anchor all the way at the bottom of the image
 			}
 			ctx.restore()
 			break

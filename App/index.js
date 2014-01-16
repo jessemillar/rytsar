@@ -19,9 +19,9 @@ var debug = false // Can be toggled by tapping the screen in game mode
 var currentScreen = 'game'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
-var gridWidth = 11 // Make sure the gridsize is always an odd number
+var gridWidth = 21 // Make sure the gridsize is always an odd number
 var gridHeight = gridWidth
-var tileSize = 36 // Should be an even number...?
+var tileSize = 38 // Should be an even number...?
 
 var gpsRequiredAccuracy = 1000 // Normally set to 15
 
@@ -43,8 +43,8 @@ var damageDistance = 2 // ...in meters
 var fieldOfView = 23 // ...in degrees
 
 // Percent of the grid covered
-var totalZombies = 20
-var totalAmmo = 10
+var totalZombies = 12
+var totalAmmo = totalZombies / 3
 
 var zombieMinHealth = 2
 var zombieMaxHealth = 3
@@ -205,7 +205,7 @@ setInterval(function() // Main game loop
 			{
 				// findSpawnRadius()
 
-				for (var i = 0; i < Math.floor(gridWidth * gridHeight / 100 * totalZombies); i++)
+				for (var i = 0; i < totalZombies; i++)
 				{
 					var thingy = new Object()
 						thingy.name = 'zombie' + i
@@ -255,7 +255,7 @@ setInterval(function() // Main game loop
 			{
 				// findSpawnRadius()
 
-				for (var i = 0; i < Math.floor(gridWidth * gridHeight / 100 * totalAmmo); i++)
+				for (var i = 0; i < totalAmmo; i++)
 				{
 					var thingy = new Object()
 						thingy.column = Math.floor(random(1, gridWidth))

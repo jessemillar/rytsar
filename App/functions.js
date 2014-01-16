@@ -172,6 +172,8 @@ function drawGame()
 
 	blank(canvasColor) // Place draw calls after this
 
+	polygon(centerX, centerY, 10, white) // Draw the player
+
 	if (debug) // Draw the aiming cone for debugging purposes
     {
     	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
@@ -190,22 +192,23 @@ function drawGame()
 	{
 		for (var x = 0; x < gridWidth + 1; x++)
 		{
-			if (x < gridWidth && y < gridHeight)
+			if (x < gridWidth && y < gridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
 			{
 				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
 					thingy.column = x + 1
 					thingy.row = y + 1
-					thingy.x = (x * tileSize - 1) + (tileSize / 2) - (tileSize * gridWidth / 2 + 2)
-					thingy.y = (y * tileSize - 1) + (tileSize / 2) - (tileSize * gridHeight / 2 + 2)
+					thingy.x = (x * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2)
+					thingy.y = (y * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2)
 				grid.push(thingy)
 
 				if (debug)
 				{
-					text(grid.length + ',' + grid[grid.length - 1].column + ',' + grid[grid.length - 1].row, grid[grid.length - 1].x, grid[grid.length - 1].y, debugColor)
+					text((x + 1) + ',' + (y + 1), x * tileSize + imgGrid.width - tileSize * gridWidth / 2, y * tileSize + imgGrid.height - tileSize * gridHeight / 2, debugColor)
+					polygon((x * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), (y * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), 2, debugColor)
 				}
 			}
 
-			image(imgGrid, (x * tileSize - 1) - (tileSize * gridWidth / 2 + 2), (y * tileSize - 1) - (tileSize * gridHeight / 2 + 2), 'normal')
+			image(imgGrid, x * tileSize - imgGrid.width / 2 - tileSize * gridWidth / 2, y * tileSize - imgGrid.height / 2 - tileSize * gridHeight / 2, 'normal')
 		}
 	}
 
@@ -226,9 +229,26 @@ function drawGame()
     {
 		if (debug)
 		{
-			text(zombies[i].name, gridCheck(zombies[i], 'x') + 15, gridCheck(zombies[i], 'y') - 10)
+			// text(zombies[i].name, gridCheck(zombies[i], 'x') + 15, gridCheck(zombies[i], 'y') - 10)
 		}
 
+		if (zombies[i].health > 0)
+		{
+			if (zombies[i].frame == 0)
+			{
+				gridImage(imgZombieDownRight, zombies[i].column, zombies[i].row, 'anchor')
+			}
+			else
+			{
+				gridImage(imgZombieDownRight2, zombies[i].column, zombies[i].row, 'anchor')
+			}
+		}
+		else
+	    {
+	    	image(imgDeadZombie, zombies[i].column, zombies[i].row, 'anchor') // Draw dead zombies
+	    }
+
+		/*
 	    if (zombies[i].health > 0) // Draw zombies facing in the right direction
 	    {	
 			if (centerX < gridCheck(zombies[i], 'x') && centerY < gridCheck(zombies[i], 'y'))
@@ -280,6 +300,7 @@ function drawGame()
 	    {
 	    	image(imgDeadZombie, zombies[i].column, zombies[i].row, 'anchor') // Draw dead zombies
 	    }
+	    */
 	}
 
 	ctx.restore()
@@ -290,8 +311,6 @@ function drawGame()
 		return a.y - b.y
 	})
 	*/
-
-	polygon(centerX, centerY, 10, white) // Draw the player
 
 	// drawHealth() // Give a visual on current health level
 
