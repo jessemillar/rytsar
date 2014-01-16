@@ -16,9 +16,14 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = true // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'menu'
+var currentScreen = 'game'
 
-var gpsRequiredAccuracy = 15 // Normally set to 15
+// Make sure the gridsize is always an odd number
+var gridWidth = 21
+var gridHeight = 21
+var tileSize = 34
+
+var gpsRequiredAccuracy = 1000 // Normally set to 15
 
 var zombies = new Array() // Our local array of zombies
 var ammo = new Array() // Locally monitor the objects placed throughout the world
@@ -37,7 +42,7 @@ var minShotDistance = 3.5 // ...in meters
 var damageDistance = 2 // ...in meters
 var fieldOfView = 23 // ...in degrees
 
-var totalZombies = 175
+var totalZombies = 25 // Previously set to 175
 var totalAmmo = 50
 
 var zombieMinHealth = 2

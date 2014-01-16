@@ -1,3 +1,8 @@
+// These pixel sizes are for the retina screen and are used for the 'anchor' placement.  How can I set the image size of non-retina images?
+
+var imgGrid = new Image(100, 100)
+	imgGrid.src = 'images/grid.png'
+
 var imgEmptyAmmoPack = new Image(68, 68)
 	imgEmptyAmmoPack.src = 'images/empty-ammo-pack.png'
 var imgAmmoPack = new Image(68, 68)

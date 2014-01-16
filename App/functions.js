@@ -170,6 +170,19 @@ function drawGame()
 {
 	blank(canvasColor) // Place draw calls after this
 
+	// Draw the grid
+	ctx.save()
+	ctx.translate(centerX, centerY)
+	ctx.rotate(-compass.toRad())
+	for (var y = 0; y < gridHeight; y++)
+	{
+		for (var x = 0; x < gridWidth; x++)
+		{
+			image(imgGrid, (x * tileSize - 1) - (tileSize * gridWidth / 2 + 2), (y * tileSize - 1) - (tileSize * gridHeight / 2 + 2), 'normal')
+		}
+	}
+	ctx.restore()
+
     if (debug) // Draw the aiming cone for debugging purposes
     {
     	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
