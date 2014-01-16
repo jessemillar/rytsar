@@ -14,14 +14,14 @@ var centerX = canvas.width / 2
 var centerY = canvas.height / 2
 
 var fps = 60
-var debug = true // Can be toggled by tapping the screen in game mode
+var debug = false // Can be toggled by tapping the screen in game mode
 
 var currentScreen = 'game'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
-var gridWidth = 15 // Make sure the gridsize is always an odd number
+var gridWidth = 11 // Make sure the gridsize is always an odd number
 var gridHeight = gridWidth
-var tileSize = 34 // Should be an even number...?
+var tileSize = 36 // Should be an even number...?
 
 var gpsRequiredAccuracy = 1000 // Normally set to 15
 
@@ -32,18 +32,19 @@ var melee = new Array() // The zombies close enough to be punched
 
 var pixelsToMeters = 10 // ...pixels equals a meter
 
-var spawnRadius = 100 // ...meters
-var spawnSeedLatitude = 0 // Set later by findSpawnRadius()
-var spawnSeedLongitude = 0 // Set later by findSpawnRadius()
+// var spawnRadius = 100 // ...meters
+// var spawnSeedLatitude = 0 // Set later by findSpawnRadius()
+// var spawnSeedLongitude = 0 // Set later by findSpawnRadius()
 
-var renderDistance = 22 // ...in meters
+// var renderDistance = 22 // ...in meters
 var maxShotDistance = 15 // ...in meters
 var minShotDistance = 3.5 // ...in meters
 var damageDistance = 2 // ...in meters
 var fieldOfView = 23 // ...in degrees
 
-var totalZombies = 25 // Previously set to 175
-var totalAmmo = 50
+// Percent of the grid covered
+var totalZombies = 20
+var totalAmmo = 10
 
 var zombieMinHealth = 2
 var zombieMaxHealth = 3
@@ -202,14 +203,14 @@ setInterval(function() // Main game loop
 
 			if (zombies.length == 0) // Spawn zombies if we have none currently
 			{
-				findSpawnRadius()
+				// findSpawnRadius()
 
-				for (var i = 0; i < totalZombies; i++)
+				for (var i = 0; i < Math.floor(gridWidth * gridHeight / 100 * totalZombies); i++)
 				{
 					var thingy = new Object()
 						thingy.name = 'zombie' + i
-						thingy.latitude = random(gps.latitude - spawnSeedLatitude, gps.latitude + spawnSeedLatitude)
-						thingy.longitude = random(gps.longitude - spawnSeedLongitude, gps.longitude + spawnSeedLongitude)
+						thingy.column = Math.floor(random(1, gridWidth))
+						thingy.row = Math.floor(random(1, gridHeight))
 						thingy.health = random(zombieMinHealth, zombieMaxHealth)
 						thingy.speed = random(zombieSpeedLow, zombieSpeedHigh) * (pixelsToMeters / fps)
 						thingy.frame = random(0, 1)
@@ -221,9 +222,10 @@ setInterval(function() // Main game loop
 			{
 				for (var i = 0; i < zombies.length; i++) // Do stuff with the zombies
 			    {
-			    	zombies[i].bearing = bearing(zombies[i].latitude, zombies[i].longitude)
-					zombies[i].distance = distance(zombies[i].latitude, zombies[i].longitude)
+			    	// zombies[i].bearing = bearing(zombies[i].latitude, zombies[i].longitude)
+					// zombies[i].distance = distance(zombies[i].latitude, zombies[i].longitude)
 
+					/*
 			    	if (zombies[i].distance < renderDistance && zombies[i].distance > (damageDistance / 2) && zombies[i].health > 0) // Move zombies closer
 			    	{
 			    		var ratio = zombies[i].speed / 10 / distance(zombies[i].latitude, zombies[i].longitude) // We have to change the meters-per-second speed to a decimal that can work with latitude/longitude coordinates
@@ -231,6 +233,7 @@ setInterval(function() // Main game loop
 						zombies[i].latitude = zombies[i].latitude + ((gps.latitude - zombies[i].latitude) * ratio)
 						zombies[i].longitude = zombies[i].longitude + ((gps.longitude - zombies[i].longitude) * ratio)
 			    	}
+			    	*/
 
 			    	if (zombies[i].distance < minShotDistance && zombies[i].health > 0)
 			    	{
@@ -250,13 +253,15 @@ setInterval(function() // Main game loop
 
 			if (ammo.length == 0) // Make ammo packs if we have none
 			{
-				findSpawnRadius()
+				// findSpawnRadius()
 
-				for (var i = 0; i < totalAmmo; i++)
+				for (var i = 0; i < Math.floor(gridWidth * gridHeight / 100 * totalAmmo); i++)
 				{
 					var thingy = new Object()
-						thingy.latitude = random(gps.latitude - spawnSeedLatitude, gps.latitude + spawnSeedLatitude)
-						thingy.longitude = random(gps.longitude - spawnSeedLongitude, gps.longitude + spawnSeedLongitude)
+						thingy.column = Math.floor(random(1, gridWidth))
+						thingy.row = Math.floor(random(1, gridHeight))
+						// thingy.latitude = random(gps.latitude - spawnSeedLatitude, gps.latitude + spawnSeedLatitude)
+						// thingy.longitude = random(gps.longitude - spawnSeedLongitude, gps.longitude + spawnSeedLongitude)
 						thingy.count = random(ammoCountLow, ammoCountHigh)
 					ammo.push(thingy)
 				}
@@ -265,8 +270,8 @@ setInterval(function() // Main game loop
 			{
 			    for (var i = 1; i < ammo.length; i++) // Do stuff with the ammo packs
 			    {
-			    	ammo[i].bearing = bearing(ammo[i].latitude, ammo[i].longitude)
-					ammo[i].distance = distance(ammo[i].latitude, ammo[i].longitude)
+			    	// ammo[i].bearing = bearing(ammo[i].latitude, ammo[i].longitude)
+					// ammo[i].distance = distance(ammo[i].latitude, ammo[i].longitude)
 			    }
 			}
 

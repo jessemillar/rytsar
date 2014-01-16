@@ -240,6 +240,28 @@ function image(image, x, y, anchor, alpha)
 	}
 }
 
+function gridCheck(object, value)
+{
+	for (var i = 0; i < grid.length; i++)
+	{
+		if (grid[i].column == object.column && grid[i].row == object.row)
+		{
+			if (value == 'x')
+			{
+				return grid[i].x
+				console.log(grid[i].x)
+				break
+			}
+			else
+			{
+				return grid[i].y
+				console.log(grid[i].y)
+				break
+			}
+		}
+	}
+}
+
 function gridImage(image, column, row, anchor, alpha)
 {
 	for (var i = 0; i < grid.length; i++)
@@ -272,7 +294,7 @@ function gridImage(image, column, row, anchor, alpha)
 			{
 				ctx.translate(grid[i].x + gridWidth / 2, grid[i].y + gridHeight / 2)
 				ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
-				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height)
+				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height * 0.9) // Don't quite anchor all the way at the bottom of the image
 			}
 			ctx.restore()
 			break

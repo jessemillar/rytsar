@@ -172,6 +172,16 @@ function drawGame()
 
 	blank(canvasColor) // Place draw calls after this
 
+	if (debug) // Draw the aiming cone for debugging purposes
+    {
+    	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
+    	line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
+		circle(centerX, centerY, maxShotDistance * pixelsToMeters, debugColor)
+		circle(centerX, centerY, minShotDistance * pixelsToMeters, debugColor)
+		circle(centerX, centerY, damageDistance * pixelsToMeters, debugColor)
+		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
+    }
+
 	// Draw the grid
 	ctx.save()
 	ctx.translate(centerX, centerY)
@@ -199,18 +209,80 @@ function drawGame()
 		}
 	}
 
-	gridImage(imgZombieDownRight, 2, 2, 'anchor')
-	ctx.restore()
-
-    if (debug) // Draw the aiming cone for debugging purposes
+	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
     {
-    	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
-    	line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
-		circle(centerX, centerY, maxShotDistance * pixelsToMeters, debugColor)
-		circle(centerX, centerY, minShotDistance * pixelsToMeters, debugColor)
-		circle(centerX, centerY, damageDistance * pixelsToMeters, debugColor)
-		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
-    }
+		if (ammo[i].count > 0)
+		{
+			gridImage(imgAmmoPack, ammo[i].column, ammo[i].row, 'anchor')
+		}
+		else
+		{
+			gridImage(imgEmptyAmmoPack, ammo[i].column, ammo[i].row, 'anchor')
+		}
+	}
+
+	// Draw the zombies
+    for (var i = 0; i < zombies.length; i++)
+    {
+		if (debug)
+		{
+			text(zombies[i].name, gridCheck(zombies[i], 'x') + 15, gridCheck(zombies[i], 'y') - 10)
+		}
+
+	    if (zombies[i].health > 0) // Draw zombies facing in the right direction
+	    {	
+			if (centerX < gridCheck(zombies[i], 'x') && centerY < gridCheck(zombies[i], 'y'))
+			{
+				if (zombies[i].frame == 0)
+				{
+					gridImage(imgZombieUpLeft, zombies[i].column, zombies[i].row, 'anchor')
+				}
+				else
+				{
+					gridImage(imgZombieUpLeft2, zombies[i].column, zombies[i].row, 'anchor')
+				}
+			}
+			else if (centerX > gridCheck(zombies[i], 'x') && centerY < gridCheck(zombies[i], 'y'))
+			{
+				if (zombies[i].frame == 0)
+				{
+					gridImage(imgZombieUpRight, zombies[i].column, zombies[i].row, 'anchor')
+				}
+				else
+				{
+					gridImage(imgZombieUpRight2, zombies[i].column, zombies[i].row, 'anchor')
+				}
+			}
+			else if (centerX < gridCheck(zombies[i], 'x') && centerY > gridCheck(zombies[i], 'y'))
+			{
+				if (zombies[i].frame == 0)
+				{
+					gridImage(imgZombieDownLeft, zombies[i].column, zombies[i].row, 'anchor')
+				}
+				else
+				{
+					gridImage(imgZombieDownLeft2, zombies[i].column, zombies[i].row, 'anchor')
+				}
+			}
+			else if (centerX > gridCheck(zombies[i], 'x') && centerY > gridCheck(zombies[i], 'y'))
+			{
+				if (zombies[i].frame == 0)
+				{
+					gridImage(imgZombieDownRight, zombies[i].column, zombies[i].row, 'anchor')
+				}
+				else
+				{
+					gridImage(imgZombieDownRight2, zombies[i].column, zombies[i].row, 'anchor')
+				}
+			}
+	    }
+	    else
+	    {
+	    	image(imgDeadZombie, zombies[i].column, zombies[i].row, 'anchor') // Draw dead zombies
+	    }
+	}
+
+	ctx.restore()
 
     /*
     zombies.sort(function(a, b) // Order the zombies for proper depth
@@ -220,91 +292,6 @@ function drawGame()
 	*/
 
 	polygon(centerX, centerY, 10, white) // Draw the player
-
-	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
-    {
-    	if (ammo[i].distance < renderDistance) // This is the bit that helps with framerate
-    	{
-		    var x = centerX + Math.cos(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
-			var y = centerY + Math.sin(((ammo[i].bearing - compass) + 270).toRad()) * (ammo[i].distance * pixelsToMeters)
-
-			if (ammo[i].count > 0)
-			{
-				image(imgAmmoPack, x, y, 'anchor')
-			}
-			else
-			{
-				image(imgEmptyAmmoPack, x, y, 'anchor')
-			}
-		}
-	}
-
-    // Draw the zombies
-    for (var i = 0; i < zombies.length; i++)
-    {
-    	if (zombies[i].distance < renderDistance) // This is the bit that helps with framerate
-    	{
-			zombies[i].x = centerX + Math.cos(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
-			zombies[i].y = centerY + Math.sin(((zombies[i].bearing - compass) + 270).toRad()) * (zombies[i].distance * pixelsToMeters)
-
-			if (debug)
-			{
-				text(zombies[i].name, zombies[i].x + 15, zombies[i].y - 10)
-			}
-
-		    if (zombies[i].health > 0) // Draw zombies facing in the right direction
-		    {	
-				if (centerX < zombies[i].x && centerY < zombies[i].y)
-				{
-					if (zombies[i].frame == 0)
-					{
-						image(imgZombieUpLeft, zombies[i].x, zombies[i].y, 'anchor')
-					}
-					else
-					{
-						image(imgZombieUpLeft2, zombies[i].x, zombies[i].y, 'anchor')
-					}
-				}
-				else if (centerX > zombies[i].x && centerY < zombies[i].y)
-				{
-					if (zombies[i].frame == 0)
-					{
-						image(imgZombieUpRight, zombies[i].x, zombies[i].y, 'anchor')
-					}
-					else
-					{
-						image(imgZombieUpRight2, zombies[i].x, zombies[i].y, 'anchor')
-					}
-				}
-				else if (centerX < zombies[i].x && centerY > zombies[i].y)
-				{
-					if (zombies[i].frame == 0)
-					{
-						image(imgZombieDownLeft, zombies[i].x, zombies[i].y, 'anchor')
-					}
-					else
-					{
-						image(imgZombieDownLeft2, zombies[i].x, zombies[i].y, 'anchor')
-					}
-				}
-				else if (centerX > zombies[i].x && centerY > zombies[i].y)
-				{
-					if (zombies[i].frame == 0)
-					{
-						image(imgZombieDownRight, zombies[i].x, zombies[i].y, 'anchor')
-					}
-					else
-					{
-						image(imgZombieDownRight2, zombies[i].x, zombies[i].y, 'anchor')
-					}
-				}
-		    }
-		    else
-		    {
-		    	image(imgDeadZombie, zombies[i].x, zombies[i].y, 'anchor') // Draw dead zombies
-		    }
-		}
-	}
 
 	// drawHealth() // Give a visual on current health level
 
