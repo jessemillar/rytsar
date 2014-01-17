@@ -226,7 +226,7 @@ function image(image, x, y, anchor, alpha)
 	}
 	else if (anchor == 'center')
 	{
-		ctx.drawImage(image, image.width / 2 - x, image.height / 2 - y)
+		ctx.drawImage(image, x - image.width / 2, y - image.height / 2)
 	}
 	else if (anchor == 'anchor')
 	{
