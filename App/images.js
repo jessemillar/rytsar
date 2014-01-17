@@ -1,9 +1,13 @@
 // These pixel sizes are for the retina screen and are used for the 'anchor' placement.  How can I set the image size of non-retina images?
 
+var imgMenuStats = new Image(284, 284)
+	imgMenuStats.src = 'images/menu-stats.png'
 var imgMenuSingle = new Image(284, 284)
 	imgMenuSingle.src = 'images/menu-single.png'
 var imgMenuMulti = new Image(284, 284)
 	imgMenuMulti.src = 'images/menu-multi.png'
+var imgMenuSettings = new Image(284, 284)
+	imgMenuSettings.src = 'images/menu-settings.png'
 
 var imgGrid = new Image(12, 12)
 	imgGrid.src = 'images/grid.png'

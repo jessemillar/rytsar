@@ -6,7 +6,7 @@
 
 ejecta.include('functions.js')
 ejecta.include('backend.js')
-ejecta.include('images/images.js')
+ejecta.include('images.js')
 ejecta.include('sounds/sounds.js')
 
 var ctx = canvas.getContext('2d')
@@ -115,8 +115,8 @@ var xSingle = centerX + menuSize / 2 + menuSpacing
 var ySingle = centerY - menuSize / 2 - menuSpacing
 var xMulti = centerX - menuSize / 2 - menuSpacing
 var yMulti = centerY + menuSize / 2 + menuSpacing
-var xPrefs = centerX + menuSize / 2 + menuSpacing
-var yPrefs = centerY + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 2
+var xSettings = centerX + menuSize / 2 + menuSpacing
+var ySettings = centerY + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 2
 
 /*
 document.addEventListener('pagehide', function() // Close the connection to the server upon leaving the app
