@@ -50,10 +50,10 @@ var totalReeds = totalZombies * 3
 
 var zombieMinHealth = 2
 var zombieMaxHealth = 3
-var zombieSpeedLow = 0.3 // ...meters per second
-var zombieSpeedHigh = 1 // ...meters per second
+var zombieSpeedLow = 0.2 // ...meters per second
+var zombieSpeedHigh = 0.6 // ...meters per second
 
-var slowestAnimation = 1000 // The longest time possible between animation frames
+var slowestAnimation = 800 // The longest time possible between animation frames
 
 // How much ammo can be in a pack
 var ammoCountLow = 1

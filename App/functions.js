@@ -113,48 +113,26 @@ function drawMenu()
 			return a.y - b.y
 		})
 		
-		if (zombies[i].xDestination < zombies[i].x && zombies[i].yDestination < zombies[i].y)
+		if (zombies[i].xDestination < zombies[i].x)
 		{
 			if (zombies[i].frame == 0)
 			{
-				image(imgZombieUpLeft, zombies[i].x, zombies[i].y, 'anchor')
+				image(imgZombieLeft, zombies[i].x, zombies[i].y, 'anchor')
 			}
 			else
 			{
-				image(imgZombieUpLeft2, zombies[i].x, zombies[i].y, 'anchor')
+				image(imgZombieLeft2, zombies[i].x, zombies[i].y, 'anchor')
 			}
 		}
-		else if (zombies[i].xDestination > zombies[i].x && zombies[i].yDestination < zombies[i].y)
+		else if (zombies[i].xDestination > zombies[i].x)
 		{
 			if (zombies[i].frame == 0)
 			{
-				image(imgZombieUpRight, zombies[i].x, zombies[i].y, 'anchor')
+				image(imgZombieRight, zombies[i].x, zombies[i].y, 'anchor')
 			}
 			else
 			{
-				image(imgZombieUpRight2, zombies[i].x, zombies[i].y, 'anchor')
-			}
-		}
-		else if (zombies[i].xDestination < zombies[i].x && zombies[i].yDestination > zombies[i].y)
-		{
-			if (zombies[i].frame == 0)
-			{
-				image(imgZombieDownLeft, zombies[i].x, zombies[i].y, 'anchor')
-			}
-			else
-			{
-				image(imgZombieDownLeft2, zombies[i].x, zombies[i].y, 'anchor')
-			}
-		}
-		else if (zombies[i].xDestination > zombies[i].x && zombies[i].yDestination > zombies[i].y)
-		{
-			if (zombies[i].frame == 0)
-			{
-				image(imgZombieDownRight, zombies[i].x, zombies[i].y, 'anchor')
-			}
-			else
-			{
-				image(imgZombieDownRight2, zombies[i].x, zombies[i].y, 'anchor')
+				image(imgZombieRight2, zombies[i].x, zombies[i].y, 'anchor')
 			}
 		}
 	}
@@ -240,16 +218,16 @@ function drawGame()
 		{
 			if (zombies[i].frame == 0)
 			{
-				gridImage(imgZombieDownRight, zombies[i].column, zombies[i].row, 'anchor')
+				gridImage(imgZombieRight, zombies[i].column, zombies[i].row, 'anchor')
 			}
 			else
 			{
-				gridImage(imgZombieDownRight2, zombies[i].column, zombies[i].row, 'anchor')
+				gridImage(imgZombieRight2, zombies[i].column, zombies[i].row, 'anchor')
 			}
 		}
 		else
 	    {
-	    	image(imgDeadZombie, zombies[i].column, zombies[i].row, 'anchor') // Draw dead zombies
+	    	image(imgZombieDead, zombies[i].column, zombies[i].row, 'anchor') // Draw dead zombies
 	    }
 
 		/*
