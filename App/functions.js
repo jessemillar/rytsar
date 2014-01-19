@@ -120,8 +120,6 @@ function drawGame()
 
 	blank(canvasColor) // Place draw calls after this
 
-	// polygon(centerX, centerY, 10, white) // Draw the player
-
 	if (debug) // Draw the aiming cone for debugging purposes
     {
     	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
@@ -164,6 +162,8 @@ function drawGame()
 	{
 		gridImage(imgReed, reeds[i].column, reeds[i].row, 'anchor')
 	}
+    
+    gridImage(imgPlayer, player.column, player.row, 'anchor') // Draw the player
 
 	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
     {
@@ -192,7 +192,7 @@ function drawGame()
 		}
 		else
 	    {
-	    	image(imgZombieDead, zombies[i].column, zombies[i].row, 'anchor') // Draw dead zombies
+	    	gridImage(imgZombieDead, zombies[i].column, zombies[i].row, 'anchor') // Draw dead zombies
 	    }
 	}
 

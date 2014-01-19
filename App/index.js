@@ -14,7 +14,7 @@ var currentScreen = 'game'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
 var tileSize = 33
-var gridWidth = 5 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
+var gridWidth = 25 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
 var gridHeight = gridWidth
 
 var gpsRequiredAccuracy = 15 // Normally set to 15
@@ -27,12 +27,12 @@ var melee = new Array() // The zombies close enough to be punched
 
 // var renderDistance = 22 // ...in meters
 var maxShotDistance = 5 // ...in meters
-var minShotDistance = 1 // ...in meters
-var damageDistance = 1 // ...in meters
+var minShotDistance = 0 // ...in meters
+var damageDistance = 0 // ...in meters
 var fieldOfView = 25 // ...in degrees
 
 var menuTotalZombies = 50
-var totalZombies = 1
+var totalZombies = 35
 var totalAmmo = totalZombies / 3
 var totalReeds = totalZombies * 3
 
@@ -204,11 +204,29 @@ setInterval(function() // Main game loop
 					zombies.push(thingy)
 				}
 			}
-			else if (zombies.length > 0)
+			else // Or do things with the zombies we have
 			{
-				if (debug)
+                for (var i = 0; i < totalZombies; i++)
                 {
-                    console.log(player.column, player.row, bearing(zombies[0]), compass)
+                    zombies[i].distance = distance(zombies[i])
+                    zombies[i].bearing = bearing(zombies[i])
+            
+                    if ((compass - fieldOfView) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView))
+                    {
+                        if (zombies[i].distance > minShotDistance && zombies[i].distance < maxShotDistance && zombies[i].health > 0)
+                        {
+                            vision.push(zombies[i])
+                            // sfxSweep.play()
+                        }
+                    }
+                }
+            
+                if (vision.length > 0)
+                {
+                    zombies.sort(function(a, b) // Order the zombies that are in our sights according to distance
+                    {
+                        return a.distance - b.distance
+                    })
                 }
 			}
 
