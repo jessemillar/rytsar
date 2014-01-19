@@ -230,7 +230,7 @@ function image(image, x, y, anchor, alpha)
 	}
 	else if (anchor == 'anchor')
 	{
-		ctx.drawImage(image, x - image.width / 2, y - image.height)
+		ctx.drawImage(image, x - image.width / 2, y - image.height * 0.75)
 	}
 }
 

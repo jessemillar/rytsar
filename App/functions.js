@@ -217,6 +217,8 @@ function drawGame()
 	    }
 	}
 
+	image(imgCloud, 200, 200, 'normal')
+
 	ctx.restore()
 
     /*

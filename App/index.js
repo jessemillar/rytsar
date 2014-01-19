@@ -16,12 +16,12 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = false // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'menu'
+var currentScreen = 'game'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
 var gridWidth = 21 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
 var gridHeight = gridWidth
-var tileSize = 39
+var tileSize = 33
 
 var gpsRequiredAccuracy = 1000 // Normally set to 15
 
@@ -57,7 +57,7 @@ var ammoCountHigh = 3
 // How much motion is required for certain actions
 var rotateRequiredShoot = 400
 var rotateRequiredReload = 500 // Set higher than needed to prevent accidental reloading
-var accelRequiredMelee = 35
+var accelRequiredMelee = 50
 
 // Keep the sound effects in line by setting their "length"
 var canShoot = true
@@ -83,8 +83,8 @@ var shotDamage = 3 // How much damage a bullet deals (change this later to be mo
 // Color scheme
 var white = '#FFFFFF'
 var green = '#3D9970'
-var black = '#111111'
-var blue = '#001F3F'
+var black = '#3D9970'
+var blue = '#7FDBFF'
 var red = '#FF4136'
 
 // UI values

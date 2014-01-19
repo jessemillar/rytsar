@@ -15,6 +15,9 @@ var imgGrid = new Image(12, 12)
 var imgReed = new Image(68, 68)
 	imgReed.src = 'images/reed.png'
 
+var imgCloud = new Image(1200, 1200)
+	imgCloud.src = 'images/cloud.png'
+
 var imgEmptyAmmoPack = new Image(68, 68)
 	imgEmptyAmmoPack.src = 'images/empty-ammo-pack.png'
 var imgAmmoPack = new Image(68, 68)
