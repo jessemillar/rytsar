@@ -16,7 +16,7 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = false // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'game'
+var currentScreen = 'menu'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
 var gridWidth = 21 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
@@ -81,11 +81,11 @@ var extraAmmo = random(0, 2)
 var shotDamage = 3 // How much damage a bullet deals (change this later to be more dynamic)
 
 // Color scheme
-var white = '#fff8e3'
-var green = '#cccc9f'
-var black = '#33322d'
-var blue = '#9fb4cc'
-var red = '#db4105'
+var white = '#FFFFFF'
+var green = '#3D9970'
+var black = '#111111'
+var blue = '#001F3F'
+var red = '#FF4136'
 
 // UI values
 var canvasColor = black

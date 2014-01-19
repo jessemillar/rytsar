@@ -26,7 +26,3 @@ var imgZombieLeft = new Image(68, 68)
 	imgZombieLeft.src = 'images/zombie-left.png'
 var imgZombieLeft2 = new Image(68, 68)
 	imgZombieLeft2.src = 'images/zombie-left-2.png'
-var imgZombieRight = new Image(68, 68)
-	imgZombieRight.src = 'images/zombie-right.png'
-var imgZombieRight2 = new Image(68, 68)
-	imgZombieRight2.src = 'images/zombie-right-2.png'

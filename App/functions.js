@@ -113,27 +113,13 @@ function drawMenu()
 			return a.y - b.y
 		})
 		
-		if (zombies[i].xDestination < zombies[i].x)
+		if (zombies[i].frame == 0)
 		{
-			if (zombies[i].frame == 0)
-			{
-				image(imgZombieLeft, zombies[i].x, zombies[i].y, 'anchor')
-			}
-			else
-			{
-				image(imgZombieLeft2, zombies[i].x, zombies[i].y, 'anchor')
-			}
+			image(imgZombieLeft, zombies[i].x, zombies[i].y, 'anchor')
 		}
-		else if (zombies[i].xDestination > zombies[i].x)
+		else
 		{
-			if (zombies[i].frame == 0)
-			{
-				image(imgZombieRight, zombies[i].x, zombies[i].y, 'anchor')
-			}
-			else
-			{
-				image(imgZombieRight2, zombies[i].x, zombies[i].y, 'anchor')
-			}
+			image(imgZombieLeft2, zombies[i].x, zombies[i].y, 'anchor')
 		}
 	}
 
@@ -218,71 +204,17 @@ function drawGame()
 		{
 			if (zombies[i].frame == 0)
 			{
-				gridImage(imgZombieRight, zombies[i].column, zombies[i].row, 'anchor')
+				gridImage(imgZombieLeft, zombies[i].column, zombies[i].row, 'anchor')
 			}
 			else
 			{
-				gridImage(imgZombieRight2, zombies[i].column, zombies[i].row, 'anchor')
+				gridImage(imgZombieLeft2, zombies[i].column, zombies[i].row, 'anchor')
 			}
 		}
 		else
 	    {
 	    	image(imgZombieDead, zombies[i].column, zombies[i].row, 'anchor') // Draw dead zombies
 	    }
-
-		/*
-	    if (zombies[i].health > 0) // Draw zombies facing in the right direction
-	    {	
-			if (centerX < gridCheck(zombies[i], 'x') && centerY < gridCheck(zombies[i], 'y'))
-			{
-				if (zombies[i].frame == 0)
-				{
-					gridImage(imgZombieUpLeft, zombies[i].column, zombies[i].row, 'anchor')
-				}
-				else
-				{
-					gridImage(imgZombieUpLeft2, zombies[i].column, zombies[i].row, 'anchor')
-				}
-			}
-			else if (centerX > gridCheck(zombies[i], 'x') && centerY < gridCheck(zombies[i], 'y'))
-			{
-				if (zombies[i].frame == 0)
-				{
-					gridImage(imgZombieUpRight, zombies[i].column, zombies[i].row, 'anchor')
-				}
-				else
-				{
-					gridImage(imgZombieUpRight2, zombies[i].column, zombies[i].row, 'anchor')
-				}
-			}
-			else if (centerX < gridCheck(zombies[i], 'x') && centerY > gridCheck(zombies[i], 'y'))
-			{
-				if (zombies[i].frame == 0)
-				{
-					gridImage(imgZombieDownLeft, zombies[i].column, zombies[i].row, 'anchor')
-				}
-				else
-				{
-					gridImage(imgZombieDownLeft2, zombies[i].column, zombies[i].row, 'anchor')
-				}
-			}
-			else if (centerX > gridCheck(zombies[i], 'x') && centerY > gridCheck(zombies[i], 'y'))
-			{
-				if (zombies[i].frame == 0)
-				{
-					gridImage(imgZombieDownRight, zombies[i].column, zombies[i].row, 'anchor')
-				}
-				else
-				{
-					gridImage(imgZombieDownRight2, zombies[i].column, zombies[i].row, 'anchor')
-				}
-			}
-	    }
-	    else
-	    {
-	    	image(imgDeadZombie, zombies[i].column, zombies[i].row, 'anchor') // Draw dead zombies
-	    }
-	    */
 	}
 
 	ctx.restore()
