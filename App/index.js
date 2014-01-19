@@ -16,12 +16,12 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = false // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'menu'
+var currentScreen = 'game'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
-var gridWidth = 21 // Make sure the gridsize is always an odd number
+var gridWidth = 21 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
 var gridHeight = gridWidth
-var tileSize = 38 // Should be an even number...?
+var tileSize = 39
 
 var gpsRequiredAccuracy = 1000 // Normally set to 15
 
@@ -33,17 +33,12 @@ var melee = new Array() // The zombies close enough to be punched
 
 var pixelsToMeters = 10 // ...pixels equals a meter
 
-// var spawnRadius = 100 // ...meters
-// var spawnSeedLatitude = 0 // Set later by findSpawnRadius()
-// var spawnSeedLongitude = 0 // Set later by findSpawnRadius()
-
 // var renderDistance = 22 // ...in meters
 var maxShotDistance = 15 // ...in meters
 var minShotDistance = 3.5 // ...in meters
 var damageDistance = 2 // ...in meters
 var fieldOfView = 23 // ...in degrees
 
-// Percent of the grid covered
 var totalZombies = 20
 var totalAmmo = totalZombies / 3
 var totalReeds = totalZombies * 3
@@ -180,8 +175,6 @@ setInterval(function() // Main game loop
 		
 		for (var i = 0; i < zombies.length; i++)
 		{
-			moveToward(zombies[i], zombies[i].xDestination, zombies[i].yDestination, zombies[i].speed)
-
 			if (Math.floor(zombies[i].x) == Math.floor(zombies[i].xDestination) && Math.floor(zombies[i].x) == Math.floor(zombies[i].xDestination)) // Pick a new destination once we arrive
 			{
 				zombies[i].xDestination = random(0 - menuZombieSandbox, canvas.width + menuZombieSandbox)
@@ -216,8 +209,6 @@ setInterval(function() // Main game loop
 
 			if (zombies.length == 0) // Spawn zombies if we have none currently
 			{
-				// findSpawnRadius()
-
 				for (var i = 0; i < totalZombies; i++)
 				{
 					var thingy = new Object()
