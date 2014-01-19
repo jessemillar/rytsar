@@ -1,9 +1,3 @@
-/* ------------------------------------------------------------------------------------------------------------------------------------------
-
-// Maybe play a sound when a zombie gets within a certain radius to let the player know that something's coming
-
------------------------------------------------------------------------------------------------------------------------------------------- */
-
 ejecta.include('functions.js')
 ejecta.include('backend.js')
 ejecta.include('images.js')
@@ -19,11 +13,11 @@ var debug = false // Can be toggled by tapping the screen in game mode
 var currentScreen = 'game'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
-var gridWidth = 21 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
-var gridHeight = gridWidth
 var tileSize = 33
+var gridWidth = 5 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
+var gridHeight = gridWidth
 
-var gpsRequiredAccuracy = 1000 // Normally set to 15
+var gpsRequiredAccuracy = 15 // Normally set to 15
 
 var zombies = new Array() // Our local array of zombies
 var ammo = new Array() // Locally monitor the objects placed throughout the world
@@ -31,15 +25,14 @@ var reeds = new Array() // Keep track of the reeds (plants) in the environment
 var vision = new Array() // The things in our field of view
 var melee = new Array() // The zombies close enough to be punched
 
-var pixelsToMeters = 10 // ...pixels equals a meter
-
 // var renderDistance = 22 // ...in meters
-var maxShotDistance = 15 // ...in meters
-var minShotDistance = 3.5 // ...in meters
-var damageDistance = 2 // ...in meters
-var fieldOfView = 23 // ...in degrees
+var maxShotDistance = 5 // ...in meters
+var minShotDistance = 1 // ...in meters
+var damageDistance = 1 // ...in meters
+var fieldOfView = 25 // ...in degrees
 
-var totalZombies = 20
+var menuTotalZombies = 50
+var totalZombies = 1
 var totalAmmo = totalZombies / 3
 var totalReeds = totalZombies * 3
 
@@ -71,6 +64,9 @@ var timeMelee = 350
 var meleeDamage = 10
 
 // General player variables
+var player = new Object()
+	player.column = Math.ceil(gridWidth / 2)
+	player.row = Math.ceil(gridHeight / 2)
 var playerMaxHealth = 5
 var health = playerMaxHealth
 var canBeHurt = true
@@ -100,9 +96,6 @@ var indicatorSpacing = 5
 // Remove when I move the menu to just images
 var menuSize = canvas.width / 4.5
 var menuSpacing = 3.5
-
-var menuTotalZombies = 50
-var menuZombieSandbox = 25 // The amount of pixels outside the screen that the menu zombies are allowed to go to as a destination
 
 var xStats = centerX - menuSize / 2 - menuSpacing
 var yStats = centerY - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
@@ -166,19 +159,9 @@ setInterval(function() // Main game loop
 					thingy.y = random(0, canvas.height)
 					thingy.xDestination = random(0 - menuZombieSandbox, canvas.width + menuZombieSandbox)
 					thingy.yDestination = random(0 - menuZombieSandbox, canvas.height + menuZombieSandbox)
-					thingy.speed = random(zombieSpeedLow, zombieSpeedHigh) * (pixelsToMeters / fps)
 					thingy.frame = random(0, 1)
-					thingy.animate = animate(thingy, slowestAnimation - thingy.speed * (slowestAnimation / 2))
+					thingy.animate = animate(thingy, slowestAnimation)
 				zombies.push(thingy)
-			}
-		}
-		
-		for (var i = 0; i < zombies.length; i++)
-		{
-			if (Math.floor(zombies[i].x) == Math.floor(zombies[i].xDestination) && Math.floor(zombies[i].x) == Math.floor(zombies[i].xDestination)) // Pick a new destination once we arrive
-			{
-				zombies[i].xDestination = random(0 - menuZombieSandbox, canvas.width + menuZombieSandbox)
-				zombies[i].yDestination = random(0 - menuZombieSandbox, canvas.height + menuZombieSandbox)
 			}
 		}
 
@@ -216,121 +199,28 @@ setInterval(function() // Main game loop
 						thingy.column = Math.floor(random(1, gridWidth))
 						thingy.row = Math.floor(random(1, gridHeight))
 						thingy.health = random(zombieMinHealth, zombieMaxHealth)
-						thingy.speed = random(zombieSpeedLow, zombieSpeedHigh) * (pixelsToMeters / fps)
 						thingy.frame = random(0, 1)
-						thingy.animate = animate(thingy, slowestAnimation - thingy.speed * (slowestAnimation / 2))
+						thingy.animate = animate(thingy, slowestAnimation)
 					zombies.push(thingy)
 				}
 			}
 			else if (zombies.length > 0)
 			{
-				for (var i = 0; i < zombies.length; i++) // Do stuff with the zombies
-			    {
-			    	// zombies[i].bearing = bearing(zombies[i].latitude, zombies[i].longitude)
-					// zombies[i].distance = distance(zombies[i].latitude, zombies[i].longitude)
-
-					/*
-			    	if (zombies[i].distance < renderDistance && zombies[i].distance > (damageDistance / 2) && zombies[i].health > 0) // Move zombies closer
-			    	{
-			    		var ratio = zombies[i].speed / 10 / distance(zombies[i].latitude, zombies[i].longitude) // We have to change the meters-per-second speed to a decimal that can work with latitude/longitude coordinates
-
-						zombies[i].latitude = zombies[i].latitude + ((gps.latitude - zombies[i].latitude) * ratio)
-						zombies[i].longitude = zombies[i].longitude + ((gps.longitude - zombies[i].longitude) * ratio)
-			    	}
-			    	*/
-
-			    	if (zombies[i].distance < minShotDistance && zombies[i].health > 0)
-			    	{
-			    		melee.push(zombies[i])
-			    	}
-
-			        if ((compass - fieldOfView) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView))
-			        {
-			            if (zombies[i].distance > minShotDistance && zombies[i].distance < maxShotDistance && zombies[i].health > 0)
-			            {
-			            	vision.push(zombies[i])
-				            // sfxSweep.play()
-			            }
-			        }
-			    }
+				if (debug)
+                {
+                    console.log(player.column, player.row, bearing(zombies[0]), compass)
+                }
 			}
 
 			if (ammo.length == 0) // Make ammo packs if we have none
 			{
-				// findSpawnRadius()
-
 				for (var i = 0; i < totalAmmo; i++)
 				{
 					var thingy = new Object()
 						thingy.column = Math.floor(random(1, gridWidth))
 						thingy.row = Math.floor(random(1, gridHeight))
-						// thingy.latitude = random(gps.latitude - spawnSeedLatitude, gps.latitude + spawnSeedLatitude)
-						// thingy.longitude = random(gps.longitude - spawnSeedLongitude, gps.longitude + spawnSeedLongitude)
 						thingy.count = random(ammoCountLow, ammoCountHigh)
 					ammo.push(thingy)
-				}
-			}
-			else if (ammo.length > 0)
-			{
-			    for (var i = 1; i < ammo.length; i++) // Do stuff with the ammo packs
-			    {
-			    	// ammo[i].bearing = bearing(ammo[i].latitude, ammo[i].longitude)
-					// ammo[i].distance = distance(ammo[i].latitude, ammo[i].longitude)
-			    }
-			}
-
-		    // ******************************
-			// If things are in range
-			// ******************************
-
-		    if (melee.length > 0) // If there's at least one zombie in melee range
-		    {
-				melee.sort(function(a, b) // Sort the vision array to find the zombie that's closest to us
-				{
-					return a.distance - b.distance
-				})
-		    }
-
-		    if (vision.length > 0) // If we're looking at at least one zombie...
-		    {
-				vision.sort(function(a, b) // Sort the vision array to find the zombie that's closest to us
-				{
-					return a.distance - b.distance
-				})
-		    }
-
-		    for (var i = 1; i < zombies.length; i++) // Get hurt by a zombie
-			{
-				if (zombies[i].distance < damageDistance && zombies[i].health > 0 && health > 0 && canBeHurt)
-				{
-					health -= 1
-
-					if (health > 0)
-					{
-						sfxHurt.play()
-					}
-					else
-					{
-						sfxFlatline.play()
-						currentScreen = 'gameover'
-					}
-
-					canBeHurt = false
-
-					setTimeout(function()
-					{
-						canBeHurt = true
-					}, timeHurt)
-				}	
-			}
-
-			for (var i = 1; i < ammo.length; i++) // Pick up some ammo
-			{
-				if (ammo[i].distance < minShotDistance && ammo[i].count > 0)
-				{
-					extraAmmo += ammo[i].count
-					ammo[i].count = 0
-					sfxReload.play() // Change this later
 				}
 			}
 

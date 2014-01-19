@@ -90,27 +90,26 @@ Number.prototype.toDeg = function()
 	return this * 180 / Math.PI
 }
 
-function distance(lat2, lon2) // Returns distance in meters
+function distance(thingy) // Returns distance in meters
 {
-	var radius = 6371000
-	var dLat = (lat2 - gps.latitude).toRad()
-	var dLon = (lon2 - gps.longitude).toRad()
-	var lat1 = gps.latitude.toRad()
-	var lat2 = lat2.toRad()
+	var differenceX = player.column - thingy.column
+	var differenceY = player.row - thingy.row
 
-	var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-			Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2)
-	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-	var d = radius * c
-	return d
+	return Math.sqrt(differenceX * differenceX + differenceY * differenceY)
 }
 
-function bearing(firstObject, secondObject)
+function bearing(thingy)
 {
-	var differenceX = firstObject.column - secondObject.column
-	var differenceY = firstObject.row - secondObject - row
-	
-	// Find an angle or summat
+    var angle = Math.atan2(thingy.row - player.row, thingy.column - player.column).toDeg() + 90
+    
+    if (angle > 0)
+    {
+        return angle
+    }
+    else
+    {
+        return angle + 360
+    }
 }
 
 function blank(color)
@@ -133,27 +132,6 @@ function rectangle(x, y, width, height, color, alpha)
 
 	ctx.fillStyle = color
 	ctx.fillRect(x, y, width, height)
-}
-
-function polygon(x, y, size, color, alpha)
-{
-	if (alpha)
-	{
-		ctx.globalAlpha = alpha
-	}
-	else
-	{
-		ctx.globalAlpha = 1
-	}
-
-	ctx.beginPath()
-	ctx.moveTo(x, y - size)
-	ctx.lineTo(x + size, y)
-	ctx.lineTo(x, y + size)
-	ctx.lineTo(x - size, y)
-	ctx.closePath()
-	ctx.fillStyle = color
-	ctx.fill()
 }
 
 function line(x1, y1, x2, y2, color, alpha)
@@ -234,24 +212,6 @@ function image(image, x, y, anchor, alpha)
 	}
 }
 
-function gridCheck(object, value)
-{
-	for (var i = 0; i < grid.length; i++)
-	{
-		if (grid[i].column == object.column && grid[i].row == object.row)
-		{
-			if (value == 'x')
-			{
-				return grid[i].x + centerX
-			}
-			else if (value == 'y')
-			{
-				return grid[i].y + centerY
-			}
-		}
-	}
-}
-
 function gridImage(image, column, row, anchor, alpha)
 {
 	for (var i = 0; i < grid.length; i++)
@@ -290,18 +250,6 @@ function gridImage(image, column, row, anchor, alpha)
 			break
 		}
 	}
-}
-
-function moveToward(thingy, x, y, speed) // Move a thingy toward a specific pixel coordinate at a constant speed
-{
-	var destinationX = x - thingy.x
-	var destinationY = y - thingy.y
-	var hypotenuse = Math.sqrt(destinationX * destinationX + destinationY * destinationY)
-	var radians = Math.atan2(destinationY, destinationX)
-	var angle = radians.toDeg()
-
-	thingy.x += (destinationX / hypotenuse) * speed
-	thingy.y += (destinationY / hypotenuse) * speed
 }
 
 function animate(thingy, time) // Use a function outside of the zombie generation to animate so the function can remember the name of the zombie that's animating

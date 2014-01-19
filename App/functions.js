@@ -1,19 +1,3 @@
-function findSpawnRadius() // Spawn stuff in relation to the player
-{
-    spawnSeedLatitude = 0
-    spawnSeedLongitude = 0
-
-    while (spawnRadius > distance(gps.latitude + spawnSeedLatitude, gps.longitude)) // Find spawnSeedLatitude
-    {
-        spawnSeedLatitude += 0.00001
-    }
-
-    while (spawnRadius > distance(gps.latitude, gps.longitude + spawnSeedLongitude)) // Find spawnSeedLongitude
-    {
-        spawnSeedLongitude += 0.00001
-    }
-}
-
 function punch()
 {
 	sfxPunch.play()
@@ -136,7 +120,7 @@ function drawGame()
 
 	blank(canvasColor) // Place draw calls after this
 
-	polygon(centerX, centerY, 10, white) // Draw the player
+	// polygon(centerX, centerY, 10, white) // Draw the player
 
 	if (debug) // Draw the aiming cone for debugging purposes
     {
@@ -195,11 +179,6 @@ function drawGame()
 
     for (var i = 0; i < zombies.length; i++) // Draw the zombies
     {
-		if (debug)
-		{
-			// text(zombies[i].name, gridCheck(zombies[i], 'x') + 15, gridCheck(zombies[i], 'y') - 10)
-		}
-
 		if (zombies[i].health > 0)
 		{
 			if (zombies[i].frame == 0)
@@ -217,18 +196,9 @@ function drawGame()
 	    }
 	}
 
-	image(imgCloud, 200, 200, 'normal')
+	image(imgCloud, 50, 50, 'normal') // Draw a cloud for testing purposes
 
-	ctx.restore()
-
-    /*
-    zombies.sort(function(a, b) // Order the zombies for proper depth
-	{
-		return a.y - b.y
-	})
-	*/
-
-	// drawHealth() // Give a visual on current health level
+	ctx.restore() // Unrotate the canvas
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // Things are only set up for right handed users right now
