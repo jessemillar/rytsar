@@ -90,22 +90,74 @@ function drawMenu()
 {
 	blank(canvasColor)
 
-	for (var i = 0; i < zombies.length; i++) // Sort and draw the menu zombies
+	// Draw the grid
+	ctx.save()
+	ctx.translate(centerX, centerY)
+	menuRotation += menuRotationSpeed // Rotate the menu
+	ctx.rotate(-menuRotation.toRad()) // Things relating to the canvas and rotation expect radians
+	for (var y = 0; y < gridHeight + 1; y++) // Draw the grid on the newly rotated canvas
 	{
-		zombies.sort(function(a, b) // Order the zombies for proper depth
+		for (var x = 0; x < gridWidth + 1; x++)
 		{
-			return a.y - b.y
-		})
-		
-		if (zombies[i].frame == 0)
+			image(imgGrid, 0 - player.column * tileSize + x * tileSize + tileSize / 2, 0 - player.row * tileSize + y * tileSize + tileSize / 2, 'center')
+			
+			if (x < gridWidth && y < gridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
+			{
+				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
+				thingy.column = x + 1
+				thingy.row = y + 1
+				thingy.x = 0 - player.column * tileSize + x * tileSize + tileSize
+				thingy.y = 0 - player.row * tileSize + y * tileSize + tileSize
+				grid.push(thingy)
+				
+				if (debug)
+				{
+					text((x + 1) + ',' + (y + 1), x * tileSize + imgGrid.width - tileSize * gridWidth / 2, y * tileSize + imgGrid.height - tileSize * gridHeight / 2, debugColor)
+					polygon((x * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), (y * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), 2, debugColor)
+				}
+			}
+		}
+	}
+	
+	for (var i = 0; i < reeds.length; i++)
+	{
+		gridImage(imgReed, reeds[i].column, reeds[i].row, 'anchor', 1, true)
+	}
+    	
+	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
+    {
+		if (ammo[i].count > 0)
 		{
-			image(imgZombieLeft, zombies[i].x, zombies[i].y, 'anchor')
+			gridImage(imgAmmoPack, ammo[i].column, ammo[i].row, 'anchor', 1, true)
 		}
 		else
 		{
-			image(imgZombieLeft2, zombies[i].x, zombies[i].y, 'anchor')
+			gridImage(imgEmptyAmmoPack, ammo[i].column, ammo[i].row, 'anchor', 1, true)
 		}
 	}
+	
+    for (var i = 0; i < zombies.length; i++) // Draw the zombies
+    {
+		if (zombies[i].health > 0)
+		{
+			if (zombies[i].frame == 0)
+			{
+				gridImage(imgZombieLeft, zombies[i].column, zombies[i].row, 'anchor', 1, true)
+			}
+			else
+			{
+				gridImage(imgZombieLeft2, zombies[i].column, zombies[i].row, 'anchor', 1, true)
+			}
+		}
+		else
+	    {
+	    	gridImage(imgZombieDead, zombies[i].column, zombies[i].row, 'anchor', 1, true) // Draw dead zombies
+	    }
+	}
+
+	ctx.restore()
+	
+	daylight(0) // Make it night
 
 	// Logo shape
 	image(imgMenuStats, xStats, yStats, 'center')
@@ -196,7 +248,7 @@ function drawGame()
 	    }
 	}
 
-	image(imgCloud, 50, 50, 'normal') // Draw a cloud for testing purposes
+	gridImage(imgCloud, 3, 3, 'center') // Draw a cloud for testing purposes
 
 	ctx.restore() // Unrotate the canvas
 
@@ -218,4 +270,12 @@ function drawGame()
 	{
 		rectangle(indicatorSpacing, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, blue)
 	}
+}
+
+function daylight(value)
+{
+	ctx.globalAlpha = darkestNight - darkestNight * value
+	
+	ctx.fillStyle = navy
+	ctx.fillRect(0, 0, canvas.width, canvas.height)
 }

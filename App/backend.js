@@ -212,7 +212,7 @@ function image(image, x, y, anchor, alpha)
 	}
 }
 
-function gridImage(image, column, row, anchor, alpha)
+function gridImage(image, column, row, anchor, alpha, menu)
 {
 	for (var i = 0; i < grid.length; i++)
 	{
@@ -231,19 +231,40 @@ function gridImage(image, column, row, anchor, alpha)
 			if (anchor == 'normal')
 			{
 				ctx.translate(grid[i].x, grid[i].y)
-				ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+				if (!menu)
+				{
+					ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+				}
+				else
+				{
+					ctx.rotate(menuRotation.toRad())
+				}
 				ctx.drawImage(image, 0, 0)
 			}
 			else if (anchor == 'center')
 			{
 				ctx.translate(grid[i].x, grid[i].y)
-				ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+				if (!menu)
+				{
+					ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+				}
+				else
+				{
+					ctx.rotate(menuRotation.toRad())
+				}
 				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height / 2)
 			}
 			else if (anchor == 'anchor')
 			{
 				ctx.translate(grid[i].x, grid[i].y)
-				ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+				if (!menu)
+				{
+					ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+				}
+				else
+				{
+					ctx.rotate(menuRotation.toRad())
+				}
 				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height * 0.85) // Don't quite anchor all the way at the bottom of the image
 			}
 			ctx.restore()

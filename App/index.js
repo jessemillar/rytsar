@@ -10,11 +10,11 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = false // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'game'
+var currentScreen = 'menu'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
 var tileSize = 33
-var gridWidth = 15 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
+var gridWidth = 19 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
 var gridHeight = gridWidth
 
 var gpsRequiredAccuracy = 1000 // Normally set to 15
@@ -31,7 +31,8 @@ var minShotDistance = 0 // ...in meters
 var damageDistance = 0 // ...in meters
 var fieldOfView = 25 // ...in degrees
 
-var menuTotalZombies = 50
+var menuTotalZombies = 35
+var menuTotalReeds = menuTotalZombies * 2
 var totalZombies = 10
 var totalAmmo = totalZombies / 3
 var totalReeds = totalZombies * 3
@@ -81,6 +82,7 @@ var white = '#FFFFFF'
 var green = '#3D9970'
 var black = '#3D9970'
 var blue = '#7FDBFF'
+var navy = '#001F3F'
 var red = '#FF4136'
 
 // UI values
@@ -88,12 +90,16 @@ var canvasColor = black
 var flashColor = red
 var debugColor = blue
 
+var darkestNight = 0.5 // The deepest night value possible
+
 // Remove once I pixel out indicator images
 var indicatorWidth = 15
 var indicatorHeight = 7
 var indicatorSpacing = 5
 
-// Remove when I move the menu to just images
+var menuRotation = 0
+var menuRotationSpeed = 0.025
+
 var menuSize = canvas.width / 4.5
 var menuSpacing = 3.5
 
@@ -161,15 +167,24 @@ setInterval(function() // Main game loop
 		{
 			musMenu.play()
 
+			for (var i = 0; i < menuTotalReeds; i++)
+			{
+				var thingy = new Object()
+				thingy.column = Math.floor(random(1, gridWidth))
+				thingy.row = Math.floor(random(1, gridHeight))
+				reeds.push(thingy)
+			}
+			
 			for (var i = 0; i < menuTotalZombies; i++)
 			{
 				var thingy = new Object()
-					thingy.x = random(0, canvas.width)
-					thingy.y = random(0, canvas.height)
-					thingy.xDestination = random(0 - menuZombieSandbox, canvas.width + menuZombieSandbox)
-					thingy.yDestination = random(0 - menuZombieSandbox, canvas.height + menuZombieSandbox)
+					thingy.name = 'zombie' + i
+					thingy.column = Math.floor(random(1, gridWidth))
+					thingy.row = Math.floor(random(1, gridHeight))
+					thingy.health = random(zombieMinHealth, zombieMaxHealth)
 					thingy.frame = random(0, 1)
 					thingy.animate = animate(thingy, slowestAnimation)
+				
 				zombies.push(thingy)
 			}
 		}
