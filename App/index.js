@@ -10,14 +10,14 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = false // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'menu'
+var currentScreen = 'game'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
 var tileSize = 33
-var gridWidth = 25 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
+var gridWidth = 7 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
 var gridHeight = gridWidth
 
-var gpsRequiredAccuracy = 15 // Normally set to 15
+var gpsRequiredAccuracy = 1000 // Normally set to 15
 
 var zombies = new Array() // Our local array of zombies
 var ammo = new Array() // Locally monitor the objects placed throughout the world
@@ -32,7 +32,7 @@ var damageDistance = 0 // ...in meters
 var fieldOfView = 25 // ...in degrees
 
 var menuTotalZombies = 50
-var totalZombies = 35
+var totalZombies = 2
 var totalAmmo = totalZombies / 3
 var totalReeds = totalZombies * 3
 
@@ -134,7 +134,16 @@ document.addEventListener('touchstart', function(ev) // Monitor touches througho
 	}
 	else if (currentScreen == 'game')
 	{
-		debug = !debug // Toggle debug mode for framerate increase
+		// debug = !debug // Toggle debug mode for framerate increase
+		if (player.row > 1 && player.row < gridHeight)
+		{
+			player.row -= 1
+		}
+		if (player.column > 1 && player.column < gridWidth)
+		{
+			player.column -= 1
+		}
+        console.log(player.row)
 	}
 	else if (currentScreen == 'gameover')
 	{

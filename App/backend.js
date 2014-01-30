@@ -244,7 +244,7 @@ function gridImage(image, column, row, anchor, alpha)
 			{
 				ctx.translate(grid[i].x, grid[i].y)
 				ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
-				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height * 0.75) // Don't quite anchor all the way at the bottom of the image
+				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height * 0.85) // Don't quite anchor all the way at the bottom of the image
 			}
 			ctx.restore()
 			break

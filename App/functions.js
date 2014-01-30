@@ -132,12 +132,16 @@ function drawGame()
 
 	// Draw the grid
 	ctx.save()
-	ctx.translate(centerX, centerY)
-	ctx.rotate(-compass.toRad()) // Things relating to the canvas expect radians
-	for (var y = 0; y < gridHeight + 1; y++)
+	ctx.translate(centerX - (player.column - Math.ceil(gridWidth / 2)) * tileSize, centerY - (player.row - Math.ceil(gridHeight / 2)) * tileSize)
+	circle(0, 0, 5, '#ff0000', 1)
+	console.log(compass)
+	ctx.rotate(-compass.toRad()) // Things relating to the canvas and rotation expect radians
+	for (var y = 0; y < gridHeight + 1; y++) // Draw the grid on the newly rotated canvas
 	{
 		for (var x = 0; x < gridWidth + 1; x++)
 		{
+			image(imgGrid, x * tileSize - tileSize * (gridWidth / 2), y * tileSize - tileSize * (gridHeight / 2), 'center')
+
 			if (x < gridWidth && y < gridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
 			{
 				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
@@ -153,8 +157,6 @@ function drawGame()
 					polygon((x * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), (y * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), 2, debugColor)
 				}
 			}
-
-			image(imgGrid, x * tileSize - imgGrid.width / 2 - tileSize * gridWidth / 2, y * tileSize - imgGrid.height / 2 - tileSize * gridHeight / 2, 'normal')
 		}
 	}
 
