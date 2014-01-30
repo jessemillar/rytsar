@@ -132,23 +132,21 @@ function drawGame()
 
 	// Draw the grid
 	ctx.save()
-	ctx.translate(centerX - (player.column - Math.ceil(gridWidth / 2)) * tileSize, centerY - (player.row - Math.ceil(gridHeight / 2)) * tileSize)
-	circle(0, 0, 5, '#ff0000', 1)
-	console.log(compass)
+	ctx.translate(centerX, centerY)
 	ctx.rotate(-compass.toRad()) // Things relating to the canvas and rotation expect radians
 	for (var y = 0; y < gridHeight + 1; y++) // Draw the grid on the newly rotated canvas
 	{
 		for (var x = 0; x < gridWidth + 1; x++)
 		{
-			image(imgGrid, x * tileSize - tileSize * (gridWidth / 2), y * tileSize - tileSize * (gridHeight / 2), 'center')
+			image(imgGrid, 0 - player.column * tileSize + x * tileSize + tileSize / 2, 0 - player.row * tileSize + y * tileSize + tileSize / 2, 'center')
 
 			if (x < gridWidth && y < gridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
 			{
 				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
 					thingy.column = x + 1
 					thingy.row = y + 1
-					thingy.x = (x * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2)
-					thingy.y = (y * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2)
+					thingy.x = 0 - player.column * tileSize + x * tileSize + tileSize
+					thingy.y = 0 - player.row * tileSize + y * tileSize + tileSize
 				grid.push(thingy)
 
 				if (debug)

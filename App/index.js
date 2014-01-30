@@ -14,7 +14,7 @@ var currentScreen = 'game'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
 var tileSize = 33
-var gridWidth = 7 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
+var gridWidth = 15 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
 var gridHeight = gridWidth
 
 var gpsRequiredAccuracy = 1000 // Normally set to 15
@@ -32,7 +32,7 @@ var damageDistance = 0 // ...in meters
 var fieldOfView = 25 // ...in degrees
 
 var menuTotalZombies = 50
-var totalZombies = 2
+var totalZombies = 10
 var totalAmmo = totalZombies / 3
 var totalReeds = totalZombies * 3
 
