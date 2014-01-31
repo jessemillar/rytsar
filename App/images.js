@@ -15,14 +15,15 @@ var imgMenuSettings = new Image(284, 284)
 var imgGrid = new Image(12, 12)
 	imgGrid.src = 'images/grid.png'
 
+var imgCone = new Image(332, 354)
+	imgCone.src = 'images/cone.png'
+
 var imgReed = new Image(68, 68)
 	imgReed.src = 'images/reed.png'
 
-var imgCloud = new Image(1200, 1200)
+var imgCloud = new Image(760, 760)
 	imgCloud.src = 'images/cloud.png'
 
-var imgEmptyAmmoPack = new Image(68, 68)
-	imgEmptyAmmoPack.src = 'images/empty-ammo-pack.png'
 var imgAmmoPack = new Image(68, 68)
 	imgAmmoPack.src = 'images/ammo-pack.png'
 

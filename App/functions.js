@@ -95,26 +95,20 @@ function drawMenu()
 	ctx.translate(centerX, centerY)
 	menuRotation += menuRotationSpeed // Rotate the menu
 	ctx.rotate(-menuRotation.toRad()) // Things relating to the canvas and rotation expect radians
-	for (var y = 0; y < gridHeight + 1; y++) // Draw the grid on the newly rotated canvas
+	for (var y = 0; y < menuGridHeight + 1; y++) // Draw the grid on the newly rotated canvas
 	{
-		for (var x = 0; x < gridWidth + 1; x++)
+		for (var x = 0; x < menuGridWidth + 1; x++)
 		{
-			image(imgGrid, 0 - player.column * tileSize + x * tileSize + tileSize / 2, 0 - player.row * tileSize + y * tileSize + tileSize / 2, 'center')
+			image(imgGrid, 0 - tileSize * (menuGridWidth / 2) + x * tileSize, 0 - tileSize * (menuGridHeight / 2) + y * tileSize, 'center')
 			
-			if (x < gridWidth && y < gridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
+			if (x < menuGridWidth && y < menuGridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
 			{
 				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
 				thingy.column = x + 1
 				thingy.row = y + 1
-				thingy.x = 0 - player.column * tileSize + x * tileSize + tileSize
-				thingy.y = 0 - player.row * tileSize + y * tileSize + tileSize
+				thingy.x = 0 - tileSize * (menuGridWidth / 2) + x * tileSize
+				thingy.y = 0 - tileSize * (menuGridHeight / 2) + y * tileSize
 				grid.push(thingy)
-				
-				if (debug)
-				{
-					text((x + 1) + ',' + (y + 1), x * tileSize + imgGrid.width - tileSize * gridWidth / 2, y * tileSize + imgGrid.height - tileSize * gridHeight / 2, debugColor)
-					polygon((x * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), (y * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), 2, debugColor)
-				}
 			}
 		}
 	}
@@ -123,43 +117,24 @@ function drawMenu()
 	{
 		gridImage(imgReed, reeds[i].column, reeds[i].row, 'anchor', 1, true)
 	}
-    	
-	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
-    {
-		if (ammo[i].count > 0)
-		{
-			gridImage(imgAmmoPack, ammo[i].column, ammo[i].row, 'anchor', 1, true)
-		}
-		else
-		{
-			gridImage(imgEmptyAmmoPack, ammo[i].column, ammo[i].row, 'anchor', 1, true)
-		}
-	}
 	
     for (var i = 0; i < zombies.length; i++) // Draw the zombies
     {
-		if (zombies[i].health > 0)
+		if (zombies[i].frame == 0)
 		{
-			if (zombies[i].frame == 0)
-			{
-				gridImage(imgZombieLeft, zombies[i].column, zombies[i].row, 'anchor', 1, true)
-			}
-			else
-			{
-				gridImage(imgZombieLeft2, zombies[i].column, zombies[i].row, 'anchor', 1, true)
-			}
+			gridImage(imgZombieLeft, zombies[i].column, zombies[i].row, 'anchor', 1, true)
 		}
 		else
-	    {
-	    	gridImage(imgZombieDead, zombies[i].column, zombies[i].row, 'anchor', 1, true) // Draw dead zombies
-	    }
+		{
+			gridImage(imgZombieLeft2, zombies[i].column, zombies[i].row, 'anchor', 1, true)
+		}
 	}
 
 	ctx.restore()
 	
 	daylight(0) // Make it night
 
-	// Logo shape
+	// Logo shape and shadow
 	image(imgMenuStats, xStats, yStats, 'center')
 	image(imgMenuSingle, xSingle, ySingle, 'center')
 	image(imgMenuMulti, xMulti, yMulti, 'center')
@@ -181,6 +156,11 @@ function drawGame()
 		circle(centerX, centerY, damageDistance * pixelsToMeters, debugColor)
 		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
     }
+	
+	// Aiming cone
+	// line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
+	// line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
+	image(imgCone, centerX, centerY - imgCone.height / 2 - 15, 'center')
 
 	// Draw the grid
 	ctx.save()
@@ -223,10 +203,6 @@ function drawGame()
 		{
 			gridImage(imgAmmoPack, ammo[i].column, ammo[i].row, 'anchor')
 		}
-		else
-		{
-			gridImage(imgEmptyAmmoPack, ammo[i].column, ammo[i].row, 'anchor')
-		}
 	}
 
     for (var i = 0; i < zombies.length; i++) // Draw the zombies
@@ -248,7 +224,7 @@ function drawGame()
 	    }
 	}
 
-	gridImage(imgCloud, 3, 3, 'center') // Draw a cloud for testing purposes
+	gridImage(imgCloud, 5, 5, 'center') // Draw a cloud for testing purposes
 
 	ctx.restore() // Unrotate the canvas
 

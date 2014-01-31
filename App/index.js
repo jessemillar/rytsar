@@ -14,7 +14,7 @@ var currentScreen = 'menu'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
 var tileSize = 33
-var gridWidth = 19 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
+var gridWidth = 3 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
 var gridHeight = gridWidth
 
 var gpsRequiredAccuracy = 1000 // Normally set to 15
@@ -31,9 +31,7 @@ var minShotDistance = 0 // ...in meters
 var damageDistance = 0 // ...in meters
 var fieldOfView = 25 // ...in degrees
 
-var menuTotalZombies = 35
-var menuTotalReeds = menuTotalZombies * 2
-var totalZombies = 10
+var totalZombies = 1
 var totalAmmo = totalZombies / 3
 var totalReeds = totalZombies * 3
 
@@ -97,11 +95,16 @@ var indicatorWidth = 15
 var indicatorHeight = 7
 var indicatorSpacing = 5
 
+var menuGridWidth = 19 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
+var menuGridHeight = menuGridWidth
 var menuRotation = 0
-var menuRotationSpeed = 0.025
+var menuRotationSpeed = 0.035
+var menuTotalZombies = 35
+var menuTotalReeds = menuTotalZombies * 2
 
 var menuSize = canvas.width / 4.5
 var menuSpacing = 3.5
+var menuShadowOffset = 10
 
 var xStats = centerX - menuSize / 2 - menuSpacing
 var yStats = centerY - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
@@ -170,8 +173,8 @@ setInterval(function() // Main game loop
 			for (var i = 0; i < menuTotalReeds; i++)
 			{
 				var thingy = new Object()
-				thingy.column = Math.floor(random(1, gridWidth))
-				thingy.row = Math.floor(random(1, gridHeight))
+				thingy.column = Math.floor(random(1, menuGridWidth))
+				thingy.row = Math.floor(random(1, menuGridHeight))
 				reeds.push(thingy)
 			}
 			
@@ -179,8 +182,8 @@ setInterval(function() // Main game loop
 			{
 				var thingy = new Object()
 					thingy.name = 'zombie' + i
-					thingy.column = Math.floor(random(1, gridWidth))
-					thingy.row = Math.floor(random(1, gridHeight))
+					thingy.column = Math.floor(random(1, menuGridWidth))
+					thingy.row = Math.floor(random(1, menuGridHeight))
 					thingy.health = random(zombieMinHealth, zombieMaxHealth)
 					thingy.frame = random(0, 1)
 					thingy.animate = animate(thingy, slowestAnimation)
@@ -233,6 +236,7 @@ setInterval(function() // Main game loop
                 for (var i = 0; i < totalZombies; i++)
                 {
                     zombies[i].distance = distance(zombies[i])
+					console.log(zombies[i].distance)
                     zombies[i].bearing = bearing(zombies[i])
             
                     if ((compass - fieldOfView) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView))
