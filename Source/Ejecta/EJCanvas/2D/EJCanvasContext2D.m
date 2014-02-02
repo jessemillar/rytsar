@@ -14,7 +14,8 @@ const EJCompositeOperationFunc EJCompositeOperationFuncs[] = {
 	[kEJCompositeOperationDestinationOut] = {GL_ZERO, GL_ONE_MINUS_SRC_ALPHA, 1},
 	[kEJCompositeOperationDestinationOver] = {GL_ONE_MINUS_DST_ALPHA, GL_ONE, 1},
 	[kEJCompositeOperationSourceAtop] = {GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA, 1},
-	[kEJCompositeOperationXOR] = {GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA, 1}
+	[kEJCompositeOperationXOR] = {GL_ONE_MINUS_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA, 1},
+	[kEJCompositeOperationCopy] = {GL_ONE, GL_ZERO, 1}
 };
 
 
@@ -29,7 +30,7 @@ const EJCompositeOperationFunc EJCompositeOperationFuncs[] = {
 		sharedGLContext = scriptView.openGLContext;
 		glContext = sharedGLContext.glContext2D;
 		vertexBuffer = (EJVertex *)(sharedGLContext.vertexBuffer.mutableBytes);
-		vertexBufferSize = sharedGLContext.vertexBuffer.length / sizeof(EJVertex);
+		vertexBufferSize = (int)(sharedGLContext.vertexBuffer.length / sizeof(EJVertex));
 	
 		memset(stateStack, 0, sizeof(stateStack));
 		stateIndex = 0;
@@ -755,8 +756,13 @@ const EJCompositeOperationFunc EJCompositeOperationFuncs[] = {
 	
 	static EJColorRGBA white = {.hex = 0xffffffff};
 	
+	EJCompositeOperation oldOp = state->globalCompositeOperation;
+	self.globalCompositeOperation = kEJCompositeOperationCopy;
+	
 	[self pushTexturedRectX:dx y:dy w:tw h:th tx:0 ty:0 tw:1 th:1 color:white withTransform:CGAffineTransformIdentity];
 	[self flushBuffers];
+	
+	self.globalCompositeOperation = oldOp;
 }
 
 - (void)putImageData:(EJImageData*)imageData dx:(float)dx dy:(float)dy {

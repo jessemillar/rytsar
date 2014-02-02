@@ -17,9 +17,13 @@
 	
 	NSString *fullPath;
 
-	// If path is a Data URI we don't want to prepend resource paths
+	// If path is a Data URI or remote URL we don't want to prepend resource paths
 	if( [path hasPrefix:@"data:"] ) {
 		NSLog(@"Loading Image from Data URI");
+		fullPath = path;
+	}
+	else if( [path hasPrefix:@"http:"] || [path hasPrefix:@"https:"] ) {
+		NSLog(@"Loading Image from URL: %@", path);
 		fullPath = path;
 	}
 	else {
@@ -61,11 +65,13 @@
 	JSValueUnprotect(scriptView.jsGlobalContext, jsObject);
 }
 
-EJ_BIND_GET(src, ctx ) { 
-	JSStringRef src = JSStringCreateWithUTF8CString( path.UTF8String );
-	JSValueRef ret = JSValueMakeString(ctx, src);
-	JSStringRelease(src);
-	return ret;
+- (void)setTexture:(EJTexture *)texturep path:(NSString *)pathp {
+	texture = [texturep retain];
+	path = [pathp retain];
+}
+
+EJ_BIND_GET(src, ctx ) {
+	return NSStringToJSValue(ctx, path);
 }
 
 EJ_BIND_SET(src, ctx, value) {
@@ -88,7 +94,7 @@ EJ_BIND_SET(src, ctx, value) {
 		texture = nil;
 	}
 	
-	if( !JSValueIsNull(ctx, value) && [newPath length] ) {
+	if( !JSValueIsNull(ctx, value) && newPath.length ) {
 		path = [newPath retain];
 		[self beginLoad];
 	}
@@ -109,5 +115,8 @@ EJ_BIND_GET(complete, ctx ) {
 EJ_BIND_EVENT(load);
 EJ_BIND_EVENT(error);
 
+EJ_BIND_GET(nodeName, ctx ) {
+	return NSStringToJSValue(ctx, @"IMG");
+}
 
 @end
