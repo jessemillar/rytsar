@@ -299,17 +299,31 @@ function hunt(zombie, time) // Use a function outside of the zombie generation t
 
 	setInterval(function()
 	{
-		if (zombie.nature == 0)
+		if (zombie.health > 0)
 		{
-			if (player.column < zombie.column)
+			if (zombie.nature == 0)
 			{
-				zombie.column -= 1
+				if (player.column < zombie.column)
+				{
+					zombie.column -= 1
+				}
+				else if (player.column > zombie.column)
+				{
+					zombie.column += 1
+				}
+				else if (zombie.column == player.column)
+				{
+					if (player.row < zombie.row)
+					{
+						zombie.row -= 1
+					}
+					else if (player.row > zombie.row)
+					{
+						zombie.row += 1
+					}
+				}
 			}
-			else if (player.column > zombie.column)
-			{
-				zombie.column += 1
-			}
-			else if (zombie.column == player.column)
+			else if (zombie.nature == 1)
 			{
 				if (player.row < zombie.row)
 				{
@@ -319,27 +333,16 @@ function hunt(zombie, time) // Use a function outside of the zombie generation t
 				{
 					zombie.row += 1
 				}
-			}
-		}
-		else if (zombie.nature == 1)
-		{
-			if (player.row < zombie.row)
-			{
-				zombie.row -= 1
-			}
-			else if (player.row > zombie.row)
-			{
-				zombie.row += 1
-			}
-			else if (zombie.row == player.row)
-			{
-				if (player.column < zombie.column)
+				else if (zombie.row == player.row)
 				{
-					zombie.column -= 1
-				}
-				else if (player.column > zombie.column)
-				{
-					zombie.column += 1
+					if (player.column < zombie.column)
+					{
+						zombie.column -= 1
+					}
+					else if (player.column > zombie.column)
+					{
+						zombie.column += 1
+					}
 				}
 			}
 		}
