@@ -188,6 +188,11 @@ function drawGame()
 		}
 	}
 
+	for (var i = 1; i < player.history.length; i++) // Draw the player's footprints to mark where they've been
+	{
+		highlight(player.history[i].column, player.history[i].row, white, 0.05)
+	}
+
 	for (var i = 0; i < reeds.length; i++)
 	{
 		gridImage(imgReed, reeds[i].column, reeds[i].row, 'anchor')

@@ -91,6 +91,7 @@ function gpsMove()
 				if (player.row > 1)
 				{
 					player.row -= 1
+					updatePlayerHistory('up')
 				}
 			}
 			else if (bearing < 135) // Right
@@ -98,6 +99,7 @@ function gpsMove()
 				if (player.column < gridWidth)
 				{
 					player.column += 1
+					updatePlayerHistory('right')
 				}
 			}
 			else if (bearing < 225) // Down
@@ -105,6 +107,7 @@ function gpsMove()
 				if (player.row < gridHeight)
 				{
 					player.row += 1
+					updatePlayerHistory('down')
 				}
 			}
 			else if (bearing < 315) // Left
@@ -112,11 +115,22 @@ function gpsMove()
 				if (player.column > 1)
 				{
 					player.column -= 1
+					updatePlayerHistory('left')
 				}
 			}
 			gps.history.length = 0
 		}
 	}
+}
+
+function updatePlayerHistory(direction)
+{
+	var thingy = new Object()
+		thingy.column = player.column
+		thingy.row = player.row
+		thingy.direction = direction
+
+	player.history.unshift(thingy)
 }
 
 function random(min, max)

@@ -67,6 +67,7 @@ var meleeDamage = 10
 var player = new Object()
 	player.column = Math.ceil(gridWidth / 2)
 	player.row = Math.ceil(gridHeight / 2)
+	player.history = new Array() // Keeps track of where the player's been on the grid
 var playerMaxHealth = 5
 var health = playerMaxHealth
 var canBeHurt = true
