@@ -151,9 +151,9 @@ function drawGame()
     {
     	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
     	line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
-		circle(centerX, centerY, maxShotDistance * pixelsToMeters, debugColor)
-		circle(centerX, centerY, minShotDistance * pixelsToMeters, debugColor)
-		circle(centerX, centerY, damageDistance * pixelsToMeters, debugColor)
+		circle(centerX, centerY, maxShotDistance * tileSize, debugColor)
+		circle(centerX, centerY, minShotDistance * tileSize, debugColor)
+		circle(centerX, centerY, damageDistance * tileSize, debugColor)
 		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
     }
 	
@@ -182,7 +182,7 @@ function drawGame()
 				if (debug)
 				{
 					text((x + 1) + ',' + (y + 1), x * tileSize + imgGrid.width - tileSize * gridWidth / 2, y * tileSize + imgGrid.height - tileSize * gridHeight / 2, debugColor)
-					polygon((x * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), (y * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), 2, debugColor)
+					circle((x * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), (y * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), 2, debugColor)
 				}
 			}
 		}

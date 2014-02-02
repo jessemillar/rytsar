@@ -80,13 +80,13 @@ var shotDamage = 3 // How much damage a bullet deals (change this later to be mo
 // Color scheme
 var white = '#FFFFFF'
 var green = '#3D9970'
-var black = '#3D9970'
+var black = '#111111'
 var blue = '#7FDBFF'
 var navy = '#001F3F'
 var red = '#FF4136'
 
 // UI values
-var canvasColor = black
+var canvasColor = green
 var flashColor = red
 var debugColor = blue
 
@@ -144,6 +144,10 @@ document.addEventListener('touchstart', function(ev) // Monitor touches througho
 			zombies.length = 0 // Wipe the zombie database so we can start playing with "real" zombies
 			currentScreen = 'game'
 		}
+		else if (Math.abs(xSettings - x) * Math.abs(xSettings - x) + Math.abs(ySettings - y) * Math.abs(ySettings - y) < menuSize * menuSize)
+		{
+			currentScreen = 'settings'
+		}
 	}
 	else if (currentScreen == 'game')
 	{
@@ -184,6 +188,18 @@ document.addEventListener('touchstart', function(ev) // Monitor touches througho
 		else
 		{
 			gps.history[0].latitude += 1
+		}
+	}
+	else if (currentScreen == 'settings')
+	{
+		if (x > 10 && x < imgBackArrow.width + 10 && y > 10 && y < imgBackArrow.height + 10)
+		{
+			currentScreen = 'menu'
+		}
+
+		if (x > canvas.width / 2 - imgBug.width / 2 && x < canvas.width / 2 + imgBug.width / 2 && y > 150 - imgBug.height / 2 && y < 150 + imgBug.height / 2)
+		{
+			debug = !debug
 		}
 	}
 	else if (currentScreen == 'gameover')
@@ -358,6 +374,19 @@ setInterval(function() // Main game loop
 			text('Current GPS accuracy of ' + gps.accuracy + ' meters is not accurate enough', 3, 3, white)
 			text('Are you outside?', 3, 13, white)
 			text('Can you see the sky?', 3, 23, white)
+		}
+	}
+	else if (currentScreen == 'settings')
+	{
+		blank(black)
+		image(imgBackArrow, 10, 10, 'normal', 0.25)
+		if (debug)
+		{
+			image(imgBug, canvas.width / 2, 150, 'center')
+		}
+		else
+		{
+			image(imgBug, canvas.width / 2, 150, 'center', 0.5)
 		}
 	}
 	else if (currentScreen == 'gameover')

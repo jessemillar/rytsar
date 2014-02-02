@@ -12,6 +12,17 @@ var imgMenuMulti = new Image(284, 284)
 var imgMenuSettings = new Image(284, 284)
 	imgMenuSettings.src = 'images/menu-settings.png'
 
+var imgBug = new Image(84, 100)
+	imgBug.src = 'images/bug.png'
+
+var imgBackArrow = new Image(150, 94)
+	imgBackArrow.src = 'images/back-arrow.png'
+
+var imgSwitchOn = new Image(100, 150)
+	imgSwitchOn.src = 'images/switch-on.png'
+var imgSwitchOff = new Image(100, 150)
+	imgSwitchOff.src = 'images/switch-off.png'
+
 var imgGrid = new Image(12, 12)
 	imgGrid.src = 'images/grid.png'
 
