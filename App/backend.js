@@ -90,7 +90,7 @@ function gpsMove()
 			{
 				if (player.row > 1)
 				{
-					player.row -= 1
+					player.row += 1
 					updatePlayerHistory('up')
 				}
 			}
@@ -106,7 +106,7 @@ function gpsMove()
 			{
 				if (player.row < gridHeight)
 				{
-					player.row += 1
+					player.row -= 1
 					updatePlayerHistory('down')
 				}
 			}

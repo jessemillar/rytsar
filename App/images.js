@@ -15,6 +15,9 @@ var imgMenuSettings = new Image(284, 284)
 var imgGrid = new Image(12, 12)
 	imgGrid.src = 'images/grid.png'
 
+var imgCompass = new Image(70, 70)
+	imgCompass.src = 'images/compass.png'
+
 var imgCone = new Image(332, 354)
 	imgCone.src = 'images/cone.png'
 

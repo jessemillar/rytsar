@@ -188,7 +188,7 @@ function drawGame()
 		}
 	}
 
-	for (var i = 1; i < player.history.length; i++) // Draw the player's footprints to mark where they've been
+	for (var i = 0; i < player.history.length; i++) // Draw the player's footprints to mark where they've been
 	{
 		highlight(player.history[i].column, player.history[i].row, white, 0.05)
 	}
@@ -227,7 +227,7 @@ function drawGame()
 	    }
 	}
 
-	gridImage(imgCloud, 5, 5, 'center') // Draw a cloud for testing purposes
+	// gridImage(imgCloud, 5, 5, 'center') // Draw a cloud for testing purposes
 
 	ctx.restore() // Unrotate the canvas
 
@@ -235,7 +235,14 @@ function drawGame()
     // Things are only set up for right handed users right now
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    for (var i = 0; i < health; i++) // Draw out health
+    // Draw the compass
+    ctx.save()
+    ctx.translate(25, 25)
+    ctx.rotate(-compass.toRad())
+    image(imgCompass, 0, 0, 'center')
+    ctx.restore()
+
+    for (var i = 0; i < player.health; i++) // Draw out health
 	{
 		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, red)
 	}
@@ -318,4 +325,37 @@ function hunt(zombie, time) // Use an external function (outside of zombie creat
 			}
 		}
 	}, speed)
+}
+
+function pickup()
+{
+	for (var i = 0; i < ammo.length; i++)
+	{
+		if (ammo[i].column == player.column && ammo[i].row == player.row)
+		{
+			extraAmmo += ammo[i].count
+			ammo[i].count = 0
+		}
+	}
+}
+
+function hurtPlayer()
+{
+	for (var i = 0; i < zombies.length; i++)
+	{
+		if (zombies[i].column == player.column && zombies[i].row == player.row)
+		{
+			if (player.health > 1)
+			{
+				player.health -= 1
+				sfxHurt.play()
+			}
+			else
+			{
+				player.health -= 1
+				sfxFlatline.play()
+				currentScreen = 'gameover'
+			}
+		}
+	}
 }

@@ -10,7 +10,7 @@ var centerY = canvas.height / 2
 var fps = 60
 var debug = false // Can be toggled by tapping the screen in game mode
 
-var currentScreen = 'game'
+var currentScreen = 'menu'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
 var tileSize = 45
@@ -64,12 +64,12 @@ var timeMelee = 350
 var meleeDamage = 10
 
 // General player variables
+var playerMaxHealth = 5
 var player = new Object()
 	player.column = Math.ceil(gridWidth / 2)
 	player.row = Math.ceil(gridHeight / 2)
+	player.health = playerMaxHealth
 	player.history = new Array() // Keeps track of where the player's been on the grid
-var playerMaxHealth = 5
-var health = playerMaxHealth
 var canBeHurt = true
 var timeHurt = 1000 // The amount of time between each damage "tick" when a zombie is close
 var capacity = 6 // Since we have a revolver right now
@@ -117,12 +117,14 @@ var yMulti = centerY + menuSize / 2 + menuSpacing
 var xSettings = centerX + menuSize / 2 + menuSpacing
 var ySettings = centerY + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 2
 
-/*
 document.addEventListener('pagehide', function() // Close the connection to the server upon leaving the app
 {
-	socket.close()
+	// socket.close()
+	gps.history.length = 0
+	currentScreen = 'menu'
 })
 
+/*
 document.addEventListener('pageshow', function() // Reconnect to the server upon resuming the app
 {
 	zombies.length = 0 // Wipe the zombie database and don't reopen the connection
@@ -156,8 +158,33 @@ document.addEventListener('touchstart', function(ev) // Monitor touches througho
 			player.column -= 1
 		}
 		*/
-		gps.history[0].latitude += 1
-		gps.history[0].longitude += 1
+
+		if (gps.history.length == 0)
+		{
+			gps.history[0] = new Object()
+			gps.history[0].latitude = gps.latitude
+			gps.history[0].longitude = gps.longitude
+		}
+
+		if (y < canvas.height / 3)
+		{
+			gps.history[0].latitude -= 1
+		}
+		else if (y < canvas.height / 3 * 2)
+		{
+			if (x < canvas.width / 2)
+			{
+				gps.history[0].longitude -= 1
+			}
+			else
+			{
+				gps.history[0].longitude += 1
+			}
+		}
+		else
+		{
+			gps.history[0].latitude += 1
+		}
 	}
 	else if (currentScreen == 'gameover')
 	{
@@ -207,6 +234,8 @@ setInterval(function() // Main game loop
 			// Run calculations
 			// ******************************
 
+			pickup()
+
 			// Clear the various arrays on each pass so we get fresh results
 			melee.length = 0
 			vision.length = 0
@@ -237,6 +266,11 @@ setInterval(function() // Main game loop
 						thingy.hunt = hunt(thingy, random(0, 1))
 					zombies.push(thingy)
 				}
+
+				setInterval(function()
+				{
+					hurtPlayer()
+				}, 1000)
 			}
 			else // Or do things with the zombies we have
 			{
