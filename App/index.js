@@ -37,8 +37,8 @@ var totalReeds = totalZombies * 3
 
 var zombieMinHealth = 2
 var zombieMaxHealth = 3
-var zombieSpeedLow = 0.2 // ...meters per second
-var zombieSpeedHigh = 0.6 // ...meters per second
+var zombieSlowest = 4000 // Longest time possible for zombies to move to a new square
+var zombieFastest = 2000 // Shortest time possible for zombies to move to a new square
 
 var slowestAnimation = 800 // The longest time possible between animation frames
 
@@ -152,7 +152,6 @@ document.addEventListener('touchstart', function(ev) // Monitor touches througho
 		{
 			player.column -= 1
 		}
-        console.log(player.row)
 	}
 	else if (currentScreen == 'gameover')
 	{
@@ -228,6 +227,8 @@ setInterval(function() // Main game loop
 						thingy.health = random(zombieMinHealth, zombieMaxHealth)
 						thingy.frame = random(0, 1)
 						thingy.animate = animate(thingy, slowestAnimation)
+						thingy.nature = Math.floor(random(0, 1))
+						thingy.hunt = hunt(thingy, random(0, 1))
 					zombies.push(thingy)
 				}
 			}
@@ -236,7 +237,6 @@ setInterval(function() // Main game loop
                 for (var i = 0; i < totalZombies; i++)
                 {
                     zombies[i].distance = distance(zombies[i])
-					console.log(zombies[i].distance)
                     zombies[i].bearing = bearing(zombies[i])
             
                     if ((compass - fieldOfView) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView))

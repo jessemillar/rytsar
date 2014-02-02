@@ -21,6 +21,9 @@ var imgCone = new Image(332, 354)
 var imgReed = new Image(68, 68)
 	imgReed.src = 'images/reed.png'
 
+var imgFootprints = new Image(64, 64)
+	imgFootprints.src = 'images/footprints.png'
+
 var imgCloud = new Image(760, 760)
 	imgCloud.src = 'images/cloud.png'
 

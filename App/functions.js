@@ -255,3 +255,8 @@ function daylight(value)
 	ctx.fillStyle = navy
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
+
+function huntPlayer(zombie)
+{
+	
+}

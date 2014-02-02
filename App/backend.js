@@ -287,3 +287,61 @@ function animate(thingy, time) // Use a function outside of the zombie generatio
 		}
 	}, time)
 }
+
+function hunt(zombie, time) // Use a function outside of the zombie generation to animate so the function can remember the name of the zombie that's animating
+{
+	var speed = time * zombieSlowest
+
+	if (speed < zombieFastest)
+	{
+		speed = zombieFastest
+	}
+
+	setInterval(function()
+	{
+		if (zombie.nature == 0)
+		{
+			if (player.column < zombie.column)
+			{
+				zombie.column -= 1
+			}
+			else if (player.column > zombie.column)
+			{
+				zombie.column += 1
+			}
+			else if (zombie.column == player.column)
+			{
+				if (player.row < zombie.row)
+				{
+					zombie.row -= 1
+				}
+				else if (player.row > zombie.row)
+				{
+					zombie.row += 1
+				}
+			}
+		}
+		else if (zombie.nature == 1)
+		{
+			if (player.row < zombie.row)
+			{
+				zombie.row -= 1
+			}
+			else if (player.row > zombie.row)
+			{
+				zombie.row += 1
+			}
+			else if (zombie.row == player.row)
+			{
+				if (player.column < zombie.column)
+				{
+					zombie.column -= 1
+				}
+				else if (player.column > zombie.column)
+				{
+					zombie.column += 1
+				}
+			}
+		}
+	}, speed)
+}
