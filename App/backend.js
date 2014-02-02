@@ -57,8 +57,11 @@ navigator.geolocation.watchPosition(function(position)
 		var thingy = new Object()
 			thingy.latitude = gps.latitude
 			thingy.longitude = gps.longitude
-		gps.history.push(thingy)
+		gps.history.unshift(thingy)
+
 	}
+
+	gpsMove() // Check if we've moved far enough in the real world to mandate a player position change
 
 	if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Gun orientation
     {
@@ -75,6 +78,47 @@ navigator.geolocation.watchPosition(function(position)
     }
 })
 
+function gpsMove()
+{
+	for (var i = 0; i < gps.history.length; i++)
+	{
+		if (gpsDistance(gps.latitude, gps.longitude, gps.history[i].latitude, gps.history[i].longitude) > tileSizeMeters)
+		{
+			var bearing = gpsBearing(gps.latitude, gps.longitude, gps.history[i].latitude, gps.history[i].longitude)
+
+			if (bearing > 315 || bearing < 45) // Up
+			{
+				if (player.row > 1)
+				{
+					player.row -= 1
+				}
+			}
+			else if (bearing < 135) // Right
+			{
+				if (player.column < gridWidth)
+				{
+					player.column += 1
+				}
+			}
+			else if (bearing < 225) // Down
+			{
+				if (player.row < gridHeight)
+				{
+					player.row += 1
+				}
+			}
+			else if (bearing < 315) // Left
+			{
+				if (player.column > 1)
+				{
+					player.column -= 1
+				}
+			}
+			gps.history.length = 0
+		}
+	}
+}
+
 function random(min, max)
 {
 	return Math.random() * (max - min) + min
@@ -88,6 +132,35 @@ Number.prototype.toRad = function()
 Number.prototype.toDeg = function()
 {
 	return this * 180 / Math.PI
+}
+
+function gpsDistance(lat1, lon1, lat2, lon2)
+{
+	var radius = 6371000
+	var dLat = (lat2 - lat1).toRad()
+	var dLon = (lon2 - lon1).toRad()
+	var lat1 = lat1.toRad()
+	var lat2 = lat2.toRad()
+
+	var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+			Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2)
+	var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+	var d = radius * c
+	return d
+}
+
+function gpsBearing(latitude1, longitude1, latitude2, longitude2)
+{
+	var lat1 = latitude1.toRad()
+	var lat2 = latitude2.toRad()
+	var dLon = (longitude2 - longitude1).toRad()
+
+	var y = Math.sin(dLon) * Math.cos(lat2)
+	var x = Math.cos(lat1) * Math.sin(lat2) -
+			Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon)
+	var bearing = Math.atan2(y, x)
+
+	return (bearing.toDeg() + 360) % 360
 }
 
 function distance(thingy) // Returns distance in meters
@@ -273,6 +346,27 @@ function gridImage(image, column, row, anchor, alpha, menu)
 	}
 }
 
+function highlight(column, row, color, alpha)
+{
+	for (var i = 0; i < grid.length; i++)
+	{
+		if (grid[i].column == column && grid[i].row == row) // Find the right grid tile
+		{
+			if (alpha)
+			{
+				ctx.globalAlpha = alpha
+			}
+			else
+			{
+				ctx.globalAlpha = 1
+			}
+			ctx.fillStyle = color
+			ctx.fillRect(grid[i].x - tileSize / 2, grid[i].y - tileSize / 2, tileSize, tileSize)
+			break
+		}
+	}
+}
+
 function animate(thingy, time) // Use a function outside of the zombie generation to animate so the function can remember the name of the zombie that's animating
 {
 	setInterval(function()
@@ -286,65 +380,4 @@ function animate(thingy, time) // Use a function outside of the zombie generatio
 			thingy.frame = 0
 		}
 	}, time)
-}
-
-function hunt(zombie, time) // Use a function outside of the zombie generation to animate so the function can remember the name of the zombie that's animating
-{
-	var speed = time * zombieSlowest
-
-	if (speed < zombieFastest)
-	{
-		speed = zombieFastest
-	}
-
-	setInterval(function()
-	{
-		if (zombie.health > 0)
-		{
-			if (zombie.nature == 0)
-			{
-				if (player.column < zombie.column)
-				{
-					zombie.column -= 1
-				}
-				else if (player.column > zombie.column)
-				{
-					zombie.column += 1
-				}
-				else if (zombie.column == player.column)
-				{
-					if (player.row < zombie.row)
-					{
-						zombie.row -= 1
-					}
-					else if (player.row > zombie.row)
-					{
-						zombie.row += 1
-					}
-				}
-			}
-			else if (zombie.nature == 1)
-			{
-				if (player.row < zombie.row)
-				{
-					zombie.row -= 1
-				}
-				else if (player.row > zombie.row)
-				{
-					zombie.row += 1
-				}
-				else if (zombie.row == player.row)
-				{
-					if (player.column < zombie.column)
-					{
-						zombie.column -= 1
-					}
-					else if (player.column > zombie.column)
-					{
-						zombie.column += 1
-					}
-				}
-			}
-		}
-	}, speed)
 }

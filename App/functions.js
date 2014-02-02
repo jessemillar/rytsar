@@ -99,15 +99,15 @@ function drawMenu()
 	{
 		for (var x = 0; x < menuGridWidth + 1; x++)
 		{
-			image(imgGrid, 0 - tileSize * (menuGridWidth / 2) + x * tileSize, 0 - tileSize * (menuGridHeight / 2) + y * tileSize, 'center')
+			image(imgGrid, 0 - player.column * tileSize + x * tileSize + tileSize / 2, 0 - player.row * tileSize + y * tileSize + tileSize / 2, 'center')
 			
 			if (x < menuGridWidth && y < menuGridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
 			{
 				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
 				thingy.column = x + 1
 				thingy.row = y + 1
-				thingy.x = 0 - tileSize * (menuGridWidth / 2) + x * tileSize
-				thingy.y = 0 - tileSize * (menuGridHeight / 2) + y * tileSize
+				thingy.x = 0 - player.column * tileSize + x * tileSize + tileSize
+				thingy.y = 0 - player.row * tileSize + y * tileSize + tileSize
 				grid.push(thingy)
 			}
 		}
@@ -158,8 +158,6 @@ function drawGame()
     }
 	
 	// Aiming cone
-	// line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
-	// line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
 	image(imgCone, centerX, centerY - imgCone.height / 2 - 15, 'center')
 
 	// Draw the grid
@@ -254,4 +252,65 @@ function daylight(value)
 	
 	ctx.fillStyle = navy
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
+
+function hunt(zombie, time) // Use an external function (outside of zombie creation) to move the zombie toward the player
+{
+	var speed = time * zombieSlowest
+
+	if (speed < zombieFastest)
+	{
+		speed = zombieFastest + time * zombieSlowest
+	}
+
+	setInterval(function()
+	{
+		if (zombie.health > 0)
+		{
+			if (zombie.nature == 0)
+			{
+				if (player.column < zombie.column)
+				{
+					zombie.column -= 1
+				}
+				else if (player.column > zombie.column)
+				{
+					zombie.column += 1
+				}
+				else if (zombie.column == player.column)
+				{
+					if (player.row < zombie.row)
+					{
+						zombie.row -= 1
+					}
+					else if (player.row > zombie.row)
+					{
+						zombie.row += 1
+					}
+				}
+			}
+			else if (zombie.nature == 1)
+			{
+				if (player.row < zombie.row)
+				{
+					zombie.row -= 1
+				}
+				else if (player.row > zombie.row)
+				{
+					zombie.row += 1
+				}
+				else if (zombie.row == player.row)
+				{
+					if (player.column < zombie.column)
+					{
+						zombie.column -= 1
+					}
+					else if (player.column > zombie.column)
+					{
+						zombie.column += 1
+					}
+				}
+			}
+		}
+	}, speed)
 }
