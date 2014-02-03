@@ -101,16 +101,16 @@ function drawGame()
 
     for (var i = 0; i < player.health; i++) // Draw out health
 	{
-		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, red)
+		image(imgHeart, canvas.width - indicatorSpacing - imgHeart.width, indicatorSpacing + (imgHeart.height + indicatorSpacing) * i, 'normal')
 	}
 
-	for (var i = 0; i < player.magazine + 1; i++) // Draw the ammo in our gun
+	for (var i = 0; i < player.magazine + 1; i++) // Draw the ammo in our gun's magazine
 	{
-		rectangle(canvas.width - indicatorSpacing - indicatorWidth, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, white)
+		image(imgMagazineBullet, canvas.width - indicatorSpacing - imgMagazineBullet.width, canvas.height - (imgMagazineBullet.height + indicatorSpacing) * i, 'normal')
 	}
 
 	for (var i = 0; i < player.ammo + 1; i++) // Draw our extraAmmo
 	{
-		rectangle(indicatorSpacing, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, blue)
+		image(imgBullet, indicatorSpacing, canvas.height - (imgBullet.height + indicatorSpacing) * i, 'normal')
 	}
 }

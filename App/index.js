@@ -120,10 +120,7 @@ var debugColor = blue
 
 var darkestNight = 0.5 // The deepest night value possible
 
-// Remove once I pixel out indicator images (health bar, ammo bar, etc.)
-var indicatorWidth = 15
-var indicatorHeight = 7
-var indicatorSpacing = 5
+var indicatorSpacing = 5 // Used for spacing the health and ammo indicators on the game screen
 
 var menuGridWidth = 19
 var menuGridHeight = menuGridWidth

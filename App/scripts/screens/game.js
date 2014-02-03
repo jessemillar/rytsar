@@ -1,5 +1,10 @@
 function screenGame()
 {
+	if (debug)
+	{
+		gpsRequiredAccuracy = 10000
+	}
+
 	if (gps.latitude && gps.longitude && gps.accuracy < gpsRequiredAccuracy) // Only do stuff if we know where we are
 	{
 		// ******************************

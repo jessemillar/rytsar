@@ -16,6 +16,14 @@ var imgBug = new Image(84, 100)
 var imgBackArrow = new Image(38, 74)
 	imgBackArrow.src = 'images/back-arrow.png'
 
+var imgHeart = new Image(30, 30)
+	imgHeart.src = 'images/heart.png'
+
+var imgMagazineBullet = new Image(30, 14)
+	imgMagazineBullet.src = 'images/magazine-bullet.png'
+var imgBullet = new Image(14, 30)
+	imgBullet.src = 'images/bullet.png'
+
 var imgGrid = new Image(12, 12)
 	imgGrid.src = 'images/grid.png'
 
