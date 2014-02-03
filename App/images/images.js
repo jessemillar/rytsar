@@ -1,5 +1,3 @@
-// These pixel sizes are for the retina screen and are used for the 'anchor' placement.  How can I set the image size of non-retina images?
-
 var imgPlayer = new Image(68, 68)
     imgPlayer.src = 'images/player.png'
 

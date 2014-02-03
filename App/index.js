@@ -1,7 +1,26 @@
 ejecta.include('functions.js')
 ejecta.include('backend.js')
-ejecta.include('images.js')
+
+ejecta.include('images/images.js')
 ejecta.include('sounds/sounds.js')
+
+ejecta.include('scripts/draw/game.js')
+ejecta.include('scripts/draw/gameover.js')
+ejecta.include('scripts/draw/menu.js')
+ejecta.include('scripts/draw/settings.js')
+
+ejecta.include('scripts/focus/hide.js')
+ejecta.include('scripts/focus/show.js')
+
+ejecta.include('scripts/screens/game.js')
+ejecta.include('scripts/screens/gameover.js')
+ejecta.include('scripts/screens/menu.js')
+ejecta.include('scripts/screens/settings.js')
+
+ejecta.include('scripts/touches/game.js')
+ejecta.include('scripts/touches/gameover.js')
+ejecta.include('scripts/touches/menu.js')
+ejecta.include('scripts/touches/settings.js')
 
 var ctx = canvas.getContext('2d')
 var centerX = canvas.width / 2
@@ -9,6 +28,9 @@ var centerY = canvas.height / 2
 
 var fps = 60
 var debug = false // Can be toggled by tapping the screen in game mode
+
+var touchX
+var touchY
 
 var currentScreen = 'menu'
 
@@ -63,6 +85,9 @@ var timeMelee = 350
 
 var meleeDamage = 10
 
+capacity = 6 // Since we have a revolver right now
+var shotDamage = 3 // How much damage a bullet deals (change this later to be more dynamic)
+
 // General player variables
 var playerMaxHealth = 5
 var player = new Object()
@@ -70,12 +95,8 @@ var player = new Object()
 	player.row = Math.ceil(gridHeight / 2)
 	player.health = playerMaxHealth
 	player.history = new Array() // Keeps track of where the player's been on the grid
-var canBeHurt = true
-var timeHurt = 1000 // The amount of time between each damage "tick" when a zombie is close
-var capacity = 6 // Since we have a revolver right now
-var magazine = random(0, capacity - 4)
-var extraAmmo = random(0, 2)
-var shotDamage = 3 // How much damage a bullet deals (change this later to be more dynamic)
+	player.magazine = random(0, capacity - 3)
+	player.ammo = random(0, 2) // Ammo not in the gun
 
 // Color scheme
 var white = '#FFFFFF'
@@ -106,7 +127,6 @@ var menuTotalReeds = menuTotalZombies * 2
 
 var menuSize = canvas.width / 4.5
 var menuSpacing = 3.5
-var menuShadowOffset = 10
 
 var xStats = centerX - menuSize / 2 - menuSpacing
 var yStats = centerY - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
@@ -119,94 +139,34 @@ var ySettings = centerY + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 
 
 document.addEventListener('pagehide', function() // Close the connection to the server upon leaving the app
 {
-	// socket.close()
-	gps.history.length = 0
-	currentScreen = 'menu'
+	focusHide()
 })
 
-/*
 document.addEventListener('pageshow', function() // Reconnect to the server upon resuming the app
 {
-	zombies.length = 0 // Wipe the zombie database and don't reopen the connection
+	focusShow()
 })
-*/
 
 document.addEventListener('touchstart', function(ev) // Monitor touches throughout the game
 {
-	var x = ev.touches[0].pageX
-	var y = ev.touches[0].pageY
+	touchX = ev.touches[0].pageX
+	touchY = ev.touches[0].pageY
 
 	if (currentScreen == 'menu')
 	{
-		if (Math.abs(xSingle - x) * Math.abs(xSingle - x) + Math.abs(ySingle - y) * Math.abs(ySingle - y) < menuSize * menuSize)
-		{
-			musMenu.pause() // Kill the menu music before moving into the game screen
-			zombies.length = 0 // Wipe the zombie database so we can start playing with "real" zombies
-			currentScreen = 'game'
-		}
-		else if (Math.abs(xSettings - x) * Math.abs(xSettings - x) + Math.abs(ySettings - y) * Math.abs(ySettings - y) < menuSize * menuSize)
-		{
-			currentScreen = 'settings'
-		}
+		touchesMenu()
 	}
 	else if (currentScreen == 'game')
 	{
-		// debug = !debug // Toggle debug mode for framerate increase
-		/*
-		if (player.row > 1 && player.row < gridHeight)
-		{
-			player.row -= 1
-		}
-		if (player.column > 1 && player.column < gridWidth)
-		{
-			player.column -= 1
-		}
-		*/
-
-		if (gps.history.length == 0)
-		{
-			gps.history[0] = new Object()
-			gps.history[0].latitude = gps.latitude
-			gps.history[0].longitude = gps.longitude
-		}
-
-		if (y < canvas.height / 3)
-		{
-			gps.history[0].latitude -= 1
-		}
-		else if (y < canvas.height / 3 * 2)
-		{
-			if (x < canvas.width / 2)
-			{
-				gps.history[0].longitude -= 1
-			}
-			else
-			{
-				gps.history[0].longitude += 1
-			}
-		}
-		else
-		{
-			gps.history[0].latitude += 1
-		}
+		touchesGame()
 	}
 	else if (currentScreen == 'settings')
 	{
-		if (x > 10 && x < imgBackArrow.width + 10 && y > 10 && y < imgBackArrow.height + 10)
-		{
-			currentScreen = 'menu'
-		}
-
-		if (x > canvas.width / 2 - imgBug.width / 2 && x < canvas.width / 2 + imgBug.width / 2 && y > 150 - imgBug.height / 2 && y < 150 + imgBug.height / 2)
-		{
-			debug = !debug
-		}
+		touchesSettings()
 	}
 	else if (currentScreen == 'gameover')
 	{
-		zombies.length = 0 // Wipe the zombie database so we can start playing with "real" zombies
-		ammo.length = 0 // Kill the ammo packs
-		currentScreen = 'game'
+		touchesGameover()
 	}
 })
 
@@ -214,185 +174,18 @@ setInterval(function() // Main game loop
 {
 	if (currentScreen == 'menu')
 	{
-		if (zombies.length == 0) // If there are no zombies, then this is the first time through the menu code
-		{
-			musMenu.play()
-
-			for (var i = 0; i < menuTotalReeds; i++)
-			{
-				var thingy = new Object()
-				thingy.column = Math.floor(random(1, menuGridWidth))
-				thingy.row = Math.floor(random(1, menuGridHeight))
-				reeds.push(thingy)
-			}
-			
-			for (var i = 0; i < menuTotalZombies; i++)
-			{
-				var thingy = new Object()
-					thingy.name = 'zombie' + i
-					thingy.column = Math.floor(random(1, menuGridWidth))
-					thingy.row = Math.floor(random(1, menuGridHeight))
-					thingy.health = random(zombieMinHealth, zombieMaxHealth)
-					thingy.frame = random(0, 1)
-					thingy.animate = animate(thingy, slowestAnimation)
-				
-				zombies.push(thingy)
-			}
-		}
-
-		drawMenu()
+		screenMenu()
 	}
 	else if (currentScreen == 'game')
 	{
-		if (gps.latitude && gps.longitude && gps.accuracy < gpsRequiredAccuracy) // Only do stuff if we know where we are
-		{
-			// ******************************
-			// Run calculations
-			// ******************************
-
-			pickup()
-
-			// Clear the various arrays on each pass so we get fresh results
-			melee.length = 0
-			vision.length = 0
-
-			if (reeds.length == 0) // Spawn reeds if we have none currently
-			{
-				for (var i = 0; i < totalReeds; i++)
-				{
-					var thingy = new Object()
-						thingy.column = Math.floor(random(1, gridWidth))
-						thingy.row = Math.floor(random(1, gridHeight))
-					reeds.push(thingy)
-				}
-			}
-
-			if (zombies.length == 0) // Spawn zombies if we have none currently
-			{
-				for (var i = 0; i < totalZombies; i++)
-				{
-					var thingy = new Object()
-						thingy.name = 'zombie' + i
-						thingy.column = Math.floor(random(1, gridWidth))
-						thingy.row = Math.floor(random(1, gridHeight))
-						thingy.health = random(zombieMinHealth, zombieMaxHealth)
-						thingy.frame = random(0, 1)
-						thingy.animate = animate(thingy, slowestAnimation)
-						thingy.nature = Math.floor(random(0, 1))
-						thingy.hunt = hunt(thingy, random(0, 1))
-					zombies.push(thingy)
-				}
-
-				setInterval(function()
-				{
-					hurtPlayer()
-				}, 1000)
-			}
-			else // Or do things with the zombies we have
-			{
-                for (var i = 0; i < totalZombies; i++)
-                {
-                    zombies[i].distance = distance(zombies[i])
-                    zombies[i].bearing = bearing(zombies[i])
-            
-                    if ((compass - fieldOfView) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView))
-                    {
-                        if (zombies[i].distance > minShotDistance && zombies[i].distance < maxShotDistance && zombies[i].health > 0)
-                        {
-                            vision.push(zombies[i])
-                            // sfxSweep.play()
-                        }
-                    }
-                }
-            
-                if (vision.length > 0)
-                {
-                    zombies.sort(function(a, b) // Order the zombies that are in our sights according to distance
-                    {
-                        return a.distance - b.distance
-                    })
-                }
-			}
-
-			if (ammo.length == 0) // Make ammo packs if we have none
-			{
-				for (var i = 0; i < totalAmmo; i++)
-				{
-					var thingy = new Object()
-						thingy.column = Math.floor(random(1, gridWidth))
-						thingy.row = Math.floor(random(1, gridHeight))
-						thingy.count = random(ammoCountLow, ammoCountHigh)
-					ammo.push(thingy)
-				}
-			}
-
-			// ******************************
-			// Attack motions
-			// ******************************
-
-		    if (acceleration.total > accelRequiredMelee) // Melee attack!
-			{
-				if (canMelee)
-				{
-					punch()
-				}
-			}
-
-		    if (((90 - 25) < Math.abs(tilt.y)) && (Math.abs(tilt.y) < (90 + 25))) // Watch for gun orientation
-		    {
-		        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		        // Things are only set up for right handed users right now
-		        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-		        if (-rotation.y > rotateRequiredReload) // Reload
-		        {
-		            reload()
-		        }
-
-		        if (-rotation.z > rotateRequiredShoot) // Fire
-		        {
-		            fire()
-		        }
-		    }
-
-		    // ******************************
-			// Draw
-			// ******************************
-
-		    drawGame()
-		}
-		else if (gps.accuracy > 0)
-		{
-			blank(red)
-			text('Waiting for GPS lock', 3, 3, white)
-			text('Are you outside?', 3, 13, white)
-			text('Can you see the sky?', 3, 23, white)
-		}
-		else if (gps.accuracy > 15)
-		{
-			blank(red)
-			text('Current GPS accuracy of ' + gps.accuracy + ' meters is not accurate enough', 3, 3, white)
-			text('Are you outside?', 3, 13, white)
-			text('Can you see the sky?', 3, 23, white)
-		}
+		screenGame()
 	}
 	else if (currentScreen == 'settings')
 	{
-		blank(black)
-		image(imgBackArrow, 10, 10, 'normal', 0.25)
-		if (debug)
-		{
-			image(imgBug, canvas.width / 2, 150, 'center')
-		}
-		else
-		{
-			image(imgBug, canvas.width / 2, 150, 'center', 0.5)
-		}
+		screenSettings()
 	}
 	else if (currentScreen == 'gameover')
 	{
-		blank(red)
-		text('GAMEOVER', 3, 3, white)
-		text('Tap to play again', 3, 13, white)
+		screenGameover()
 	}
 }, 1000 / fps)

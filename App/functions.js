@@ -24,10 +24,10 @@ function fire()
 {
 	if (canShoot)
     {
-	    if (magazine > 0) // Don't fire if we don't have ammo
+	    if (player.magazine > 0) // Don't fire if we don't have ammo
 	    {
 	    	blank(flashColor) // Flash the screen
-	        magazine-- // Remove a bullet
+	        player.magazine-- // Remove a bullet
 	        sfxFire.play()
 	        canShoot = false
 
@@ -63,12 +63,12 @@ function reload()
 {
 	if (canShoot) // Prevent reloading during the playback of sound effects
     {
-	    if (magazine < capacity && extraAmmo > 0) // Don't reload if we already have a full magazine or if we don't have ammo to reload with
+	    if (player.magazine < capacity && player.ammo > 0) // Don't reload if we already have a full player.magazine or if we don't have ammo to reload with
 	    {
-	        while (magazine < capacity - 1 && extraAmmo > 0) // Fill the magazine with our extra ammo
+	        while (player.magazine < capacity - 1 && player.ammo > 0) // Fill the player.magazine with our extra ammo
 	        {
-	        	magazine += 1
-	        	extraAmmo -= 1
+	        	player.magazine += 1
+	        	player.ammo -= 1
 	        }
 	        sfxReload.play()
 	        canShoot = false
@@ -83,178 +83,6 @@ function reload()
 	            canShoot = true
 	        }, timeCock + timeReload)
 	    }
-	}
-}
-
-function drawMenu()
-{
-	blank(canvasColor)
-
-	// Draw the grid
-	ctx.save()
-	ctx.translate(centerX, centerY)
-	menuRotation += menuRotationSpeed // Rotate the menu
-	ctx.rotate(-menuRotation.toRad()) // Things relating to the canvas and rotation expect radians
-	for (var y = 0; y < menuGridHeight + 1; y++) // Draw the grid on the newly rotated canvas
-	{
-		for (var x = 0; x < menuGridWidth + 1; x++)
-		{
-			image(imgGrid, 0 - player.column * tileSize + x * tileSize + tileSize / 2, 0 - player.row * tileSize + y * tileSize + tileSize / 2, 'center')
-			
-			if (x < menuGridWidth && y < menuGridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
-			{
-				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
-				thingy.column = x + 1
-				thingy.row = y + 1
-				thingy.x = 0 - player.column * tileSize + x * tileSize + tileSize
-				thingy.y = 0 - player.row * tileSize + y * tileSize + tileSize
-				grid.push(thingy)
-			}
-		}
-	}
-	
-	for (var i = 0; i < reeds.length; i++)
-	{
-		gridImage(imgReed, reeds[i].column, reeds[i].row, 'anchor', 1, true)
-	}
-	
-    for (var i = 0; i < zombies.length; i++) // Draw the zombies
-    {
-		if (zombies[i].frame == 0)
-		{
-			gridImage(imgZombieLeft, zombies[i].column, zombies[i].row, 'anchor', 1, true)
-		}
-		else
-		{
-			gridImage(imgZombieLeft2, zombies[i].column, zombies[i].row, 'anchor', 1, true)
-		}
-	}
-
-	ctx.restore()
-	
-	daylight(0) // Make it night
-
-	// Logo shape and shadow
-	image(imgMenuStats, xStats, yStats, 'center')
-	image(imgMenuSingle, xSingle, ySingle, 'center')
-	image(imgMenuMulti, xMulti, yMulti, 'center')
-	image(imgMenuSettings, xSettings, ySettings, 'center')
-}
-
-function drawGame()
-{
-	grid.length = 0 // Wipe the database of pixel to grid coordinants to start fresh
-
-	blank(canvasColor) // Place draw calls after this
-
-	if (debug) // Draw the aiming cone for debugging purposes
-    {
-    	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
-    	line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
-		circle(centerX, centerY, maxShotDistance * tileSize, debugColor)
-		circle(centerX, centerY, minShotDistance * tileSize, debugColor)
-		circle(centerX, centerY, damageDistance * tileSize, debugColor)
-		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
-    }
-	
-	// Aiming cone
-	image(imgCone, centerX, centerY - imgCone.height / 2 - 15, 'center')
-
-	// Draw the grid
-	ctx.save()
-	ctx.translate(centerX, centerY)
-	ctx.rotate(-compass.toRad()) // Things relating to the canvas and rotation expect radians
-	for (var y = 0; y < gridHeight + 1; y++) // Draw the grid on the newly rotated canvas
-	{
-		for (var x = 0; x < gridWidth + 1; x++)
-		{
-			image(imgGrid, 0 - player.column * tileSize + x * tileSize + tileSize / 2, 0 - player.row * tileSize + y * tileSize + tileSize / 2, 'center')
-
-			if (x < gridWidth && y < gridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
-			{
-				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
-					thingy.column = x + 1
-					thingy.row = y + 1
-					thingy.x = 0 - player.column * tileSize + x * tileSize + tileSize
-					thingy.y = 0 - player.row * tileSize + y * tileSize + tileSize
-				grid.push(thingy)
-
-				if (debug)
-				{
-					text((x + 1) + ',' + (y + 1), x * tileSize + imgGrid.width - tileSize * gridWidth / 2, y * tileSize + imgGrid.height - tileSize * gridHeight / 2, debugColor)
-					circle((x * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), (y * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), 2, debugColor)
-				}
-			}
-		}
-	}
-
-	for (var i = 0; i < player.history.length; i++) // Draw the player's footprints to mark where they've been
-	{
-		highlight(player.history[i].column, player.history[i].row, white, 0.05)
-	}
-
-	for (var i = 0; i < reeds.length; i++)
-	{
-		gridImage(imgReed, reeds[i].column, reeds[i].row, 'anchor')
-	}
-    
-    gridImage(imgPlayer, player.column, player.row, 'anchor') // Draw the player
-
-	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
-    {
-		if (ammo[i].count > 0)
-		{
-			gridImage(imgAmmoPack, ammo[i].column, ammo[i].row, 'anchor')
-		}
-	}
-
-    for (var i = 0; i < zombies.length; i++) // Draw the zombies
-    {
-		if (zombies[i].health > 0)
-		{
-			if (zombies[i].frame == 0)
-			{
-				gridImage(imgZombieLeft, zombies[i].column, zombies[i].row, 'anchor')
-			}
-			else
-			{
-				gridImage(imgZombieLeft2, zombies[i].column, zombies[i].row, 'anchor')
-			}
-		}
-		else
-	    {
-	    	gridImage(imgZombieDead, zombies[i].column, zombies[i].row, 'anchor') // Draw dead zombies
-	    }
-	}
-
-	// gridImage(imgCloud, 5, 5, 'center') // Draw a cloud for testing purposes
-
-	ctx.restore() // Unrotate the canvas
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Things are only set up for right handed users right now
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    // Draw the compass
-    ctx.save()
-    ctx.translate(25, 25)
-    ctx.rotate(-compass.toRad())
-    image(imgCompass, 0, 0, 'center')
-    ctx.restore()
-
-    for (var i = 0; i < player.health; i++) // Draw out health
-	{
-		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, red)
-	}
-
-	for (var i = 0; i < magazine + 1; i++) // Draw the ammo in our gun
-	{
-		rectangle(canvas.width - indicatorSpacing - indicatorWidth, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, white)
-	}
-
-	for (var i = 0; i < extraAmmo + 1; i++) // Draw our extraAmmo
-	{
-		rectangle(indicatorSpacing, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, blue)
 	}
 }
 
@@ -333,7 +161,7 @@ function pickup()
 	{
 		if (ammo[i].column == player.column && ammo[i].row == player.row)
 		{
-			extraAmmo += ammo[i].count
+			player.ammo += ammo[i].count
 			ammo[i].count = 0
 		}
 	}

@@ -1,0 +1,116 @@
+function drawGame()
+{
+	grid.length = 0 // Wipe the database of pixel to grid coordinants to start fresh
+
+	blank(canvasColor) // Place draw calls after this
+
+	if (debug) // Draw the aiming cone for debugging purposes
+    {
+    	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
+    	line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
+		circle(centerX, centerY, maxShotDistance * tileSize, debugColor)
+		circle(centerX, centerY, minShotDistance * tileSize, debugColor)
+		circle(centerX, centerY, damageDistance * tileSize, debugColor)
+		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
+    }
+	
+	// Aiming cone
+	image(imgCone, centerX, centerY - imgCone.height / 2 - 15, 'center')
+
+	// Draw the grid
+	ctx.save()
+	ctx.translate(centerX, centerY)
+	ctx.rotate(-compass.toRad()) // Things relating to the canvas and rotation expect radians
+	for (var y = 0; y < gridHeight + 1; y++) // Draw the grid on the newly rotated canvas
+	{
+		for (var x = 0; x < gridWidth + 1; x++)
+		{
+			image(imgGrid, 0 - player.column * tileSize + x * tileSize + tileSize / 2, 0 - player.row * tileSize + y * tileSize + tileSize / 2, 'center')
+
+			if (x < gridWidth && y < gridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
+			{
+				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
+					thingy.column = x + 1
+					thingy.row = y + 1
+					thingy.x = 0 - player.column * tileSize + x * tileSize + tileSize
+					thingy.y = 0 - player.row * tileSize + y * tileSize + tileSize
+				grid.push(thingy)
+
+				if (debug)
+				{
+					text((x + 1) + ',' + (y + 1), x * tileSize + imgGrid.width - tileSize * gridWidth / 2, y * tileSize + imgGrid.height - tileSize * gridHeight / 2, debugColor)
+					circle((x * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), (y * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), 2, debugColor)
+				}
+			}
+		}
+	}
+
+	for (var i = 0; i < player.history.length; i++) // Draw the player's footprints to mark where they've been
+	{
+		highlight(player.history[i].column, player.history[i].row, white, 0.05)
+	}
+
+	for (var i = 0; i < reeds.length; i++)
+	{
+		gridImage(imgReed, reeds[i].column, reeds[i].row, 'anchor')
+	}
+    
+    gridImage(imgPlayer, player.column, player.row, 'anchor') // Draw the player
+
+	for (var i = 0; i < ammo.length; i++) // Draw the ammo packs
+    {
+		if (ammo[i].count > 0)
+		{
+			gridImage(imgAmmoPack, ammo[i].column, ammo[i].row, 'anchor')
+		}
+	}
+
+    for (var i = 0; i < zombies.length; i++) // Draw the zombies
+    {
+		if (zombies[i].health > 0)
+		{
+			if (zombies[i].frame == 0)
+			{
+				gridImage(imgZombieLeft, zombies[i].column, zombies[i].row, 'anchor')
+			}
+			else
+			{
+				gridImage(imgZombieLeft2, zombies[i].column, zombies[i].row, 'anchor')
+			}
+		}
+		else
+	    {
+	    	gridImage(imgZombieDead, zombies[i].column, zombies[i].row, 'anchor') // Draw dead zombies
+	    }
+	}
+
+	// gridImage(imgCloud, 5, 5, 'center') // Draw a cloud for testing purposes
+
+	ctx.restore() // Unrotate the canvas
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // Things are only set up for right handed users right now
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    // Draw the compass
+    ctx.save()
+    ctx.translate(25, 25)
+    ctx.rotate(-compass.toRad())
+    image(imgCompass, 0, 0, 'center')
+    ctx.restore()
+
+    for (var i = 0; i < player.health; i++) // Draw out health
+	{
+		rectangle(canvas.width - indicatorSpacing - indicatorWidth, indicatorSpacing + (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, red)
+	}
+
+	for (var i = 0; i < player.magazine + 1; i++) // Draw the ammo in our gun
+	{
+		rectangle(canvas.width - indicatorSpacing - indicatorWidth, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, white)
+	}
+
+	for (var i = 0; i < player.ammo + 1; i++) // Draw our extraAmmo
+	{
+		rectangle(indicatorSpacing, canvas.height - (indicatorHeight + indicatorSpacing) * i, indicatorWidth, indicatorHeight, blue)
+	}
+}
