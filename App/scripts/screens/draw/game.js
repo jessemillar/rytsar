@@ -11,7 +11,7 @@ function drawGame()
 		circle(centerX, centerY, maxShotDistance * tileSize, debugColor)
 		circle(centerX, centerY, minShotDistance * tileSize, debugColor)
 		circle(centerX, centerY, damageDistance * tileSize, debugColor)
-		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + indicatorWidth, canvas.height - 10, debugColor)
+		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + imgBullet.width, canvas.height - 10, debugColor)
     }
 	
 	// Aiming cone
