@@ -13,13 +13,8 @@ var imgMenuSettings = new Image(284, 284)
 var imgBug = new Image(84, 100)
 	imgBug.src = 'images/bug.png'
 
-var imgBackArrow = new Image(150, 94)
+var imgBackArrow = new Image(38, 74)
 	imgBackArrow.src = 'images/back-arrow.png'
-
-var imgSwitchOn = new Image(100, 150)
-	imgSwitchOn.src = 'images/switch-on.png'
-var imgSwitchOff = new Image(100, 150)
-	imgSwitchOff.src = 'images/switch-off.png'
 
 var imgGrid = new Image(12, 12)
 	imgGrid.src = 'images/grid.png'
@@ -32,9 +27,6 @@ var imgCone = new Image(332, 354)
 
 var imgReed = new Image(68, 68)
 	imgReed.src = 'images/reed.png'
-
-var imgFootprints = new Image(64, 64)
-	imgFootprints.src = 'images/footprints.png'
 
 var imgCloud = new Image(760, 760)
 	imgCloud.src = 'images/cloud.png'

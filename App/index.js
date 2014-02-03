@@ -1,32 +1,40 @@
-ejecta.include('functions.js')
-ejecta.include('backend.js')
+// --------------------------------------------------------------
+// External scripts
+// --------------------------------------------------------------
 
 ejecta.include('images/images.js')
 ejecta.include('sounds/sounds.js')
 
-ejecta.include('scripts/draw/game.js')
-ejecta.include('scripts/draw/gameover.js')
-ejecta.include('scripts/draw/menu.js')
-ejecta.include('scripts/draw/settings.js')
+ejecta.include('scripts/backend.js')
+ejecta.include('scripts/functions.js')
+ejecta.include('scripts/sensors.js')
+ejecta.include('scripts/visuals.js')
+ejecta.include('scripts/weapons.js')
 
 ejecta.include('scripts/focus/hide.js')
 ejecta.include('scripts/focus/show.js')
 
 ejecta.include('scripts/screens/game.js')
+	ejecta.include('scripts/screens/draw/game.js')
+	ejecta.include('scripts/screens/touches/game.js')
 ejecta.include('scripts/screens/gameover.js')
+	ejecta.include('scripts/screens/draw/gameover.js')
+	ejecta.include('scripts/screens/touches/gameover.js')
 ejecta.include('scripts/screens/menu.js')
+	ejecta.include('scripts/screens/draw/menu.js')
+	ejecta.include('scripts/screens/touches/menu.js')
 ejecta.include('scripts/screens/settings.js')
+	ejecta.include('scripts/screens/draw/settings.js')
+	ejecta.include('scripts/screens/touches/settings.js')
 
-ejecta.include('scripts/touches/game.js')
-ejecta.include('scripts/touches/gameover.js')
-ejecta.include('scripts/touches/menu.js')
-ejecta.include('scripts/touches/settings.js')
+// --------------------------------------------------------------
+// Global variables
+// --------------------------------------------------------------
 
 var ctx = canvas.getContext('2d')
 var centerX = canvas.width / 2
 var centerY = canvas.height / 2
 
-var fps = 60
 var debug = false // Can be toggled by tapping the screen in game mode
 
 var touchX
@@ -83,10 +91,9 @@ var timeCock = 450
 var canMelee = true
 var timeMelee = 350
 
-var meleeDamage = 10
-
-capacity = 6 // Since we have a revolver right now
+var gunCapacity = 6 // Since we have a revolver right now
 var shotDamage = 3 // How much damage a bullet deals (change this later to be more dynamic)
+var meleeDamage = 10
 
 // General player variables
 var playerMaxHealth = 5
@@ -94,9 +101,9 @@ var player = new Object()
 	player.column = Math.ceil(gridWidth / 2)
 	player.row = Math.ceil(gridHeight / 2)
 	player.health = playerMaxHealth
-	player.history = new Array() // Keeps track of where the player's been on the grid
-	player.magazine = random(0, capacity - 3)
+	player.magazine = random(0, gunCapacity - 3)
 	player.ammo = random(0, 2) // Ammo not in the gun
+	player.history = new Array() // Keeps track of where the player's been on the grid
 
 // Color scheme
 var white = '#FFFFFF'
@@ -106,43 +113,45 @@ var blue = '#7FDBFF'
 var navy = '#001F3F'
 var red = '#FF4136'
 
-// UI values
+// General UI values
 var canvasColor = green
 var flashColor = red
 var debugColor = blue
 
 var darkestNight = 0.5 // The deepest night value possible
 
-// Remove once I pixel out indicator images
+// Remove once I pixel out indicator images (health bar, ammo bar, etc.)
 var indicatorWidth = 15
 var indicatorHeight = 7
 var indicatorSpacing = 5
 
-var menuGridWidth = 19 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
+var menuGridWidth = 19
 var menuGridHeight = menuGridWidth
 var menuRotation = 0
 var menuRotationSpeed = 0.035
-var menuTotalZombies = 35
+var menuTotalZombies = 40
 var menuTotalReeds = menuTotalZombies * 2
 
-var menuSize = canvas.width / 4.5
-var menuSpacing = 3.5
+// Magic numbers ahoy!
+var xStats = centerX - canvas.width / 4.5 / 2 - 3.5
+var yStats = centerY - canvas.width / 4.5 / 2 - 3.5 - canvas.width / 4.5 - 3.5 * 2
+var xSingle = centerX + canvas.width / 4.5 / 2 + 3.5
+var ySingle = centerY - canvas.width / 4.5 / 2 - 3.5
+var xMulti = centerX - canvas.width / 4.5 / 2 - 3.5
+var yMulti = centerY + canvas.width / 4.5 / 2 + 3.5
+var xSettings = centerX + canvas.width / 4.5 / 2 + 3.5
+var ySettings = centerY + canvas.width / 4.5 / 2 + 3.5 + canvas.width / 4.5 + 3.5 * 2
 
-var xStats = centerX - menuSize / 2 - menuSpacing
-var yStats = centerY - menuSize / 2 - menuSpacing - menuSize - menuSpacing * 2
-var xSingle = centerX + menuSize / 2 + menuSpacing
-var ySingle = centerY - menuSize / 2 - menuSpacing
-var xMulti = centerX - menuSize / 2 - menuSpacing
-var yMulti = centerY + menuSize / 2 + menuSpacing
-var xSettings = centerX + menuSize / 2 + menuSpacing
-var ySettings = centerY + menuSize / 2 + menuSpacing + menuSize + menuSpacing * 2
+// --------------------------------------------------------------
+// Game "skeleton" (events referencing external functions)
+// --------------------------------------------------------------
 
-document.addEventListener('pagehide', function() // Close the connection to the server upon leaving the app
+document.addEventListener('pagehide', function()
 {
 	focusHide()
 })
 
-document.addEventListener('pageshow', function() // Reconnect to the server upon resuming the app
+document.addEventListener('pageshow', function()
 {
 	focusShow()
 })
@@ -170,7 +179,7 @@ document.addEventListener('touchstart', function(ev) // Monitor touches througho
 	}
 })
 
-setInterval(function() // Main game loop
+setInterval(function() // Main game loop at 60 frames per second
 {
 	if (currentScreen == 'menu')
 	{
@@ -188,4 +197,4 @@ setInterval(function() // Main game loop
 	{
 		screenGameover()
 	}
-}, 1000 / fps)
+}, 1000 / 60)

@@ -7,6 +7,7 @@ function screenGame()
 		// ******************************
 
 		pickup()
+		gpsMove() // Check if we've moved far enough in the real world to mandate a player position change
 
 		// Clear the various arrays on each pass so we get fresh results
 		melee.length = 0
@@ -117,7 +118,7 @@ function screenGame()
 
 	    drawGame()
 	}
-	else if (gps.accuracy > 0)
+	else if (gps.accuracy == 0)
 	{
 		blank(red)
 		text('Waiting for GPS lock', 3, 3, white)

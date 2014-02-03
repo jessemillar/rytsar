@@ -7,8 +7,9 @@ function screenMenu()
 		for (var i = 0; i < menuTotalReeds; i++)
 		{
 			var thingy = new Object()
-			thingy.column = Math.floor(random(1, menuGridWidth))
-			thingy.row = Math.floor(random(1, menuGridHeight))
+				thingy.column = Math.floor(random(1, menuGridWidth))
+				thingy.row = Math.floor(random(1, menuGridHeight))
+
 			reeds.push(thingy)
 		}
 		
@@ -18,7 +19,6 @@ function screenMenu()
 				thingy.name = 'zombie' + i
 				thingy.column = Math.floor(random(1, menuGridWidth))
 				thingy.row = Math.floor(random(1, menuGridHeight))
-				thingy.health = random(zombieMinHealth, zombieMaxHealth)
 				thingy.frame = random(0, 1)
 				thingy.animate = animate(thingy, slowestAnimation)
 			

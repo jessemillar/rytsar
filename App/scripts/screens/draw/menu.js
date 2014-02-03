@@ -1,11 +1,12 @@
 function drawMenu()
 {
+	menuRotation += menuRotationSpeed // Rotate the menu
+	grid.length = 0
+	
 	blank(canvasColor)
 
-	// Draw the grid
 	ctx.save()
 	ctx.translate(centerX, centerY)
-	menuRotation += menuRotationSpeed // Rotate the menu
 	ctx.rotate(-menuRotation.toRad()) // Things relating to the canvas and rotation expect radians
 	for (var y = 0; y < menuGridHeight + 1; y++) // Draw the grid on the newly rotated canvas
 	{
@@ -16,10 +17,11 @@ function drawMenu()
 			if (x < menuGridWidth && y < menuGridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
 			{
 				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
-				thingy.column = x + 1
-				thingy.row = y + 1
-				thingy.x = 0 - player.column * tileSize + x * tileSize + tileSize
-				thingy.y = 0 - player.row * tileSize + y * tileSize + tileSize
+					thingy.column = x + 1
+					thingy.row = y + 1
+					thingy.x = 0 - player.column * tileSize + x * tileSize + tileSize
+					thingy.y = 0 - player.row * tileSize + y * tileSize + tileSize
+
 				grid.push(thingy)
 			}
 		}
