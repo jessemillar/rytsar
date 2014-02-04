@@ -7,9 +7,11 @@ ejecta.include('sounds/sounds.js')
 
 ejecta.include('scripts/backend.js')
 ejecta.include('scripts/functions.js')
+ejecta.include('scripts/player.js')
 ejecta.include('scripts/sensors.js')
 ejecta.include('scripts/visuals.js')
 ejecta.include('scripts/weapons.js')
+ejecta.include('scripts/zombies.js')
 
 ejecta.include('screens/focus/hide.js')
 ejecta.include('screens/focus/show.js')
@@ -20,6 +22,9 @@ ejecta.include('screens/game.js')
 ejecta.include('screens/gameover.js')
 	ejecta.include('screens/draw/gameover.js')
 	ejecta.include('screens/touches/gameover.js')
+ejecta.include('screens/gps.js')
+	ejecta.include('screens/draw/gps.js')
+	ejecta.include('screens/touches/gps.js')
 ejecta.include('screens/menu.js')
 	ejecta.include('screens/draw/menu.js')
 	ejecta.include('screens/touches/menu.js')
@@ -44,7 +49,7 @@ var currentScreen = 'menu'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
 var tileSize = 45
-var gridWidth = 21 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
+var gridWidth = 25 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
 var gridHeight = gridWidth
 
 var tileSizeMeters = 10
@@ -62,14 +67,14 @@ var minShotDistance = 0 // ...in meters
 var damageDistance = 0 // ...in meters
 var fieldOfView = 25 // ...in degrees
 
-var totalZombies = 10
+var totalZombies = 25
 var totalAmmo = totalZombies / 2
-var totalReeds = totalZombies * 5
+var totalReeds = totalZombies * 7
 
 var zombieMinHealth = 2
 var zombieMaxHealth = 3
-var zombieSlowest = 5000 // Longest time possible for zombies to move to a new square
-var zombieFastest = 3000 // Shortest time possible for zombies to move to a new square
+var zombieSlowest = 6500 // Longest time possible for zombies to move to a new square
+var zombieFastest = 4500 // Shortest time possible for zombies to move to a new square
 
 var slowestAnimation = 800 // The longest time possible between animation frames
 
@@ -131,6 +136,9 @@ var menuRotationSpeed = 0.035
 var menuTotalZombies = 40
 var menuTotalReeds = menuTotalZombies * 2
 
+var gpsRotation = 0 // Make the satellite icon rotate to indicate that we're looking for a lock
+var gpsRotationSpeed = 0.2
+
 // Magic numbers ahoy!
 var xStats = centerX - canvas.width / 4.5 / 2 - 3.5
 var yStats = centerY - canvas.width / 4.5 / 2 - 3.5 - canvas.width / 4.5 - 3.5 * 2
@@ -155,7 +163,7 @@ document.addEventListener('pageshow', function()
 	focusShow()
 })
 
-document.addEventListener('touchstart', function(ev) // Monitor touches throughout the game
+document.addEventListener('touchstart', function(ev) // Monitor touchstarts throughout the game
 {
 	touchX = ev.touches[0].pageX
 	touchY = ev.touches[0].pageY
@@ -167,6 +175,10 @@ document.addEventListener('touchstart', function(ev) // Monitor touches througho
 	else if (currentScreen == 'game')
 	{
 		touchesGame()
+	}
+	else if (currentScreen == 'gps')
+	{
+		touchesGPS()
 	}
 	else if (currentScreen == 'settings')
 	{
@@ -187,6 +199,10 @@ setInterval(function() // Main game loop at 60 frames per second
 	else if (currentScreen == 'game')
 	{
 		screenGame()
+	}
+	else if (currentScreen == 'gps')
+	{
+		screenGPS()
 	}
 	else if (currentScreen == 'settings')
 	{

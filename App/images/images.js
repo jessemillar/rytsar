@@ -16,6 +16,9 @@ var imgBug = new Image(84, 100)
 var imgSkull = new Image(160, 160)
 	imgSkull.src = 'images/skull.png'
 
+var imgSatellite = new Image(150, 150)
+	imgSatellite.src = 'images/satellite.png'
+
 var imgBackArrow = new Image(38, 74)
 	imgBackArrow.src = 'images/back-arrow.png'
 

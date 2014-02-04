@@ -1,0 +1,4 @@
+function touchesGPS()
+{
+	currentScreen = 'menu'
+}

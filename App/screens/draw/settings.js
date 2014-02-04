@@ -1,6 +1,6 @@
 function drawSettings()
 {
-	blank(navy)
+	blank(black)
 	image(imgBackArrow, 10, 10, 'normal')
 	if (debug)
 	{

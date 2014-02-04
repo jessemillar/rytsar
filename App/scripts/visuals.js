@@ -1,3 +1,9 @@
+function blank(color)
+{
+	ctx.fillStyle = color
+	ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
+
 function animate(thingy, time) // Use a function outside of the zombie generation to animate so the function can remember the name of the zombie that's animating
 {
 	setInterval(function()
@@ -42,11 +48,9 @@ function highlight(column, row, color, alpha)
 	}
 }
 
-function blank(color)
-{
-	ctx.fillStyle = color
-	ctx.fillRect(0, 0, canvas.width, canvas.height)
-}
+// ------------------------
+// Shapes
+// ------------------------
 
 function rectangle(x, y, width, height, color, alpha)
 {
@@ -115,6 +119,10 @@ function text(message, x, y, color, alpha)
 	ctx.fillStyle = color
 	ctx.fillText(message, x, y + 7)
 }
+
+// ------------------------
+// Images
+// ------------------------
 
 function image(image, x, y, anchor, alpha)
 {

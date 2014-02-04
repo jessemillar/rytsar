@@ -18,32 +18,9 @@ function screenGame()
 		melee.length = 0
 		vision.length = 0
 
-		if (reeds.length == 0) // Spawn reeds if we have none currently
-		{
-			for (var i = 0; i < totalReeds; i++)
-			{
-				var thingy = new Object()
-					thingy.column = Math.floor(random(1, gridWidth))
-					thingy.row = Math.floor(random(1, gridHeight))
-				reeds.push(thingy)
-			}
-		}
-
 		if (zombies.length == 0) // Spawn zombies if we have none currently
 		{
-			for (var i = 0; i < totalZombies; i++)
-			{
-				var thingy = new Object()
-					thingy.name = 'zombie' + i
-					thingy.column = Math.floor(random(1, gridWidth))
-					thingy.row = Math.floor(random(1, gridHeight))
-					thingy.health = random(zombieMinHealth, zombieMaxHealth)
-					thingy.frame = random(0, 1)
-					thingy.animate = animate(thingy, slowestAnimation)
-					thingy.nature = Math.floor(random(0, 1))
-					thingy.hunt = hunt(thingy, random(0, 1))
-				zombies.push(thingy)
-			}
+			makeZombies()
 
 			if (!hurtPlayerTimer)
 			{
@@ -56,17 +33,29 @@ function screenGame()
 		}
 		else // Or do things with the zombies we have
 		{
-            for (var i = 0; i < totalZombies; i++)
+            for (var i = 0; i < zombies.length; i++)
             {
                 zombies[i].distance = distance(zombies[i])
                 zombies[i].bearing = bearing(zombies[i])
         
+                if (zombies[i].column == player.column && zombies[i].row == player.row && zombies[i].health > 0)
+				{
+					melee.push(zombies[i])
+				}
+
                 if ((compass - fieldOfView) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView))
                 {
                     if (zombies[i].distance > minShotDistance && zombies[i].distance < maxShotDistance && zombies[i].health > 0)
                     {
                         vision.push(zombies[i])
-                        // sfxSweep.play()
+                    }
+                }
+
+                if ((compass - fieldOfView / 3) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView / 3))
+                {
+                    if (zombies[i].distance > minShotDistance && zombies[i].distance < maxShotDistance && zombies[i].health > 0)
+                    {
+                        sfxSweep.play()
                     }
                 }
             }
@@ -82,14 +71,12 @@ function screenGame()
 
 		if (ammo.length == 0) // Make ammo packs if we have none
 		{
-			for (var i = 0; i < totalAmmo; i++)
-			{
-				var thingy = new Object()
-					thingy.column = Math.floor(random(1, gridWidth))
-					thingy.row = Math.floor(random(1, gridHeight))
-					thingy.count = random(ammoCountLow, ammoCountHigh)
-				ammo.push(thingy)
-			}
+			makeAmmo()
+		}
+
+		if (reeds.length == 0) // Spawn reeds if we have none currently
+		{
+			makeReeds()
 		}
 
 		// ******************************
@@ -127,18 +114,8 @@ function screenGame()
 
 	    drawGame()
 	}
-	else if (gps.accuracy == 0)
+	else if (gps.accuracy == 0 || gps.accuracy > gpsRequiredAccuracy)
 	{
-		blank(red)
-		text('Waiting for GPS lock', 3, 3, white)
-		text('Are you outside?', 3, 13, white)
-		text('Can you see the sky?', 3, 23, white)
-	}
-	else if (gps.accuracy > 15)
-	{
-		blank(red)
-		text('Current GPS accuracy of ' + gps.accuracy + ' meters is not accurate enough', 3, 3, white)
-		text('Are you outside?', 3, 13, white)
-		text('Can you see the sky?', 3, 23, white)
+		currentScreen = 'gps'
 	}
 }
