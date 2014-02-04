@@ -5,6 +5,7 @@
 ejecta.include('images/images.js')
 ejecta.include('sounds/sounds.js')
 
+ejecta.include('scripts/audio.js')
 ejecta.include('scripts/backend.js')
 ejecta.include('scripts/functions.js')
 ejecta.include('scripts/player.js')

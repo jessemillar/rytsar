@@ -3,8 +3,8 @@ function screenMenu()
 	if (zombies.length == 0) // If there are no zombies, then this is the first time through the menu code
 	{
 		sfxFlatline.pause()
-		sfxFlatline.currentTime = 0
-		musMenu.currentTime = 0
+		rewind(sfxFlatline)
+		rewind(musMenu)
 		musMenu.play()
 
 		for (var i = 0; i < menuTotalReeds; i++)

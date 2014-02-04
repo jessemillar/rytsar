@@ -2,7 +2,7 @@ function touchesMenu()
 {
 	if (Math.abs(xSingle - touchX) * Math.abs(xSingle - touchX) + Math.abs(ySingle - touchY) * Math.abs(ySingle - touchY) < canvas.width / 4.5 * canvas.width / 4.5)
 	{
-		musMenu.pause() // Kill the menu music before moving into the game screen
+		fadeOut(musMenu, 250)
 		reset()
 		currentScreen = 'game'
 	}
