@@ -95,8 +95,9 @@ function drawGame()
     // Draw the compass
     ctx.save()
     ctx.translate(25, 25)
+    image(imgCompassBack, 0, 0, 'center')
     ctx.rotate(-compass.toRad())
-    image(imgCompass, 0, 0, 'center')
+    image(imgCompassNeedle, 0, 0, 'center')
     ctx.restore()
 
     for (var i = 0; i < player.health; i++) // Draw out health

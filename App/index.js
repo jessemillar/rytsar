@@ -11,21 +11,21 @@ ejecta.include('scripts/sensors.js')
 ejecta.include('scripts/visuals.js')
 ejecta.include('scripts/weapons.js')
 
-ejecta.include('scripts/focus/hide.js')
-ejecta.include('scripts/focus/show.js')
+ejecta.include('screens/focus/hide.js')
+ejecta.include('screens/focus/show.js')
 
-ejecta.include('scripts/screens/game.js')
-	ejecta.include('scripts/screens/draw/game.js')
-	ejecta.include('scripts/screens/touches/game.js')
-ejecta.include('scripts/screens/gameover.js')
-	ejecta.include('scripts/screens/draw/gameover.js')
-	ejecta.include('scripts/screens/touches/gameover.js')
-ejecta.include('scripts/screens/menu.js')
-	ejecta.include('scripts/screens/draw/menu.js')
-	ejecta.include('scripts/screens/touches/menu.js')
-ejecta.include('scripts/screens/settings.js')
-	ejecta.include('scripts/screens/draw/settings.js')
-	ejecta.include('scripts/screens/touches/settings.js')
+ejecta.include('screens/game.js')
+	ejecta.include('screens/draw/game.js')
+	ejecta.include('screens/touches/game.js')
+ejecta.include('screens/gameover.js')
+	ejecta.include('screens/draw/gameover.js')
+	ejecta.include('screens/touches/gameover.js')
+ejecta.include('screens/menu.js')
+	ejecta.include('screens/draw/menu.js')
+	ejecta.include('screens/touches/menu.js')
+ejecta.include('screens/settings.js')
+	ejecta.include('screens/draw/settings.js')
+	ejecta.include('screens/touches/settings.js')
 
 // --------------------------------------------------------------
 // Global variables
@@ -62,9 +62,9 @@ var minShotDistance = 0 // ...in meters
 var damageDistance = 0 // ...in meters
 var fieldOfView = 25 // ...in degrees
 
-var totalZombies = 15
-var totalAmmo = totalZombies / 3
-var totalReeds = totalZombies * 3
+var totalZombies = 10
+var totalAmmo = totalZombies / 2
+var totalReeds = totalZombies * 5
 
 var zombieMinHealth = 2
 var zombieMaxHealth = 3
@@ -104,6 +104,8 @@ var player = new Object()
 	player.magazine = random(0, gunCapacity - 3)
 	player.ammo = random(0, 2) // Ammo not in the gun
 	player.history = new Array() // Keeps track of where the player's been on the grid
+
+var hurtPlayerTimer = false // Used to keep track of whether or not we've started an interval timer to hurt the player
 
 // Color scheme
 var white = '#FFFFFF'

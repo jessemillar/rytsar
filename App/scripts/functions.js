@@ -1,3 +1,16 @@
+function reset()
+{
+	zombies.length = 0 // Wipe the zombie database so we can start playing with "real" zombies
+	reeds.length = 0 // Kill the reeds too
+	ammo.length = 0 // Wipe the ammo packs
+	player.column = Math.ceil(gridWidth / 2)
+	player.row = Math.ceil(gridHeight / 2)
+	player.health = playerMaxHealth
+	player.magazine = random(0, gunCapacity - 3)
+	player.ammo = random(0, 2) // Ammo not in the gun
+	player.history.length = 0
+}
+
 function hunt(zombie, time) // Use an external function (outside of zombie creation) to move the zombie toward the player
 {
 	var speed = time * zombieSlowest
@@ -82,7 +95,7 @@ function hurtPlayer()
 				player.health -= 1
 				sfxHurt.play()
 			}
-			else
+			else if (player.health == 1)
 			{
 				player.health -= 1
 				sfxFlatline.play()

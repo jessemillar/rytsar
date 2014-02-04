@@ -13,13 +13,16 @@ var imgMenuSettings = new Image(284, 284)
 var imgBug = new Image(84, 100)
 	imgBug.src = 'images/bug.png'
 
+var imgSkull = new Image(160, 160)
+	imgSkull.src = 'images/skull.png'
+
 var imgBackArrow = new Image(38, 74)
 	imgBackArrow.src = 'images/back-arrow.png'
 
 var imgHeart = new Image(30, 30)
 	imgHeart.src = 'images/heart.png'
 
-var imgMagazineBullet = new Image(30, 14)
+var imgMagazineBullet = new Image(60, 28)
 	imgMagazineBullet.src = 'images/magazine-bullet.png'
 var imgBullet = new Image(14, 30)
 	imgBullet.src = 'images/bullet.png'
@@ -27,8 +30,10 @@ var imgBullet = new Image(14, 30)
 var imgGrid = new Image(12, 12)
 	imgGrid.src = 'images/grid.png'
 
-var imgCompass = new Image(70, 70)
-	imgCompass.src = 'images/compass.png'
+var imgCompassNeedle = new Image(70, 70)
+	imgCompassNeedle.src = 'images/compass-needle.png'
+var imgCompassBack = new Image(70, 70)
+	imgCompassBack.src = 'images/compass-back.png'
 
 var imgCone = new Image(332, 354)
 	imgCone.src = 'images/cone.png'

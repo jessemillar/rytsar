@@ -45,10 +45,14 @@ function screenGame()
 				zombies.push(thingy)
 			}
 
-			setInterval(function()
+			if (!hurtPlayerTimer)
 			{
-				hurtPlayer()
-			}, 1000)
+				setInterval(function()
+				{
+					hurtPlayer()
+				}, 1000)
+				hurtPlayerTimer = true
+			}
 		}
 		else // Or do things with the zombies we have
 		{
