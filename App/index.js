@@ -95,7 +95,7 @@ var ammoCountHigh = 3
 // How much motion is required for certain actions
 var rotateRequiredShoot = 400
 var rotateRequiredReload = 500 // Set higher than needed to prevent accidental reloading
-var accelRequiredMelee = 50
+var accelRequiredMelee = 65
 
 // Keep the sound effects in line by setting their "length"
 var canShoot = true
@@ -105,6 +105,8 @@ var timeReload = 1100 // canShoot manages timeReload
 var timeCock = 450
 var canMelee = true
 var timeMelee = 350
+var canBeep = true
+var timeBeep = 500
 
 var gunCapacity = 6 // Since we have a revolver right now
 var shotDamage = 3 // How much damage a bullet deals (change this later to be more dynamic)

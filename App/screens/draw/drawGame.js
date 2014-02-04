@@ -6,10 +6,12 @@ function drawGame()
 
 	if (debug) // Draw the aiming cone for debugging purposes
     {
+    	/*
     	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
     	line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
 		circle(centerX, centerY, maxShotDistance * tileSize, debugColor)
 		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + imgBullet.width, canvas.height - 10, debugColor)
+    	*/
     }
 	
 	// Aiming cone
@@ -26,7 +28,7 @@ function drawGame()
 			var positionX = 0 - player.column * tileSize + x * tileSize + tileSize / 2
 			var positionY = 0 - player.row * tileSize + y * tileSize + tileSize / 2
 
-			gridCross(imgGrid, positionX, positionY, 'center')
+			// gridCross(imgGrid, positionX, positionY, 'center')
 
 			if (x < gridWidth && y < gridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
 			{

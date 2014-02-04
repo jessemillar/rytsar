@@ -51,11 +51,22 @@ function screenGame()
                     }
                 }
 
+               	// Beep when we're looking at a zombie
                 if ((compass - fieldOfView / 3) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView / 3))
                 {
                     if (zombies[i].distance > minShotDistance && zombies[i].distance < maxShotDistance && zombies[i].health > 0)
                     {
-                        sfxSweep.play()
+                    	if (canBeep)
+                    	{
+                    		sfxSweep.play()
+
+	                        canBeep = false
+
+							setTimeout(function()
+						    {
+						    	canBeep = true
+						    }, timeBeep)
+                    	}
                     }
                 }
             }
