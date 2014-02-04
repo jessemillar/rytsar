@@ -38,7 +38,18 @@ document.addEventListener('devicemotion', function(motion)
 	acceleration.total = Math.abs(acceleration.x + acceleration.y + acceleration.z)
 }, true)
 
-navigator.geolocation.watchPosition(function(position)
+navigator.geolocation.watchPosition(gpsSuccess, gpsError)
+
+function gpsError(error)
+{
+    if (error.code === navigator.geolocation.PERMISSION_DENIED)
+    {
+    	currentScreen = 'gps'
+	    console.log('GPS Error', error.code, error.message)
+	}
+}
+
+function gpsSuccess(position)
 {
 	gps.latitude = position.coords.latitude
 	gps.longitude = position.coords.longitude
@@ -73,4 +84,4 @@ navigator.geolocation.watchPosition(function(position)
     {
     	compass = position.coords.heading
     }
-})
+}

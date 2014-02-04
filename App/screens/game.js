@@ -7,6 +7,8 @@ function screenGame()
 
 	if (gps.latitude && gps.longitude && gps.accuracy < gpsRequiredAccuracy) // Only do stuff if we know where we are
 	{
+		fadeOut(musMenu, 250) // Fade out the menu music
+
 		// ******************************
 		// Run calculations
 		// ******************************

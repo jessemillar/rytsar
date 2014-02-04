@@ -62,21 +62,21 @@ var musMenu = document.createElement('audio')
 // sounds/player/
 // --------------------------
 var sfxFlatline = document.createElement('audio')
-	sfxFlatline.src = 'sounds/flatline.mp3'
+	sfxFlatline.src = 'sounds/player/flatline.mp3'
 	sfxFlatline.preload = true
 	sfxFlatline.loop = false
 	sfxFlatline.volume = 1
 	sfxFlatline.load()
 	document.body.appendChild(sfxFlatline)
 var sfxHurt = document.createElement('audio')
-	sfxHurt.src = 'sounds/hurt.wav'
+	sfxHurt.src = 'sounds/player/hurt.wav'
 	sfxHurt.preload = true
 	sfxHurt.loop = false
 	sfxHurt.volume = 1
 	sfxHurt.load()
 	document.body.appendChild(sfxHurt)
 var sfxPunch = document.createElement('audio')
-	sfxPunch.src = 'sounds/punch.mp3'
+	sfxPunch.src = 'sounds/player/punch.mp3'
 	sfxPunch.preload = true
 	sfxPunch.loop = false
 	sfxPunch.volume = 1
