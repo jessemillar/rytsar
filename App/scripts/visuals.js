@@ -124,8 +124,25 @@ function text(message, x, y, color, alpha)
 // Images
 // ------------------------
 
-function image(image, x, y, anchor, alpha)
+function gridCross(image, x, y, anchor, alpha)
 {
+	if (x > (0 - canvasRadius) && x < canvasRadius && y > (0 - canvasRadius) && y < canvasRadius)
+	{
+		if (alpha)
+		{
+			ctx.globalAlpha = alpha
+		}
+		else
+		{
+			ctx.globalAlpha = 1
+		}
+
+		ctx.drawImage(image, x - image.width / 2, y - image.height / 2)
+	}
+}
+
+function image(image, x, y, anchor, alpha)
+{	
 	if (alpha)
 	{
 		ctx.globalAlpha = alpha
@@ -145,7 +162,14 @@ function image(image, x, y, anchor, alpha)
 	}
 	else if (anchor == 'anchor')
 	{
-		ctx.drawImage(image, x - image.width / 2, y - image.height * 0.75)
+		if (image.anchorX && image.anchorY)
+		{
+			ctx.drawImage(image, x - image.anchorX, y - image.anchorY)
+		}
+		else
+		{
+			ctx.drawImage(image, x - image.width / 2, y - image.height * 0.75)
+		}
 	}
 }
 
@@ -155,57 +179,60 @@ function gridImage(image, column, row, anchor, alpha, menu)
 	{
 		if (grid[i].column == column && grid[i].row == row) // Find the right grid tile
 		{
-			if (alpha)
+			if (grid[i].x > (0 - canvasRadius) && grid[i].x < canvasRadius && grid[i].y > (0 - canvasRadius) && grid[i].y < canvasRadius)
 			{
-				ctx.globalAlpha = alpha
-			}
-			else
-			{
-				ctx.globalAlpha = 1
-			}
+				if (alpha)
+				{
+					ctx.globalAlpha = alpha
+				}
+				else
+				{
+					ctx.globalAlpha = 1
+				}
 
-			ctx.save()
-			if (anchor == 'normal')
-			{
-				ctx.translate(grid[i].x, grid[i].y)
-				if (!menu)
+				ctx.save()
+				if (anchor == 'normal')
 				{
-					ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+					ctx.translate(grid[i].x, grid[i].y)
+					if (!menu)
+					{
+						ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+					}
+					else
+					{
+						ctx.rotate(menuRotation.toRad())
+					}
+					ctx.drawImage(image, 0, 0)
 				}
-				else
+				else if (anchor == 'center')
 				{
-					ctx.rotate(menuRotation.toRad())
+					ctx.translate(grid[i].x, grid[i].y)
+					if (!menu)
+					{
+						ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+					}
+					else
+					{
+						ctx.rotate(menuRotation.toRad())
+					}
+					ctx.drawImage(image, 0 - image.width / 2, 0 - image.height / 2)
 				}
-				ctx.drawImage(image, 0, 0)
+				else if (anchor == 'anchor')
+				{
+					ctx.translate(grid[i].x, grid[i].y)
+					if (!menu)
+					{
+						ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
+					}
+					else
+					{
+						ctx.rotate(menuRotation.toRad())
+					}
+					ctx.drawImage(image, 0 - image.width / 2, 0 - image.height * 0.85) // Don't quite anchor all the way at the bottom of the image
+				}
+				ctx.restore()
+				break
 			}
-			else if (anchor == 'center')
-			{
-				ctx.translate(grid[i].x, grid[i].y)
-				if (!menu)
-				{
-					ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
-				}
-				else
-				{
-					ctx.rotate(menuRotation.toRad())
-				}
-				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height / 2)
-			}
-			else if (anchor == 'anchor')
-			{
-				ctx.translate(grid[i].x, grid[i].y)
-				if (!menu)
-				{
-					ctx.rotate(compass.toRad()) // Rotate the image so it's not affected by the compass-aware orientation of the map
-				}
-				else
-				{
-					ctx.rotate(menuRotation.toRad())
-				}
-				ctx.drawImage(image, 0 - image.width / 2, 0 - image.height * 0.85) // Don't quite anchor all the way at the bottom of the image
-			}
-			ctx.restore()
-			break
 		}
 	}
 }

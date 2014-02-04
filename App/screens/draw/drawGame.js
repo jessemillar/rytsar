@@ -9,8 +9,6 @@ function drawGame()
     	line((centerX) - (centerY * Math.tan(fieldOfView.toRad())), 0, centerX, centerY, debugColor)
     	line(centerX, centerY, (centerX) + (centerY * Math.tan(fieldOfView.toRad())), 0, debugColor)
 		circle(centerX, centerY, maxShotDistance * tileSize, debugColor)
-		circle(centerX, centerY, minShotDistance * tileSize, debugColor)
-		circle(centerX, centerY, damageDistance * tileSize, debugColor)
 		text('GPS currently accurate within ' + gps.accuracy + ' meters', 5 + indicatorSpacing + imgBullet.width, canvas.height - 10, debugColor)
     }
 	
@@ -25,22 +23,19 @@ function drawGame()
 	{
 		for (var x = 0; x < gridWidth + 1; x++)
 		{
-			image(imgGrid, 0 - player.column * tileSize + x * tileSize + tileSize / 2, 0 - player.row * tileSize + y * tileSize + tileSize / 2, 'center')
+			var positionX = 0 - player.column * tileSize + x * tileSize + tileSize / 2
+			var positionY = 0 - player.row * tileSize + y * tileSize + tileSize / 2
+
+			gridCross(imgGrid, positionX, positionY, 'center')
 
 			if (x < gridWidth && y < gridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
 			{
 				var thingy = new Object() // Write grid data to an array to use later for drawing stuff in the tiles
 					thingy.column = x + 1
 					thingy.row = y + 1
-					thingy.x = 0 - player.column * tileSize + x * tileSize + tileSize
-					thingy.y = 0 - player.row * tileSize + y * tileSize + tileSize
+					thingy.x = 0 - player.column * tileSize + x * tileSize + tileSize // Relates to positionX but is slightly different
+					thingy.y = 0 - player.row * tileSize + y * tileSize + tileSize // Relates to positionY but is slightly different
 				grid.push(thingy)
-
-				if (debug)
-				{
-					text((x + 1) + ',' + (y + 1), x * tileSize + imgGrid.width - tileSize * gridWidth / 2, y * tileSize + imgGrid.height - tileSize * gridHeight / 2, debugColor)
-					circle((x * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), (y * tileSize) + (tileSize / 2) - (tileSize * gridWidth / 2), 2, debugColor)
-				}
 			}
 		}
 	}

@@ -12,7 +12,7 @@ function pickup()
 
 function hurtPlayer()
 {
-	if (melee.length > 0)
+	if (currentScreen == 'game' && melee.length > 0)
 	{
 		if (player.health > 1)
 		{

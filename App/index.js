@@ -17,20 +17,20 @@ ejecta.include('screens/focus/hide.js')
 ejecta.include('screens/focus/show.js')
 
 ejecta.include('screens/game.js')
-	ejecta.include('screens/draw/game.js')
-	ejecta.include('screens/touches/game.js')
+	ejecta.include('screens/draw/drawGame.js')
+	ejecta.include('screens/touches/touchesGame.js')
 ejecta.include('screens/gameover.js')
-	ejecta.include('screens/draw/gameover.js')
-	ejecta.include('screens/touches/gameover.js')
+	ejecta.include('screens/draw/drawGameover.js')
+	ejecta.include('screens/touches/touchesGameover.js')
 ejecta.include('screens/gps.js')
-	ejecta.include('screens/draw/gps.js')
-	ejecta.include('screens/touches/gps.js')
+	ejecta.include('screens/draw/drawGPS.js')
+	ejecta.include('screens/touches/touchesGPS.js')
 ejecta.include('screens/menu.js')
-	ejecta.include('screens/draw/menu.js')
-	ejecta.include('screens/touches/menu.js')
+	ejecta.include('screens/draw/drawMenu.js')
+	ejecta.include('screens/touches/touchesMenu.js')
 ejecta.include('screens/settings.js')
-	ejecta.include('screens/draw/settings.js')
-	ejecta.include('screens/touches/settings.js')
+	ejecta.include('screens/draw/drawSettings.js')
+	ejecta.include('screens/touches/touchesSettings.js')
 
 // --------------------------------------------------------------
 // Global variables
@@ -39,9 +39,11 @@ ejecta.include('screens/settings.js')
 var ctx = canvas.getContext('2d')
 var centerX = canvas.width / 2
 var centerY = canvas.height / 2
+var canvasRadius = Math.ceil(Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height) / 2) + 50
 
 var debug = false // Can be toggled by tapping the screen in game mode
 
+// Keep track of where the user touches the screen
 var touchX
 var touchY
 
@@ -55,16 +57,23 @@ var gridHeight = gridWidth
 var tileSizeMeters = 10
 var gpsRequiredAccuracy = 15 // Normally set to 15
 
+// --------------------------------------------------------------
+// Gameplay arrays
+// --------------------------------------------------------------
+
 var zombies = new Array() // Our local array of zombies
 var ammo = new Array() // Locally monitor the objects placed throughout the world
 var reeds = new Array() // Keep track of the reeds (plants) in the environment
 var vision = new Array() // The things in our field of view
 var melee = new Array() // The zombies close enough to be punched
 
-// var renderDistance = 22 // ...in meters
-var maxShotDistance = 5 // ...in meters
-var minShotDistance = 0 // ...in meters
-var damageDistance = 0 // ...in meters
+// --------------------------------------------------------------
+// Gameplay arrays
+// --------------------------------------------------------------
+
+var renderDistance = 22 // ...in meters
+var maxShotDistance = 5 // ...in grid squares
+var minShotDistance = 0 // ...in grid squares
 var fieldOfView = 25 // ...in degrees
 
 var totalZombies = 25
