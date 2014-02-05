@@ -42,11 +42,8 @@ navigator.geolocation.watchPosition(gpsSuccess, gpsError)
 
 function gpsError(error)
 {
-    if (error.code === navigator.geolocation.PERMISSION_DENIED)
-    {
-    	currentScreen = 'gps'
-	    console.log('GPS Error', error.code, error.message)
-	}
+    currentScreen = 'gps'
+	console.log('GPS Error', error.code, error.message)
 }
 
 function gpsSuccess(position)

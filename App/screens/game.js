@@ -110,6 +110,8 @@ function screenGame()
 	        // Things are only set up for right handed users right now
 	        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+	        currentScreen = 'gun'
+
 	        if (-rotation.y > rotateRequiredReload) // Reload
 	        {
 	            reload()
@@ -120,12 +122,23 @@ function screenGame()
 	            fire()
 	        }
 	    }
+	    else
+	    {
+	    	currentScreen = 'game'
+	    }
 
 	    // ******************************
 		// Draw
 		// ******************************
 
-	    drawGame()
+		if (currentScreen == 'game') // Draw the game screen if we're not in gun orientation
+		{
+			drawGame()
+		}
+		else if (currentScreen == 'gun') // ...or draw the gun if we're in that orientation
+		{
+			drawGun()
+		}
 	}
 	else if (gps.accuracy == 0 || gps.accuracy > gpsRequiredAccuracy)
 	{

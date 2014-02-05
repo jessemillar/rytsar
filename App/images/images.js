@@ -19,11 +19,14 @@ var imgSkull = new Image(160, 160)
 var imgSatellite = new Image(150, 150)
 	imgSatellite.src = 'images/satellite.png'
 
-var imgBackArrow = new Image(38, 74)
+var imgBackArrow = new Image(110, 72)
 	imgBackArrow.src = 'images/back-arrow.png'
 
 var imgHeart = new Image(30, 30)
 	imgHeart.src = 'images/heart.png'
+
+var imgRevolver = new Image(640, 1136)
+	imgRevolver.src = 'images/revolver.png'
 
 var imgMagazineBullet = new Image(60, 28)
 	imgMagazineBullet.src = 'images/magazine-bullet.png'

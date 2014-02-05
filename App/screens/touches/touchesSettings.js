@@ -1,6 +1,6 @@
 function touchesSettings()
 {
-	if (touchX > 10 && touchX < imgBackArrow.width + 10 && touchY > 10 && touchY < imgBackArrow.height + 10)
+	if (touchY < imgBackArrow.height + 10)
 	{
 		currentScreen = 'menu'
 	}

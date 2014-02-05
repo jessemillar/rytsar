@@ -12,18 +12,21 @@ function pickup()
 
 function hurtPlayer()
 {
-	if (currentScreen == 'game' && melee.length > 0)
+	if (currentScreen == 'game' || currentScreen == 'gun')
 	{
-		if (player.health > 1)
+		if (melee.length > 0)
 		{
-			player.health -= 1
-			sfxHurt.play()
-		}
-		else if (player.health == 1)
-		{
-			player.health -= 1
-			sfxFlatline.play()
-			currentScreen = 'gameover'
+			if (player.health > 1)
+			{
+				player.health -= 1
+				sfxHurt.play()
+			}
+			else if (player.health == 1)
+			{
+				player.health -= 1
+				sfxFlatline.play()
+				currentScreen = 'gameover'
+			}
 		}
 	}
 }

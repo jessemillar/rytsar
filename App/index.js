@@ -23,6 +23,8 @@ ejecta.include('screens/game.js')
 ejecta.include('screens/gameover.js')
 	ejecta.include('screens/draw/drawGameover.js')
 	ejecta.include('screens/touches/touchesGameover.js')
+ejecta.include('screens/gun.js')
+	ejecta.include('screens/draw/drawGun.js')
 ejecta.include('screens/gps.js')
 	ejecta.include('screens/draw/drawGPS.js')
 	ejecta.include('screens/touches/touchesGPS.js')
@@ -186,7 +188,7 @@ document.addEventListener('touchstart', function(ev) // Monitor touchstarts thro
 	{
 		touchesMenu()
 	}
-	else if (currentScreen == 'game')
+	else if (currentScreen == 'game' || currentScreen == 'gun')
 	{
 		touchesGame()
 	}
@@ -210,7 +212,7 @@ setInterval(function() // Main game loop at 60 frames per second
 	{
 		screenMenu()
 	}
-	else if (currentScreen == 'game')
+	else if (currentScreen == 'game' || currentScreen == 'gun')
 	{
 		screenGame()
 	}
