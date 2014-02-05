@@ -21,9 +21,8 @@ function makeZombies()
 			thingy.row = Math.floor(random(1, gridHeight))
 			thingy.health = random(zombieMinHealth, zombieMaxHealth)
 			thingy.frame = random(0, 1)
-			thingy.animate = animate(thingy, slowestAnimation)
+			thingy.animate = animate(thingy, zombieAnimationSpeed)
 			thingy.nature = Math.floor(random(0, 1))
-			thingy.hunt = hunt(thingy, random(0, 1))
 		zombies.push(thingy)
 	}
 }

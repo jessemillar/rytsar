@@ -28,7 +28,7 @@ function drawGame()
 			var positionX = 0 - player.column * tileSize + x * tileSize + tileSize / 2
 			var positionY = 0 - player.row * tileSize + y * tileSize + tileSize / 2
 
-			// gridCross(imgGrid, positionX, positionY, 'center')
+			gridCross(imgGrid, positionX, positionY, 'center')
 
 			if (x < gridWidth && y < gridHeight) // Only save squares inside the play area, not the ones on the outside bottom and bottom-right (that are used to just make the visual square markers)
 			{

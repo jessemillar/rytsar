@@ -46,7 +46,7 @@ var centerX = canvas.width / 2
 var centerY = canvas.height / 2
 var canvasRadius = Math.ceil(Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height) / 2) + 50
 
-var fps = 30
+var fps = 60
 
 var debug = false // Can be toggled by tapping the screen in game mode
 
@@ -57,12 +57,12 @@ var touchY
 var currentScreen = 'menu'
 
 var grid = new Array() // Keeps track of grid pixel and coordinate positions for use in other functions
-var tileSize = 45
-var gridWidth = 25 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
+var tileSize = 80
+var gridWidth = 19 // Make sure the gridsize is always an odd number so there's a tile in the center to start the player in
 var gridHeight = gridWidth
 
-var tileSizeMeters = 10
-var gpsRequiredAccuracy = 15 // Normally set to 15
+var gpsRequiredAccuracy = 15
+var tileSizeMeters = gpsRequiredAccuracy
 
 // --------------------------------------------------------------
 // Gameplay arrays
@@ -78,21 +78,18 @@ var melee = new Array() // The zombies close enough to be punched
 // Gameplay arrays
 // --------------------------------------------------------------
 
-var renderDistance = 22 // ...in meters
-var maxShotDistance = 5 // ...in grid squares
-var minShotDistance = 0 // ...in grid squares
-var fieldOfView = 25 // ...in degrees
+var maxShotDistance = 3 // ...in grid squares
+var minShotDistance = 1 // ...in grid squares
+var fieldOfView = 30 // ...in degrees
 
-var totalZombies = 25
+var totalZombies = 15
 var totalAmmo = totalZombies / 2
-var totalReeds = totalZombies * 7
+var totalReeds = totalZombies * 5
 
 var zombieMinHealth = 2
-var zombieMaxHealth = 3
-var zombieSlowest = 6500 // Longest time possible for zombies to move to a new square
-var zombieFastest = 4500 // Shortest time possible for zombies to move to a new square
-
-var slowestAnimation = 800 // The longest time possible between animation frames
+var zombieMaxHealth = 4
+var zombieHuntDistance = 4 // How close the player has to be to a zombie for it to start chasing the player
+var zombieAnimationSpeed = 800 // The longest time possible between animation frames
 
 // How much ammo can be in a pack
 var ammoCountLow = 1
@@ -119,7 +116,7 @@ var shotDamage = 3 // How much damage a bullet deals (change this later to be mo
 var meleeDamage = 10
 
 // General player variables
-var playerMaxHealth = 5
+var playerMaxHealth = 3
 var player = new Object()
 	player.column = Math.ceil(gridWidth / 2)
 	player.row = Math.ceil(gridHeight / 2)
@@ -127,8 +124,6 @@ var player = new Object()
 	player.magazine = random(0, gunCapacity - 3)
 	player.ammo = random(0, 2) // Ammo not in the gun
 	player.history = new Array() // Keeps track of where the player's been on the grid
-
-var hurtPlayerTimer = false // Used to keep track of whether or not we've started an interval timer to hurt the player
 
 // Color scheme
 var white = '#FFFFFF'
@@ -150,8 +145,8 @@ var indicatorSpacing = 5 // Used for spacing the health and ammo indicators on t
 var menuGridWidth = 19
 var menuGridHeight = menuGridWidth
 var menuRotation = 0
-var menuRotationSpeed = 0.035
-var menuTotalZombies = 40
+var menuRotationSpeed = 0.08
+var menuTotalZombies = 45
 var menuTotalReeds = menuTotalZombies * 2
 
 var gpsRotation = 0 // Make the satellite icon rotate to indicate that we're looking for a lock
@@ -208,8 +203,13 @@ document.addEventListener('touchstart', function(ev) // Monitor touchstarts thro
 	}
 })
 
-setInterval(function() // Main game loop at 60 frames per second
+setInterval(function() // Main game loop at X frames per second (framerate is set by the "fps" variable near the top of this file)
 {
+	if (debug)
+	{
+		console.log(currentScreen)
+	}
+
 	if (currentScreen == 'menu')
 	{
 		screenMenu()

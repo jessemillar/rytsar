@@ -1,60 +1,63 @@
-function hunt(zombie, time) // Use an external function (outside of zombie creation) to move the zombie toward the player
+function turnZombies() // Use an external function (outside of zombie creation) to move the zombie toward the player
 {
-	var speed = time * zombieSlowest
-
-	if (speed < zombieFastest)
+	for (var i = 0; i < zombies.length; i++)
 	{
-		speed = zombieFastest + time * zombieSlowest
-	}
-
-	setInterval(function()
-	{
-		if (zombie.health > 0)
+		if (zombies[i].health > 0)
 		{
-			if (zombie.nature == 0)
+			var distanceToPlayer = distance(zombies[i])
+
+			if (distanceToPlayer <= zombieHuntDistance)
 			{
-				if (player.column < zombie.column)
+				if (zombies[i].nature == 0)
 				{
-					zombie.column -= 1
-				}
-				else if (player.column > zombie.column)
-				{
-					zombie.column += 1
-				}
-				else if (zombie.column == player.column)
-				{
-					if (player.row < zombie.row)
+					if (player.column < zombies[i].column)
 					{
-						zombie.row -= 1
+						zombies[i].column -= 1
 					}
-					else if (player.row > zombie.row)
+					else if (player.column > zombies[i].column)
 					{
-						zombie.row += 1
+						zombies[i].column += 1
+					}
+					else if (zombies[i].column == player.column)
+					{
+						if (player.row < zombies[i].row)
+						{
+							zombies[i].row -= 1
+						}
+						else if (player.row > zombies[i].row)
+						{
+							zombies[i].row += 1
+						}
 					}
 				}
-			}
-			else if (zombie.nature == 1)
-			{
-				if (player.row < zombie.row)
+				else if (zombies[i].nature == 1)
 				{
-					zombie.row -= 1
-				}
-				else if (player.row > zombie.row)
-				{
-					zombie.row += 1
-				}
-				else if (zombie.row == player.row)
-				{
-					if (player.column < zombie.column)
+					if (player.row < zombies[i].row)
 					{
-						zombie.column -= 1
+						zombies[i].row -= 1
 					}
-					else if (player.column > zombie.column)
+					else if (player.row > zombies[i].row)
 					{
-						zombie.column += 1
+						zombies[i].row += 1
+					}
+					else if (zombies[i].row == player.row)
+					{
+						if (player.column < zombies[i].column)
+						{
+							zombies[i].column -= 1
+						}
+						else if (player.column > zombies[i].column)
+						{
+							zombies[i].column += 1
+						}
 					}
 				}
 			}
 		}
-	}, speed)
+	}
+	
+	sfxWalk.pause()
+	rewind(sfxWalk)
+	sfxWalk.play() // Play a walk sound to let the player know that the zombies just took a turn
+	proximity() // Check if we're near the player
 }

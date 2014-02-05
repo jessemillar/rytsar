@@ -10,6 +10,8 @@ function punch()
     	{
     		sfxGroan.play()
     	}, 200)
+
+    	turnZombies() // A punch counts as a turn for the player so advance the zombies toward him
 	}
 
 	canMelee = false
@@ -56,6 +58,8 @@ function fire()
         {
             canShoot = true
         }, timeFire + timeCock)
+
+        turnZombies() // Shooting also counts as a turn so advance the zombies
 	}
 }
 
@@ -82,6 +86,8 @@ function reload()
 	        {
 	            canShoot = true
 	        }, timeCock + timeReload)
+
+	       	turnZombies() // Yup, reloading counts too
 	    }
 	}
 }

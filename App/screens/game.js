@@ -7,79 +7,9 @@ function screenGame()
 
 	if (gps.latitude && gps.longitude && gps.accuracy < gpsRequiredAccuracy) // Only do stuff if we know where we are
 	{
-		fadeOut(musMenu, 250) // Fade out the menu music
-
-		// ******************************
-		// Run calculations
-		// ******************************
-
-		pickup()
-		gpsMove() // Check if we've moved far enough in the real world to mandate a player position change
-
-		// Clear the various arrays on each pass so we get fresh results
-		melee.length = 0
-		vision.length = 0
-
 		if (zombies.length == 0) // Spawn zombies if we have none currently
 		{
 			makeZombies()
-
-			if (!hurtPlayerTimer)
-			{
-				setInterval(function()
-				{
-					hurtPlayer()
-				}, 1000)
-				hurtPlayerTimer = true
-			}
-		}
-		else // Or do things with the zombies we have
-		{
-            for (var i = 0; i < zombies.length; i++)
-            {
-                zombies[i].distance = distance(zombies[i])
-                zombies[i].bearing = bearing(zombies[i])
-        
-                if (zombies[i].column == player.column && zombies[i].row == player.row && zombies[i].health > 0)
-				{
-					melee.push(zombies[i])
-				}
-
-                if ((compass - fieldOfView) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView))
-                {
-                    if (zombies[i].distance > minShotDistance && zombies[i].distance < maxShotDistance && zombies[i].health > 0)
-                    {
-                        vision.push(zombies[i])
-                    }
-                }
-
-               	// Beep when we're looking at a zombie
-                if ((compass - fieldOfView / 3) < zombies[i].bearing && zombies[i].bearing < (compass + fieldOfView / 3))
-                {
-                    if (zombies[i].distance > minShotDistance && zombies[i].distance < maxShotDistance && zombies[i].health > 0)
-                    {
-                    	if (canBeep)
-                    	{
-                    		sfxSweep.play()
-
-	                        canBeep = false
-
-							setTimeout(function()
-						    {
-						    	canBeep = true
-						    }, timeBeep)
-                    	}
-                    }
-                }
-            }
-        
-            if (vision.length > 0)
-            {
-                zombies.sort(function(a, b) // Order the zombies that are in our sights according to distance
-                {
-                    return a.distance - b.distance
-                })
-            }
 		}
 
 		if (ammo.length == 0) // Make ammo packs if we have none
@@ -126,6 +56,9 @@ function screenGame()
 	    {
 	    	currentScreen = 'game'
 	    }
+
+	    // Place this after the tracker for attack motions
+	    turnPlayer() // Let the player take their turn whenever they move in the real world
 
 	    // ******************************
 		// Draw

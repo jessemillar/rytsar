@@ -20,7 +20,7 @@ function screenMenu()
 				thingy.column = Math.floor(random(1, menuGridWidth))
 				thingy.row = Math.floor(random(1, menuGridHeight))
 				thingy.frame = random(0, 1)
-				thingy.animate = animate(thingy, slowestAnimation)
+				thingy.animate = animate(thingy, zombieAnimationSpeed)
 			
 			zombies.push(thingy)
 		}

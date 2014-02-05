@@ -94,7 +94,7 @@ var sfxGroan = document.createElement('audio')
 	sfxGroan.load()
 	document.body.appendChild(sfxGroan)
 var sfxWalk = document.createElement('audio')
-	sfxWalk.src = 'sounds/zombies/walk.mp3'
+	sfxWalk.src = 'sounds/zombies/walk.wav'
 	sfxWalk.preload = true
 	sfxWalk.loop = false
 	sfxWalk.volume = 1
