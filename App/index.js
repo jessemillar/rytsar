@@ -46,6 +46,8 @@ var centerX = canvas.width / 2
 var centerY = canvas.height / 2
 var canvasRadius = Math.ceil(Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height) / 2) + 50
 
+var fps = 30
+
 var debug = false // Can be toggled by tapping the screen in game mode
 
 // Keep track of where the user touches the screen
@@ -228,4 +230,4 @@ setInterval(function() // Main game loop at 60 frames per second
 	{
 		screenGameover()
 	}
-}, 1000 / 60)
+}, 1000 / fps)
