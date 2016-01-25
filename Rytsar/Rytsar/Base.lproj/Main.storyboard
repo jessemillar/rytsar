@@ -3,6 +3,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--Hello-->
@@ -85,6 +86,39 @@
             </objects>
             <point key="canvasLocation" x="750" y="360"/>
         </scene>
+        <!--Map-->
+        <scene sceneID="QEu-sV-ZPd">
+            <objects>
+                <viewController id="CCA-Ig-n5J" customClass="MapViewController" customModule="Rytsar" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="UuS-XX-hr6"/>
+                        <viewControllerLayoutGuide type="bottom" id="qY4-Xf-jt1"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="crV-zo-YO4">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="h4P-z8-CAX">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="551"/>
+                            </mapView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstAttribute="trailingMargin" secondItem="h4P-z8-CAX" secondAttribute="trailing" constant="-20" id="2dS-Og-qXr"/>
+                            <constraint firstItem="qY4-Xf-jt1" firstAttribute="top" secondItem="h4P-z8-CAX" secondAttribute="bottom" id="7oh-T2-GJi"/>
+                            <constraint firstItem="h4P-z8-CAX" firstAttribute="top" secondItem="crV-zo-YO4" secondAttribute="topMargin" id="Lzl-IH-Sq2"/>
+                            <constraint firstItem="h4P-z8-CAX" firstAttribute="leading" secondItem="crV-zo-YO4" secondAttribute="leadingMargin" constant="-20" id="Weg-BE-1Tb"/>
+                        </constraints>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Map" image="first" id="Y5f-ce-gxJ"/>
+                    <connections>
+                        <outlet property="mapView" destination="h4P-z8-CAX" id="ibx-71-2QE"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xEg-H2-6CP" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="218" y="1155"/>
+        </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="yl2-sM-qoP">
             <objects>
@@ -98,11 +132,12 @@
                     <connections>
                         <segue destination="9pv-A4-QxB" kind="relationship" relationship="viewControllers" id="u7Y-xg-7CH"/>
                         <segue destination="8rJ-Kc-sve" kind="relationship" relationship="viewControllers" id="lzU-1b-eKA"/>
+                        <segue destination="CCA-Ig-n5J" kind="relationship" relationship="viewControllers" id="4Kd-qc-LOn"/>
                     </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HuB-VB-40B" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="0.0" y="0.0"/>
+            <point key="canvasLocation" x="-326" y="360"/>
         </scene>
     </scenes>
     <resources>
