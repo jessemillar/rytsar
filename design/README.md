@@ -2,7 +2,7 @@ The purpose of Rytsar is to engage audiences in a collaborative game environment
 
 The art design will be based off a steampunk knight-in-shining-armor style a la [this forum post](http://forums.cgsociety.org/showpost.php?p=5578927&postcount=10).
 
-The game will, at set intervals, spawn loot chests in random locations located within a certain radius of players. Around these loot chests will be hoards of monsters. There will be at least a few types of monsters. The player will attempt to clear the hoards and access the loot using their steampunk crossbow/revolver.
+The game will, at set intervals, spawn loot chests in random locations located within a certain radius of players. Around these loot chests will be hoards of monsters. There will be at least a few types of monsters. The player will attempt to clear the hoards and access the loot using their steampunk crossbow/revolver that is fired via a gun-like twitch of the phone that is detected via the accelerometer. Aiming is handled via the built-in compass.
 
 Players will move through the game via the GPS chip embedded in their phones. This chip can only guarantee accuracy to twenty meters which prohibits true multiplayer. Instead of viewing other players on their devices, players will share loot locations and claim territory together fighting off waves of monsters spawned on each individual phones.
 
