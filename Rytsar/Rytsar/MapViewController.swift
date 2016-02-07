@@ -25,19 +25,23 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         self.locationManager.startUpdatingHeading() // Watch the compass
         self.mapView.showsUserLocation = true
         
-        let enemy = Enemy(coordinate: CLLocationCoordinate2D(latitude: 21.283921, longitude: -157.831661))
-        mapView.addAnnotation(enemy)
-        
+        // Call to the API to get the global enemies
         guard let rest = RestController.createFromURLString("http://woodsman.jessemillar.com:33333/database") else {
             print("Bad URL")
             return
         }
         
+        // Populate the map with global enemies
         rest.get { result in
             do {
                 let json = try result.value()
-                print(json)
-                print(json["url"]?.stringValue)
+                var i = 1
+                while json[i] != nil {
+                    let enemy = Enemy(coordinate: CLLocationCoordinate2D(latitude: Double((json[i]?["latitude"]?.stringValue)!)!, longitude: Double((json[i]?["longitude"]?.stringValue)!)!))
+                    self.mapView.addAnnotation(enemy)
+                    i = i + 1
+                }
+                
             } catch {
                 print("Error performing GET: \(error)")
             }
