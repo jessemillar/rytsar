@@ -12,7 +12,7 @@ import CoreLocation
 import CoreMotion
 
 class Enemy: NSObject { // Used to make an array of enemies from the database
-    var latitude : Double = 0.0
+    var latitude : Double = 0.0 // Initialize to a "null" double
     var longitude : Double = 0.0
 }
 
@@ -32,11 +32,24 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         self.locationManager.startUpdatingHeading() // Watch the compass
         self.mapView.showsUserLocation = true
         self.mapView.rotateEnabled = true
-        motionManager.startAccelerometerUpdates() // Start watching the accelerometer
         
-        // Print out some accelerometer data
-        if let accelerometerData = motionManager.accelerometerData {
-            print(accelerometerData.acceleration.y * -50, accelerometerData.acceleration.x * 50)
+        if motionManager.accelerometerAvailable{
+            motionManager.startAccelerometerUpdatesToQueue(NSOperationQueue()) { (data: CMAccelerometerData?, error: NSError?) in
+                guard data != nil else {
+                    print("There was an error: \(error)")
+                    return
+                }
+                
+                print(data!.acceleration.x)
+                
+                let cone = 0.1
+
+                if abs(data!.acceleration.x) > (0.9 - cone) && abs(data!.acceleration.x) < (0.9 + cone){
+                    print("Ready")
+                }
+            }
+        } else {
+            print("Accelerometer is not available")
         }
         
         // Get data from the API, parse it, and add pins to the map
@@ -97,7 +110,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     func locationManager(manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        print(newHeading.magneticHeading)
+//        print(newHeading.magneticHeading)
     }
     
     func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
