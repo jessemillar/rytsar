@@ -9,8 +9,9 @@
 import UIKit
 import MapKit
 import CoreLocation
+import CoreMotion
 
-class Enemy: NSObject {
+class Enemy: NSObject { // Used to make an array of enemies from the database
     var latitude : Double = 0.0
     var longitude : Double = 0.0
 }
@@ -19,6 +20,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     @IBOutlet weak var mapView: MKMapView!
     
     let locationManager = CLLocationManager()
+    let motionManager = CMMotionManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,12 +31,18 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         self.locationManager.startUpdatingLocation() // Watch the GPS
         self.locationManager.startUpdatingHeading() // Watch the compass
         self.mapView.showsUserLocation = true
+        self.mapView.rotateEnabled = true
+        motionManager.startAccelerometerUpdates() // Start watching the accelerometer
         
+        // Print out some accelerometer data
+        if let accelerometerData = motionManager.accelerometerData {
+            print(accelerometerData.acceleration.y * -50, accelerometerData.acceleration.x * 50)
+        }
+        
+        // Get data from the API, parse it, and add pins to the map
         let url = NSURL(string: "http://woodsman.jessemillar.com:33333/database")
         
         let task = NSURLSession.sharedSession().dataTaskWithURL(url!) {(data, response, error) in
-//            print(NSString(data: data!, encoding: NSUTF8StringEncoding))
-            
             var enemies = [Enemy]()
             
             do {
@@ -80,7 +88,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
         
 //        var zoom = 0.0025
-        let zoom = 15.0
+        let zoom = 30.0
         let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: zoom, longitudeDelta: zoom))
         
         self.mapView.setRegion(region, animated: true) // Zoom into the user's current location
