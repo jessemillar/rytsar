@@ -27,6 +27,21 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         
         let enemy = Enemy(coordinate: CLLocationCoordinate2D(latitude: 21.283921, longitude: -157.831661))
         mapView.addAnnotation(enemy)
+        
+        guard let rest = RestController.createFromURLString("http://woodsman.jessemillar.com:33333/database") else {
+            print("Bad URL")
+            return
+        }
+        
+        rest.get { result in
+            do {
+                let json = try result.value()
+                print(json)
+                print(json["url"]?.stringValue)
+            } catch {
+                print("Error performing GET: \(error)")
+            }
+        }
     }
     
     override func didReceiveMemoryWarning() {

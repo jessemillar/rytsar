@@ -16,6 +16,9 @@
 		8542DC601C55BFCB004FCF64 /* RytsarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8542DC5F1C55BFCB004FCF64 /* RytsarTests.swift */; };
 		8542DC6B1C55BFCC004FCF64 /* RytsarUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8542DC6A1C55BFCC004FCF64 /* RytsarUITests.swift */; };
 		8542DC791C55C20F004FCF64 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8542DC781C55C20F004FCF64 /* MapViewController.swift */; };
+		856AAC0F1C670C35004168E2 /* JSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856AAC0C1C670C35004168E2 /* JSON.swift */; };
+		856AAC101C670C35004168E2 /* RestController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856AAC0D1C670C35004168E2 /* RestController.swift */; };
+		856AAC111C670C35004168E2 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856AAC0E1C670C35004168E2 /* Result.swift */; };
 		85F0CFF11C66D2FA00A38570 /* Enemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F0CFF01C66D2FA00A38570 /* Enemy.swift */; };
 /* End PBXBuildFile section */
 
@@ -52,6 +55,9 @@
 		8542DC6A1C55BFCC004FCF64 /* RytsarUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RytsarUITests.swift; sourceTree = "<group>"; };
 		8542DC6C1C55BFCC004FCF64 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8542DC781C55C20F004FCF64 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		856AAC0C1C670C35004168E2 /* JSON.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSON.swift; sourceTree = "<group>"; };
+		856AAC0D1C670C35004168E2 /* RestController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RestController.swift; sourceTree = "<group>"; };
+		856AAC0E1C670C35004168E2 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		85F0CFF01C66D2FA00A38570 /* Enemy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Enemy.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -104,6 +110,9 @@
 			isa = PBXGroup;
 			children = (
 				8542DC481C55BFCB004FCF64 /* AppDelegate.swift */,
+				856AAC0C1C670C35004168E2 /* JSON.swift */,
+				856AAC0D1C670C35004168E2 /* RestController.swift */,
+				856AAC0E1C670C35004168E2 /* Result.swift */,
 				8542DC4A1C55BFCB004FCF64 /* FirstViewController.swift */,
 				8542DC4C1C55BFCB004FCF64 /* SecondViewController.swift */,
 				8542DC781C55C20F004FCF64 /* MapViewController.swift */,
@@ -271,8 +280,11 @@
 				8542DC4D1C55BFCB004FCF64 /* SecondViewController.swift in Sources */,
 				85F0CFF11C66D2FA00A38570 /* Enemy.swift in Sources */,
 				8542DC491C55BFCB004FCF64 /* AppDelegate.swift in Sources */,
+				856AAC0F1C670C35004168E2 /* JSON.swift in Sources */,
 				8542DC4B1C55BFCB004FCF64 /* FirstViewController.swift in Sources */,
 				8542DC791C55C20F004FCF64 /* MapViewController.swift in Sources */,
+				856AAC111C670C35004168E2 /* Result.swift in Sources */,
+				856AAC101C670C35004168E2 /* RestController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -415,6 +427,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Rytsar/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jessemillar.Rytsar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -426,6 +439,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = Rytsar/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jessemillar.Rytsar;
 				PRODUCT_NAME = "$(TARGET_NAME)";

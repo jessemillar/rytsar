@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "4044E6E0A90E6FBDEB45A29FCE2482E925E1ED4B",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "4044E6E0A90E6FBDEB45A29FCE2482E925E1ED4B" : 0,
+    "3DEE348339549D2FB2F5E154D083822C5CB44DF0" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "B7CE9EDF-EC21-4F2A-A84D-15390E78E1D4",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "4044E6E0A90E6FBDEB45A29FCE2482E925E1ED4B" : "rytsar\/",
+    "3DEE348339549D2FB2F5E154D083822C5CB44DF0" : "rytsar\/RestEssentials\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Rytsar",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Rytsar\/Rytsar.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/sean7512\/RestEssentials.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "3DEE348339549D2FB2F5E154D083822C5CB44DF0"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/jessemillar\/rytsar.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "4044E6E0A90E6FBDEB45A29FCE2482E925E1ED4B"
+    }
+  ]
+}
