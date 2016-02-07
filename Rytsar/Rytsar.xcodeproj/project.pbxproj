@@ -16,6 +16,7 @@
 		8542DC601C55BFCB004FCF64 /* RytsarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8542DC5F1C55BFCB004FCF64 /* RytsarTests.swift */; };
 		8542DC6B1C55BFCC004FCF64 /* RytsarUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8542DC6A1C55BFCC004FCF64 /* RytsarUITests.swift */; };
 		8542DC791C55C20F004FCF64 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8542DC781C55C20F004FCF64 /* MapViewController.swift */; };
+		85F0CFF11C66D2FA00A38570 /* Enemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F0CFF01C66D2FA00A38570 /* Enemy.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,7 @@
 		8542DC6A1C55BFCC004FCF64 /* RytsarUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RytsarUITests.swift; sourceTree = "<group>"; };
 		8542DC6C1C55BFCC004FCF64 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8542DC781C55C20F004FCF64 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		85F0CFF01C66D2FA00A38570 /* Enemy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Enemy.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +111,7 @@
 				8542DC511C55BFCB004FCF64 /* Assets.xcassets */,
 				8542DC531C55BFCB004FCF64 /* LaunchScreen.storyboard */,
 				8542DC561C55BFCB004FCF64 /* Info.plist */,
+				85F0CFF01C66D2FA00A38570 /* Enemy.swift */,
 			);
 			path = Rytsar;
 			sourceTree = "<group>";
@@ -266,6 +269,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8542DC4D1C55BFCB004FCF64 /* SecondViewController.swift in Sources */,
+				85F0CFF11C66D2FA00A38570 /* Enemy.swift in Sources */,
 				8542DC491C55BFCB004FCF64 /* AppDelegate.swift in Sources */,
 				8542DC4B1C55BFCB004FCF64 /* FirstViewController.swift in Sources */,
 				8542DC791C55C20F004FCF64 /* MapViewController.swift in Sources */,
@@ -495,6 +499,7 @@
 				8542DC711C55BFCC004FCF64 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8542DC721C55BFCC004FCF64 /* Build configuration list for PBXNativeTarget "RytsarTests" */ = {
 			isa = XCConfigurationList;
@@ -503,6 +508,7 @@
 				8542DC741C55BFCC004FCF64 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8542DC751C55BFCC004FCF64 /* Build configuration list for PBXNativeTarget "RytsarUITests" */ = {
 			isa = XCConfigurationList;
@@ -511,6 +517,7 @@
 				8542DC771C55BFCC004FCF64 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

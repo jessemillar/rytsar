@@ -17,16 +17,16 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
         
         self.locationManager.delegate = self
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        
         self.locationManager.requestWhenInUseAuthorization() // Only use location services when the app is in use
-        
-        self.locationManager.startUpdatingLocation()
-        
+        self.locationManager.startUpdatingLocation() // Watch the GPS
+        self.locationManager.startUpdatingHeading() // Watch the compass
         self.mapView.showsUserLocation = true
+        
+        let enemy = Enemy(coordinate: CLLocationCoordinate2D(latitude: 21.283921, longitude: -157.831661))
+        mapView.addAnnotation(enemy)
     }
     
     override func didReceiveMemoryWarning() {
@@ -44,7 +44,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         
         self.mapView.setRegion(region, animated: true) // Zoom into the user's current location
         
-//        self.locationManager.stopUpdatingLocation() // Stop updating the location
+        self.locationManager.stopUpdatingLocation() // Stop updating the location
+    }
+    
+    func locationManager(manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        print(newHeading.magneticHeading)
     }
     
     func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
