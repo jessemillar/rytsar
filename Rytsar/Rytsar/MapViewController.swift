@@ -10,6 +10,11 @@ import UIKit
 import MapKit
 import CoreLocation
 
+class Enemy: NSObject {
+    var latitude : Double = 0.0
+    var longitude : Double = 0.0
+}
+
 class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
     @IBOutlet weak var mapView: MKMapView!
     
@@ -25,27 +30,42 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         self.locationManager.startUpdatingHeading() // Watch the compass
         self.mapView.showsUserLocation = true
         
-        // Call to the API to get the global enemies
-        guard let rest = RestController.createFromURLString("http://woodsman.jessemillar.com:33333/database") else {
-            print("Bad URL")
-            return
-        }
+        let url = NSURL(string: "http://woodsman.jessemillar.com:33333/database")
         
-        // Populate the map with global enemies
-        rest.get { result in
+        let task = NSURLSession.sharedSession().dataTaskWithURL(url!) {(data, response, error) in
+//            print(NSString(data: data!, encoding: NSUTF8StringEncoding))
+            
+            var enemies = [Enemy]()
+            
             do {
-                let json = try result.value()
-                var i = 1
-                while json[i] != nil {
-                    let enemy = Enemy(coordinate: CLLocationCoordinate2D(latitude: Double((json[i]?["latitude"]?.stringValue)!)!, longitude: Double((json[i]?["longitude"]?.stringValue)!)!))
-                    self.mapView.addAnnotation(enemy)
-                    i = i + 1
-                }
+                let json = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments)
                 
+                if let coordinates = json as? [[String: AnyObject]] {
+                    for cursor in coordinates {
+                        let newEnemy : Enemy = Enemy()
+                        
+                        if let latitude = cursor["latitude"] as? String {
+                            newEnemy.latitude = Double(latitude)!
+                        }
+                        
+                        if let longitude = cursor["longitude"] as? String {
+                            newEnemy.longitude = Double(longitude)!
+                        }
+                        
+                        enemies.append(newEnemy)
+                    }
+                }
             } catch {
-                print("Error performing GET: \(error)")
+                print("error serializing JSON: \(error)")
+            }
+            
+            for enemy in enemies {
+                let pin = EnemyPin(coordinate: CLLocationCoordinate2D(latitude: enemy.latitude, longitude: enemy.longitude))
+                self.mapView.addAnnotation(pin)
             }
         }
+        
+        task.resume()
     }
     
     override func didReceiveMemoryWarning() {
@@ -59,7 +79,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         
         let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
         
-        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.0025, longitudeDelta: 0.0025))
+//        var zoom = 0.0025
+        let zoom = 15.0
+        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: zoom, longitudeDelta: zoom))
         
         self.mapView.setRegion(region, animated: true) // Zoom into the user's current location
         

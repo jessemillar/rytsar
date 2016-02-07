@@ -9,7 +9,7 @@
 import Foundation
 import MapKit
 
-class Enemy: NSObject, MKAnnotation {
+class EnemyPin: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D
     
     init(coordinate: CLLocationCoordinate2D) {
