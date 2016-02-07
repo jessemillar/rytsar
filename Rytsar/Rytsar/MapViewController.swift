@@ -39,9 +39,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     print("There was an error: \(error)")
                     return
                 }
-                
-                print(data!.acceleration.x)
-                
+                                
                 let cone = 0.1
 
                 if abs(data!.acceleration.x) > (0.9 - cone) && abs(data!.acceleration.x) < (0.9 + cone){
