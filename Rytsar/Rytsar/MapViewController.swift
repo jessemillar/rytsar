@@ -10,6 +10,7 @@ import UIKit
 import MapKit
 import CoreLocation
 import CoreMotion
+import AVFoundation
 
 class Enemy: NSObject { // Used to make an array of enemies from the database
     var latitude : Double = 0.0 // Initialize to a "null" double
@@ -18,12 +19,21 @@ class Enemy: NSObject { // Used to make an array of enemies from the database
 
 class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
     @IBOutlet weak var mapView: MKMapView!
+ 
+    var gunFire : AVAudioPlayer?
+    var gunReload : AVAudioPlayer?
+    var gunCock : AVAudioPlayer?
+    var gunEmpty : AVAudioPlayer?
     
     let locationManager = CLLocationManager()
     let motionManager = CMMotionManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if let gunFire = self.setupAudioPlayerWithFile("fire", type:"mp3") {
+            self.gunFire = gunFire
+        }
         
         self.locationManager.delegate = self
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -44,6 +54,22 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
                 if abs(data!.acceleration.x) > (0.9 - cone) && abs(data!.acceleration.x) < (0.9 + cone){
                     print("Ready")
+                }
+            }
+        } else {
+            print("Accelerometer is not available")
+        }
+        
+        if motionManager.accelerometerAvailable{
+            motionManager.startGyroUpdatesToQueue(NSOperationQueue()) { (data: CMGyroData?, error: NSError?) in
+                guard data != nil else {
+                    print("There was an error: \(error)")
+                    return
+                }
+                
+                if abs(data!.rotationRate.z) > 8{
+                    self.gunFire?.play() // Play a gun firing sound
+                    print("FIRE")
                 }
             }
         } else {
@@ -99,12 +125,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
         
 //        var zoom = 0.0025
-        let zoom = 30.0
+        let zoom = 30.0 // Way zoomed out for testing
         let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: zoom, longitudeDelta: zoom))
         
         self.mapView.setRegion(region, animated: true) // Zoom into the user's current location
         
-        self.locationManager.stopUpdatingLocation() // Stop updating the location
+        self.locationManager.stopUpdatingLocation() // Stop updating the location so we can zoom around the map
     }
     
     func locationManager(manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
@@ -114,5 +140,22 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     func locationManager(manager: CLLocationManager, didFailWithError error: NSError) {
         print("Errors: " + error.localizedDescription)
     }
+    
+    func setupAudioPlayerWithFile(file:NSString, type:NSString) -> AVAudioPlayer?  {
+        //1
+        let path = NSBundle.mainBundle().pathForResource(file as String, ofType: type as String)
+        let url = NSURL.fileURLWithPath(path!)
+        
+        //2
+        var audioPlayer:AVAudioPlayer?
+        
+        // 3
+        do {
+            try audioPlayer = AVAudioPlayer(contentsOfURL: url)
+        } catch {
+            print("Player not available")
+        }
+        
+        return audioPlayer
+    }
 }
-

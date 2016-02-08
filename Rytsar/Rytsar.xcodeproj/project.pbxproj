@@ -16,6 +16,7 @@
 		8542DC601C55BFCB004FCF64 /* RytsarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8542DC5F1C55BFCB004FCF64 /* RytsarTests.swift */; };
 		8542DC6B1C55BFCC004FCF64 /* RytsarUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8542DC6A1C55BFCC004FCF64 /* RytsarUITests.swift */; };
 		8542DC791C55C20F004FCF64 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8542DC781C55C20F004FCF64 /* MapViewController.swift */; };
+		85DC38E31C68D1EF004E1050 /* fire.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 85DC38E21C68D1EF004E1050 /* fire.mp3 */; };
 		85F0CFF11C66D2FA00A38570 /* EnemyPin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F0CFF01C66D2FA00A38570 /* EnemyPin.swift */; };
 /* End PBXBuildFile section */
 
@@ -52,6 +53,7 @@
 		8542DC6A1C55BFCC004FCF64 /* RytsarUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RytsarUITests.swift; sourceTree = "<group>"; };
 		8542DC6C1C55BFCC004FCF64 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8542DC781C55C20F004FCF64 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		85DC38E21C68D1EF004E1050 /* fire.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = fire.mp3; sourceTree = "<group>"; };
 		85F0CFF01C66D2FA00A38570 /* EnemyPin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnemyPin.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -107,6 +109,7 @@
 				8542DC4A1C55BFCB004FCF64 /* FirstViewController.swift */,
 				8542DC4C1C55BFCB004FCF64 /* SecondViewController.swift */,
 				8542DC781C55C20F004FCF64 /* MapViewController.swift */,
+				85DC38E21C68D1EF004E1050 /* fire.mp3 */,
 				8542DC4E1C55BFCB004FCF64 /* Main.storyboard */,
 				8542DC511C55BFCB004FCF64 /* Assets.xcassets */,
 				8542DC531C55BFCB004FCF64 /* LaunchScreen.storyboard */,
@@ -241,6 +244,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				85DC38E31C68D1EF004E1050 /* fire.mp3 in Resources */,
 				8542DC551C55BFCB004FCF64 /* LaunchScreen.storyboard in Resources */,
 				8542DC521C55BFCB004FCF64 /* Assets.xcassets in Resources */,
 				8542DC501C55BFCB004FCF64 /* Main.storyboard in Resources */,
