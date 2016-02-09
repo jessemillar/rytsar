@@ -79,7 +79,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     return
                 }
                 
-                print(data!.rotationRate.y)
+//                print(data!.rotationRate.y)
                 
                 if data!.rotationRate.y < -15{
                     self.gunReload.play()
@@ -94,9 +94,35 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         } else {
             print("Accelerometer is not available")
         }
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    // Location delegate methods
+    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        let location = locations.last
+        
+        let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
+        
+//        var zoom = 0.0025
+        let zoom = 30.0 // Way zoomed out for testing
+        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: zoom, longitudeDelta: zoom))
+        
+        self.mapView.setRegion(region, animated: true) // Zoom into the user's current location
         
         // Get data from the API, parse it, and add pins to the map
-        let url = NSURL(string: "http://woodsman.jessemillar.com:33333/database")
+        let searchRadius = 5
+        let userLatitude = location!.coordinate.latitude
+        let userLongitude = location!.coordinate.longitude
+        var apiURL = "http://woodsman.jessemillar.com:33333/database/"
+            apiURL += String(userLatitude) + "/"
+            apiURL += String(userLongitude) + "/"
+            apiURL += String(searchRadius)
+        print(apiURL)
+        let url = NSURL(string: apiURL)
         
         let task = NSURLSession.sharedSession().dataTaskWithURL(url!) {(data, response, error) in
             var enemies = [Enemy]()
@@ -130,24 +156,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         }
         
         task.resume()
-    }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-    // Location delegate methods
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let location = locations.last
-        
-        let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
-        
-//        var zoom = 0.0025
-        let zoom = 30.0 // Way zoomed out for testing
-        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: zoom, longitudeDelta: zoom))
-        
-        self.mapView.setRegion(region, animated: true) // Zoom into the user's current location
         
         self.locationManager.stopUpdatingLocation() // Stop updating the location so we can zoom around the map
     }
