@@ -114,13 +114,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         self.mapView.setRegion(region, animated: true) // Zoom into the user's current location
         
         // Get data from the API, parse it, and add pins to the map
-        let searchRadius = 5
-        let userLatitude = location!.coordinate.latitude
-        let userLongitude = location!.coordinate.longitude
-        var apiURL = "http://woodsman.jessemillar.com:33333/database/"
-            apiURL += String(userLatitude) + "/"
-            apiURL += String(userLongitude) + "/"
-            apiURL += String(searchRadius)
+        let apiURL = "http://woodsman.jessemillar.com:33333/database/" + String(location!.coordinate.latitude) + "/" + String(location!.coordinate.longitude) + "/" + String(5)
         print(apiURL)
         let url = NSURL(string: apiURL)
         
