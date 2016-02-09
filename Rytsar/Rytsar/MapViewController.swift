@@ -20,10 +20,12 @@ class Enemy: NSObject { // Used to make an array of enemies from the database
 class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
     @IBOutlet weak var mapView: MKMapView!
  
-    var gunFire : AVAudioPlayer?
-    var gunReload : AVAudioPlayer?
-    var gunCock : AVAudioPlayer?
-    var gunEmpty : AVAudioPlayer?
+    var ammo = 6
+    var canShoot = true
+    var canShootTimer = NSTimer()
+    
+    var gunFire = AVAudioPlayer()
+    var gunReload = AVAudioPlayer()
     
     let locationManager = CLLocationManager()
     let motionManager = CMMotionManager()
@@ -31,10 +33,20 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let gunFire = self.setupAudioPlayerWithFile("fire", type:"mp3") {
-            self.gunFire = gunFire
+        let gunFireFile = NSBundle.mainBundle().URLForResource("fire", withExtension: "mp3")
+        do {
+            try gunFire = AVAudioPlayer(contentsOfURL: gunFireFile!, fileTypeHint: nil)
+        } catch {
+            print(error)
         }
         
+        let gunReloadFile = NSBundle.mainBundle().URLForResource("reload", withExtension: "mp3")
+        do {
+            try gunReload = AVAudioPlayer(contentsOfURL: gunReloadFile!, fileTypeHint: nil)
+        } catch {
+            print(error)
+        }
+            
         self.locationManager.delegate = self
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest
         self.locationManager.requestWhenInUseAuthorization() // Only use location services when the app is in use
@@ -53,7 +65,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 let cone = 0.1
 
                 if abs(data!.acceleration.x) > (0.9 - cone) && abs(data!.acceleration.x) < (0.9 + cone){
-                    print("Ready")
+//                    print("Ready")
                 }
             }
         } else {
@@ -67,9 +79,16 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     return
                 }
                 
-                if abs(data!.rotationRate.z) > 8{
-                    self.gunFire?.play() // Play a gun firing sound
-                    print("FIRE")
+                print(data!.rotationRate.y)
+                
+                if data!.rotationRate.y < -15{
+                    self.gunReload.play()
+                    print("RELOAD")
+                }
+                
+                if data!.rotationRate.z < -8{
+                    self.gunFire.play() // Play a gun firing sound
+//                    print("FIRE")
                 }
             }
         } else {
