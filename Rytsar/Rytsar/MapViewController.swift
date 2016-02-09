@@ -20,6 +20,10 @@ class Enemy: NSObject { // Used to make an array of enemies from the database
 class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
     @IBOutlet weak var mapView: MKMapView!
  
+    let enemyRadius = 2 // Kilometers
+    
+    var enemiesLoaded = false
+
     var ammo = 6
     var canShoot = true
     var canShootTimer = NSTimer()
@@ -107,49 +111,52 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         
         let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
         
-//        var zoom = 0.0025
-        let zoom = 30.0 // Way zoomed out for testing
+        let zoom = 0.0035
         let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: zoom, longitudeDelta: zoom))
         
         self.mapView.setRegion(region, animated: true) // Zoom into the user's current location
         
-        // Get data from the API, parse it, and add pins to the map
-        let apiURL = "http://woodsman.jessemillar.com:33333/database/" + String(location!.coordinate.latitude) + "/" + String(location!.coordinate.longitude) + "/" + String(5)
-        print(apiURL)
-        let url = NSURL(string: apiURL)
-        
-        let task = NSURLSession.sharedSession().dataTaskWithURL(url!) {(data, response, error) in
-            var enemies = [Enemy]()
+        if !enemiesLoaded {
+            enemiesLoaded = true
             
-            do {
-                let json = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments)
+            // Get data from the API, parse it, and add pins to the map
+            let apiURL = "http://woodsman.jessemillar.com:33333/database/" + String(location!.coordinate.latitude) + "/" + String(location!.coordinate.longitude) + "/" + String(enemyRadius)
+            print(apiURL)
+            let url = NSURL(string: apiURL)
+            
+            let task = NSURLSession.sharedSession().dataTaskWithURL(url!) {(data, response, error) in
+                var enemies = [Enemy]()
                 
-                if let coordinates = json as? [[String: AnyObject]] {
-                    for cursor in coordinates {
-                        let newEnemy : Enemy = Enemy()
-                        
-                        if let latitude = cursor["latitude"] as? String {
-                            newEnemy.latitude = Double(latitude)!
+                do {
+                    let json = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments)
+                    
+                    if let coordinates = json as? [[String: AnyObject]] {
+                        for cursor in coordinates {
+                            let newEnemy : Enemy = Enemy()
+                            
+                            if let latitude = cursor["latitude"] as? String {
+                                newEnemy.latitude = Double(latitude)!
+                            }
+                            
+                            if let longitude = cursor["longitude"] as? String {
+                                newEnemy.longitude = Double(longitude)!
+                            }
+                            
+                            enemies.append(newEnemy)
                         }
-                        
-                        if let longitude = cursor["longitude"] as? String {
-                            newEnemy.longitude = Double(longitude)!
-                        }
-                        
-                        enemies.append(newEnemy)
                     }
+                } catch {
+                    print("error serializing JSON: \(error)")
                 }
-            } catch {
-                print("error serializing JSON: \(error)")
+                
+                for enemy in enemies {
+                    let pin = EnemyPin(coordinate: CLLocationCoordinate2D(latitude: enemy.latitude, longitude: enemy.longitude))
+                    self.mapView.addAnnotation(pin)
+                }
             }
             
-            for enemy in enemies {
-                let pin = EnemyPin(coordinate: CLLocationCoordinate2D(latitude: enemy.latitude, longitude: enemy.longitude))
-                self.mapView.addAnnotation(pin)
-            }
+            task.resume()
         }
-        
-        task.resume()
         
         self.locationManager.stopUpdatingLocation() // Stop updating the location so we can zoom around the map
     }
