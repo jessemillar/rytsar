@@ -11,6 +11,7 @@ import MapKit
 import CoreLocation
 import CoreMotion
 import AVFoundation
+import AudioToolbox
 
 class Enemy: NSObject { // Used to make an array of enemies from the database
     var latitude : Double = 0.0 // Initialize to a "null" double
@@ -20,10 +21,16 @@ class Enemy: NSObject { // Used to make an array of enemies from the database
 class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
     @IBOutlet weak var mapView: MKMapView!
  
+    var enemies = [Enemy]()
+    
     let enemyRadius = 2 // Kilometers
+    let shootRadius = 0.004 // Kilometers (about 100 feet)
     
     var enemiesLoaded = false
 
+    var userLatitude = 0.0
+    var userLongitude = 0.0
+    
     var ammo = 6
     var canShoot = true
     var canShootTimer = NSTimer()
@@ -36,6 +43,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+//        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
         
         let gunFireFile = NSBundle.mainBundle().URLForResource("fire", withExtension: "mp3")
         do {
@@ -83,8 +92,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     return
                 }
                 
-//                print(data!.rotationRate.y)
-                
                 if data!.rotationRate.y < -15{
                     self.gunReload.play()
                     print("RELOAD")
@@ -109,12 +116,17 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         let location = locations.last
         
-        let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
+        userLatitude = location!.coordinate.latitude
+        userLongitude = location!.coordinate.longitude
         
-        let zoom = 0.0035
-        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: zoom, longitudeDelta: zoom))
+//        let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
+//        
+//        let zoom = 0.0035
+//        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: zoom, longitudeDelta: zoom))
+//        
+//        self.mapView.setRegion(region, animated: true) // Zoom into the user's current location
         
-        self.mapView.setRegion(region, animated: true) // Zoom into the user's current location
+        mapView.setUserTrackingMode(MKUserTrackingMode.FollowWithHeading, animated: true)
         
         if !enemiesLoaded {
             enemiesLoaded = true
@@ -125,8 +137,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             let url = NSURL(string: apiURL)
             
             let task = NSURLSession.sharedSession().dataTaskWithURL(url!) {(data, response, error) in
-                var enemies = [Enemy]()
-                
                 do {
                     let json = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments)
                     
@@ -142,14 +152,14 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                                 newEnemy.longitude = Double(longitude)!
                             }
                             
-                            enemies.append(newEnemy)
+                            self.enemies.append(newEnemy)
                         }
                     }
                 } catch {
                     print("error serializing JSON: \(error)")
                 }
                 
-                for enemy in enemies {
+                for enemy in self.enemies {
                     let pin = EnemyPin(coordinate: CLLocationCoordinate2D(latitude: enemy.latitude, longitude: enemy.longitude))
                     self.mapView.addAnnotation(pin)
                 }
@@ -158,10 +168,22 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             task.resume()
         }
         
-        self.locationManager.stopUpdatingLocation() // Stop updating the location so we can zoom around the map
+//        self.locationManager.stopUpdatingLocation() // Stop updating the location so we can zoom around the map
     }
     
     func locationManager(manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        for enemy in enemies {
+            let halfCone = 2.0
+            let angle = angleTo(enemy.latitude, lon1: enemy.longitude, lat2: userLatitude, lon2: userLongitude)
+            
+            if newHeading.magneticHeading > (angle - halfCone) && newHeading.magneticHeading < (angle + halfCone) && withinRange(enemy.latitude, lon1: enemy.longitude, lat2: userLatitude, lon2: userLongitude) {
+//                print(angle)
+//                print((angle - halfCone), newHeading.magneticHeading, (angle + halfCone), withinRange(enemy.latitude, lon1: enemy.longitude, lat2: userLatitude, lon2: userLongitude))
+                AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
+                print("Aimed", newHeading.magneticHeading, angle, enemy.latitude, enemy.longitude)
+            }
+        }
+        
 //        print(newHeading.magneticHeading)
     }
     
@@ -169,21 +191,30 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         print("Errors: " + error.localizedDescription)
     }
     
-    func setupAudioPlayerWithFile(file:NSString, type:NSString) -> AVAudioPlayer?  {
-        //1
-        let path = NSBundle.mainBundle().pathForResource(file as String, ofType: type as String)
-        let url = NSURL.fileURLWithPath(path!)
+    func angleTo(lat1: Float64, lon1: Float64, lat2: Float64, lon2: Float64) -> Float64 {
+        let pi = 3.14159
+        var angle = atan2(lat2 - lat1, lon2 - lon1) * 180/pi
         
-        //2
-        var audioPlayer:AVAudioPlayer?
-        
-        // 3
-        do {
-            try audioPlayer = AVAudioPlayer(contentsOfURL: url)
-        } catch {
-            print("Player not available")
+        if (angle < 0){
+            angle += 360
         }
         
-        return audioPlayer
+        return angle + 90;
+    }
+    
+    func withinRange(lat1: Float64, lon1: Float64, lat2: Float64, lon2: Float64) -> Bool {
+        let a = (lat2 - lat1)*(lat2 - lat1)
+        let b = (lon2 - lon1)*(lon2 - lon1)
+        let distance = sqrt(a + b)
+        
+        if (distance < self.shootRadius){
+            print(distance, self.shootRadius)
+        }
+        
+        if distance < self.shootRadius {
+            return true
+        } else {
+            return false
+        }
     }
 }
