@@ -24,7 +24,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     var enemies = [Enemy]()
     
     let enemyRadius = 2 // Kilometers
-    let shootRadius = 0.004 // Kilometers (about 100 feet)
+    let shootRadius = 200.0 // In meters
     
     var enemiesLoaded = false
 
@@ -203,13 +203,18 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     func withinRange(lat1: Float64, lon1: Float64, lat2: Float64, lon2: Float64) -> Bool {
-        let a = (lat2 - lat1)*(lat2 - lat1)
-        let b = (lon2 - lon1)*(lon2 - lon1)
-        let distance = sqrt(a + b)
+//        let a = (lat2 - lat1)*(lat2 - lat1)
+//        let b = (lon2 - lon1)*(lon2 - lon1)
+//        let distance = sqrt(a + b)
         
-        if (distance < self.shootRadius){
+        let R = 6371000.0 // Radius of the earth in meters
+        let x = (lon2-lon1) * cos((lat1+lat2)/2);
+        let y = (lat2-lat1);
+        let distance = sqrt(x*x + y*y) * R;
+        
+//        if (distance < 10000){
             print(distance, self.shootRadius)
-        }
+//        }
         
         if distance < self.shootRadius {
             return true
