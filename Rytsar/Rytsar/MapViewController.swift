@@ -163,6 +163,13 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     let pin = EnemyPin(coordinate: CLLocationCoordinate2D(latitude: enemy.latitude, longitude: enemy.longitude))
                     self.mapView.addAnnotation(pin)
                 }
+                
+                for enemy in self.enemies {
+                    let angle = self.angleTo(self.userLatitude, lon1: self.userLongitude, lat2: enemy.latitude, lon2: enemy.longitude)
+                    
+                    //            if newHeading.magneticHeading > (angle - halfCone) && newHeading.magneticHeading < (angle + halfCone) && withinRange(enemy.latitude, lon1: enemy.longitude, lat2: userLatitude, lon2: userLongitude) {
+                    print(angle)
+                }
             }
             
             task.resume()
@@ -174,14 +181,14 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     func locationManager(manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
         for enemy in enemies {
             let halfCone = 2.0
-            let angle = angleTo(enemy.latitude, lon1: enemy.longitude, lat2: userLatitude, lon2: userLongitude)
+//            let angle = angleTo(enemy.latitude, lon1: enemy.longitude, lat2: userLatitude, lon2: userLongitude)
             
-            if newHeading.magneticHeading > (angle - halfCone) && newHeading.magneticHeading < (angle + halfCone) && withinRange(enemy.latitude, lon1: enemy.longitude, lat2: userLatitude, lon2: userLongitude) {
+//            if newHeading.magneticHeading > (angle - halfCone) && newHeading.magneticHeading < (angle + halfCone) && withinRange(enemy.latitude, lon1: enemy.longitude, lat2: userLatitude, lon2: userLongitude) {
 //                print(angle)
 //                print((angle - halfCone), newHeading.magneticHeading, (angle + halfCone), withinRange(enemy.latitude, lon1: enemy.longitude, lat2: userLatitude, lon2: userLongitude))
                 AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
-                print("Aimed", newHeading.magneticHeading, angle, enemy.latitude, enemy.longitude)
-            }
+//                print("Aimed", newHeading.magneticHeading, angle, enemy.latitude, enemy.longitude)
+//            }
         }
         
 //        print(newHeading.magneticHeading)
@@ -192,34 +199,55 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     func angleTo(lat1: Float64, lon1: Float64, lat2: Float64, lon2: Float64) -> Float64 {
-        let pi = 3.14159
-        var angle = atan2(lat2 - lat1, lon2 - lon1) * 180/pi
+//        let pi = 3.14159
+//        var angle = atan2(lat2 - lat1, lon2 - lon1) * 180/pi
+//        
+//        if (angle < 0){
+//            angle += 360
+//        }
+//        
+//        return angle + 90;
         
-        if (angle < 0){
-            angle += 360
+        print(lat1, lon1, lat2, lon2)
+        
+//        let φ1 = toRadians(lat1)
+//        let φ2 = toRadians(lat2)
+//        let λ1 = toRadians(lon1)
+//        let λ2 = toRadians(lon2)
+//        
+//        let y = sin(λ2-λ1) * cos(φ2)
+//        let x = cos(φ1)*sin(φ2)-sin(φ1)*cos(φ2)*cos(λ2-λ1)
+//        
+//        return toDegrees(atan2(y, x))
+        
+        var angle = toDegrees(atan2(sin(toRadians(lon2-lon1))*cos(toRadians(lat2)), cos(toRadians(lat1))*sin(toRadians(lat2))-sin(toRadians(lat1))*cos(toRadians(lat2))*cos(toRadians(lon2-lon1))))
+        
+        if angle < 0 {
+            angle = angle + 360
         }
         
-        return angle + 90;
+        return angle
     }
     
-    func withinRange(lat1: Float64, lon1: Float64, lat2: Float64, lon2: Float64) -> Bool {
-//        let a = (lat2 - lat1)*(lat2 - lat1)
-//        let b = (lon2 - lon1)*(lon2 - lon1)
-//        let distance = sqrt(a + b)
+    func distanceTo(lat1: Float64, lon1: Float64, lat2: Float64, lon2: Float64) -> Float64 {
+        let φ1 = toRadians(lat1)
+        let φ2 = toRadians(lat2)
+        let Δλ = toRadians(lon2-lon1)
+        let R = 6371000.0 // gives d in metres
+        let distance = acos(sin(φ1)*sin(φ2) + cos(φ1)*cos(φ2) * cos(Δλ) ) * R;
         
-        let R = 6371000.0 // Radius of the earth in meters
-        let x = (lon2-lon1) * cos((lat1+lat2)/2);
-        let y = (lat2-lat1);
-        let distance = sqrt(x*x + y*y) * R;
+        return distance
+    }
+    
+    func toDegrees(number: Float64) -> Float64 {
+        let PI = 3.14159
         
-//        if (distance < 10000){
-            print(distance, self.shootRadius)
-//        }
+        return number*180/PI
+    }
+    
+    func toRadians(number: Float64) -> Float64 {
+        let PI = 3.14159
         
-        if distance < self.shootRadius {
-            return true
-        } else {
-            return false
-        }
+        return number*PI/180
     }
 }
