@@ -23,7 +23,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
  
     var enemies = [Enemy]()
     
-    let enemyRadius = 2 // Kilometers
+    let baseURL = "http://woodsman.jessemillar.com:33333"
+    
+    let enemyRadius = 1.5 // Kilometers
     let shootRadius = 150.0 // In meters
     
     var enemiesLoaded = false
@@ -31,9 +33,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     var userLatitude = 0.0
     var userLongitude = 0.0
     
-    var ammo = 6
-    var canShoot = true
-    var canShootTimer = NSTimer()
+    var gunOrientation = true // Make sure we're in gun orientation before allowing a shot
+    var enemyAimedAtLatitude = 0.0
+    var enemyAimedAtLongitude = 0.0
     
     var gunFire = AVAudioPlayer()
     var gunReload = AVAudioPlayer()
@@ -76,7 +78,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 let cone = 0.1
 
                 if abs(data!.acceleration.x) > (0.9 - cone) && abs(data!.acceleration.x) < (0.9 + cone){
-//                    print("Ready")
+                    self.gunOrientation = true
+                } else {
+                    self.gunOrientation = false
                 }
             }
         } else {
@@ -97,7 +101,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 
                 if data!.rotationRate.z < -8{
                     self.gunFire.play() // Play a gun firing sound
-//                    print("FIRE")
+                    print("FIRE")
+                    self.shootEnemy()
                 }
             }
         } else {
@@ -122,41 +127,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         if !enemiesLoaded {
             enemiesLoaded = true
             
-            // Get data from the API, parse it, and add pins to the map
-            let apiURL = "http://woodsman.jessemillar.com:33333/database/" + String(location!.coordinate.latitude) + "/" + String(location!.coordinate.longitude) + "/" + String(enemyRadius)
-            print(apiURL)
-            let url = NSURL(string: apiURL)
-            
-            let task = NSURLSession.sharedSession().dataTaskWithURL(url!) {(data, response, error) in
-                do {
-                    let json = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments)
-                    
-                    if let coordinates = json as? [[String: AnyObject]] {
-                        for cursor in coordinates {
-                            let newEnemy : Enemy = Enemy()
-                            
-                            if let latitude = cursor["latitude"] as? String {
-                                newEnemy.latitude = Double(latitude)!
-                            }
-                            
-                            if let longitude = cursor["longitude"] as? String {
-                                newEnemy.longitude = Double(longitude)!
-                            }
-                            
-                            self.enemies.append(newEnemy)
-                        }
-                    }
-                } catch {
-                    print("error serializing JSON: \(error)")
-                }
-                
-                for enemy in self.enemies {
-                    let pin = EnemyPin(coordinate: CLLocationCoordinate2D(latitude: enemy.latitude, longitude: enemy.longitude))
-                    self.mapView.addAnnotation(pin)
-                }
-            }
-            
-            task.resume()
+            getEnemies()
         }
     }
     
@@ -166,12 +137,11 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             let angle = angleTo(userLatitude, lon1: userLongitude, lat2: enemy.latitude, lon2: enemy.longitude)
             let distance = distanceTo(userLatitude, lon1: userLongitude, lat2: enemy.latitude, lon2: enemy.longitude)
             
-//            print(newHeading.magneticHeading, angle)
-            
             if newHeading.magneticHeading > (angle - halfCone) && newHeading.magneticHeading < (angle + halfCone) && distance < shootRadius {
-//                print((angle - halfCone), newHeading.magneticHeading, (angle + halfCone), distanceTo(enemy.latitude, lon1: enemy.longitude, lat2: userLatitude, lon2: userLongitude))
                 AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
-                print("Aimed", newHeading.magneticHeading, angle, distance)
+//                print("Aimed", newHeading.magneticHeading, angle, distance)
+                enemyAimedAtLatitude = enemy.latitude
+                enemyAimedAtLongitude = enemy.longitude
             }
         }
     }
@@ -210,5 +180,73 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         let PI = 3.14159
         
         return number*PI/180
+    }
+    
+    func getEnemies() {
+        let latitude = "\(userLatitude)"
+        let longitude = "\(userLongitude)"
+        let radius = "\(enemyRadius)"
+        
+        var apiURL = baseURL
+            apiURL += "/database/"
+            apiURL += latitude + "/"
+            apiURL += longitude + "/" + radius
+        print(apiURL)
+        let url = NSURL(string: apiURL)
+        
+        let task = NSURLSession.sharedSession().dataTaskWithURL(url!) {(data, response, error) in
+            do {
+                let json = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments)
+                
+                if let coordinates = json as? [[String: AnyObject]] {
+                    for cursor in coordinates {
+                        let newEnemy : Enemy = Enemy()
+                        
+                        if let latitude = cursor["latitude"] as? String {
+                            newEnemy.latitude = Double(latitude)!
+                        }
+                        
+                        if let longitude = cursor["longitude"] as? String {
+                            newEnemy.longitude = Double(longitude)!
+                        }
+                        
+                        self.enemies.append(newEnemy)
+                    }
+                }
+            } catch {
+                print("error serializing JSON: \(error)")
+            }
+            
+            for enemy in self.enemies {
+                let pin = EnemyPin(coordinate: CLLocationCoordinate2D(latitude: enemy.latitude, longitude: enemy.longitude))
+                self.mapView.addAnnotation(pin)
+            }
+        }
+        
+        task.resume()
+    }
+    
+    func shootEnemy() {
+        let enemyLatitude = "\(enemyAimedAtLatitude)"
+        let enemyLongitude = "\(enemyAimedAtLongitude)"
+        
+        let endpoint: String = baseURL + "/" + enemyLatitude + "/" + enemyLongitude
+        let endpointRequest = NSMutableURLRequest(URL: NSURL(string: endpoint)!)
+        endpointRequest.HTTPMethod = "DELETE"
+        
+        let config = NSURLSessionConfiguration.defaultSessionConfiguration()
+        let session = NSURLSession(configuration: config)
+        
+        let task = session.dataTaskWithRequest(endpointRequest, completionHandler: {
+            (data, response, error) in
+            guard let _ = data else {
+                print("Error shooting enemy")
+                return
+            }
+            
+            self.mapView.removeAnnotations(self.mapView.annotations) // Remove all annotations from the map
+        })
+        
+        task.resume()
     }
 }
