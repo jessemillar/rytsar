@@ -14,7 +14,8 @@ import AVFoundation
 import AudioToolbox
 
 struct Globals {
-    static var ammo = 6
+    static var maxAmmo = 3
+    static var ammo = maxAmmo
 }
 
 class Enemy: NSObject { // Used to make an array of enemies from the database
@@ -35,6 +36,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     var enemiesLoaded = false
     var canShoot = true
+    var canReload = true
     let reloadTime = 1.5 // In seconds (needs to be a double)
 
     var userLatitude = 0.0
@@ -45,6 +47,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     var crossbowShoot = AVAudioPlayer()
     var crossbowCock = AVAudioPlayer()
+    var crossbowEmpty = AVAudioPlayer()
     
     let locationManager = CLLocationManager()
     let motionManager = CMMotionManager()
@@ -62,6 +65,13 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         let crossbowCockFile = NSBundle.mainBundle().URLForResource("cock", withExtension: "wav")
         do {
             try crossbowCock = AVAudioPlayer(contentsOfURL: crossbowCockFile!, fileTypeHint: nil)
+        } catch {
+            print(error)
+        }
+        
+        let crossbowEmptyFile = NSBundle.mainBundle().URLForResource("empty", withExtension: "wav")
+        do {
+            try crossbowEmpty = AVAudioPlayer(contentsOfURL: crossbowEmptyFile!, fileTypeHint: nil)
         } catch {
             print(error)
         }
@@ -100,13 +110,14 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     return
                 }
                 
-//                if data!.rotationRate.y < -15{
-//                    self.crossbowCock.play()
-//                    print("RELOAD")
-//                }
-                
-//                print(self.canShoot, self.shootOrientation)
-                
+                if data!.rotationRate.y < -15{
+                    if self.canReload {
+                        Globals.ammo = Globals.maxAmmo
+                        self.crossbowCock.play()
+                        print("RELOAD")
+                    }
+                }
+
                 if data!.rotationRate.z < -8{
                     self.shoot()
                 }
@@ -117,16 +128,22 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     func shoot() {
-        if (self.canShoot) {
-            if Globals.ammo > 1 {
-                Globals.ammo--
-            } else {
-                Globals.ammo = 6
-            }
+        if self.canShoot && Globals.ammo > 0 {
+            Globals.ammo--
             
             self.canShoot = false
-            self.crossbowShoot.play() // Play a gun firing sound
+            self.canReload = false // Don't allow reloading RIGHT after firing
+            self.crossbowShoot.play() // Play a crossbow firing sound
             self.shootEnemy()
+            
+            let date = NSDate().dateByAddingTimeInterval(self.reloadTime)
+            let timer = NSTimer(fireDate: date, interval: 0, target: self, selector: "canShootEnable", userInfo: nil, repeats: false)
+            NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
+        } else if Globals.ammo == 0 && self.canShoot {
+            print("Playing empty sound")
+            self.canShoot = false
+            self.canReload = false // Don't allow reloading RIGHT after firing
+            self.crossbowCock.play()
             
             let date = NSDate().dateByAddingTimeInterval(self.reloadTime)
             let timer = NSTimer(fireDate: date, interval: 0, target: self, selector: "canShootEnable", userInfo: nil, repeats: false)
@@ -135,8 +152,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     func canShootEnable() {
-        self.canShoot = true
-        self.crossbowCock.play()
+        self.canShoot = true // Allows firing for real and when we're out of ammo (just to play the empty sound)
+        self.canReload = true
     }
     
     override func didReceiveMemoryWarning() {
