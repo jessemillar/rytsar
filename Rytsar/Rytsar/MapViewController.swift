@@ -30,7 +30,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     let baseURL = "http://woodsman.jessemillar.com:33333"
     
-    let enemyRadius = 1.25 // Kilometers
+    let enemyRadius = 1.0 // Kilometers
     let shootRadius = 150.0 // In meters
     
     var enemiesLoaded = false
@@ -43,8 +43,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     var shootOrientation = true // Make sure we're in gun orientation before allowing a shot
     var enemyAimedAtID = 0
     
-    var gunFire = AVAudioPlayer()
-    var gunReload = AVAudioPlayer()
+    var crossbowShoot = AVAudioPlayer()
+    var crossbowCock = AVAudioPlayer()
     
     let locationManager = CLLocationManager()
     let motionManager = CMMotionManager()
@@ -52,16 +52,16 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let gunFireFile = NSBundle.mainBundle().URLForResource("shoot", withExtension: "wav")
+        let crossbowShootFile = NSBundle.mainBundle().URLForResource("shoot", withExtension: "wav")
         do {
-            try gunFire = AVAudioPlayer(contentsOfURL: gunFireFile!, fileTypeHint: nil)
+            try crossbowShoot = AVAudioPlayer(contentsOfURL: crossbowShootFile!, fileTypeHint: nil)
         } catch {
             print(error)
         }
         
-        let gunReloadFile = NSBundle.mainBundle().URLForResource("cock", withExtension: "wav")
+        let crossbowCockFile = NSBundle.mainBundle().URLForResource("cock", withExtension: "wav")
         do {
-            try gunReload = AVAudioPlayer(contentsOfURL: gunReloadFile!, fileTypeHint: nil)
+            try crossbowCock = AVAudioPlayer(contentsOfURL: crossbowCockFile!, fileTypeHint: nil)
         } catch {
             print(error)
         }
@@ -101,7 +101,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 }
                 
 //                if data!.rotationRate.y < -15{
-//                    self.gunReload.play()
+//                    self.crossbowCock.play()
 //                    print("RELOAD")
 //                }
                 
@@ -125,7 +125,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             }
             
             self.canShoot = false
-            self.gunFire.play() // Play a gun firing sound
+            self.crossbowShoot.play() // Play a gun firing sound
             self.shootEnemy()
             
             let date = NSDate().dateByAddingTimeInterval(self.reloadTime)
@@ -136,7 +136,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     func canShootEnable() {
         self.canShoot = true
-        self.gunReload.play()
+        self.crossbowCock.play()
     }
     
     override func didReceiveMemoryWarning() {
@@ -153,12 +153,34 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         
         mapView.setUserTrackingMode(MKUserTrackingMode.FollowWithHeading, animated: true)
         
-        self.mapView.addOverlay(MKCircle(centerCoordinate: CLLocationCoordinate2D(latitude: userLatitude, longitude: userLongitude), radius: CLLocationDistance(shootRadius))) // Show the shooting radius
+        let overlays = mapView.overlays // Remove previous range circles so we don't get duplicates
+        mapView.removeOverlays(overlays)
+        let tempLocation = CLLocation(latitude: userLatitude as CLLocationDegrees, longitude: userLongitude as CLLocationDegrees)
+        addRadiusCircle(tempLocation)
         
         if !enemiesLoaded {
             enemiesLoaded = true
             
             getEnemies()
+        }
+    }
+
+// MARK: MapView delegate for drawing annotations (mainly the shooting radius)
+    func addRadiusCircle(location: CLLocation){
+        self.mapView.delegate = self
+        let circle = MKCircle(centerCoordinate: location.coordinate, radius: shootRadius as CLLocationDistance)
+        self.mapView.addOverlay(circle)
+    }
+    
+    func mapView(mapView: MKMapView!, rendererForOverlay overlay: MKOverlay!) -> MKOverlayRenderer! {
+        if overlay is MKCircle {
+            let circle = MKCircleRenderer(overlay: overlay)
+                circle.strokeColor = UIColor(red:0.94, green:0.55, blue:0.23, alpha:0.5) // rgb(239, 139, 59)
+                circle.fillColor = UIColor(red:0.94, green:0.55, blue:0.23, alpha:0.25) // rgb(239, 139, 59)
+                circle.lineWidth = 1
+            return circle
+        } else {
+            return nil
         }
     }
     
@@ -289,6 +311,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     return
                 }
                 
+                // Run the following as an asynchronous process so the UI can update
                 dispatch_async(dispatch_get_main_queue(), { // Kill all the enemy pins and repopulate with the updates from the database
                     let allAnnotations = self.mapView.annotations
                     self.mapView.removeAnnotations(allAnnotations)
