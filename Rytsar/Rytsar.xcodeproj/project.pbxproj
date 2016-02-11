@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		8542DC491C55BFCB004FCF64 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8542DC481C55BFCB004FCF64 /* AppDelegate.swift */; };
-		8542DC4B1C55BFCB004FCF64 /* BackpackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8542DC4A1C55BFCB004FCF64 /* BackpackViewController.swift */; };
 		8542DC501C55BFCB004FCF64 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8542DC4E1C55BFCB004FCF64 /* Main.storyboard */; };
 		8542DC521C55BFCB004FCF64 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8542DC511C55BFCB004FCF64 /* Assets.xcassets */; };
 		8542DC551C55BFCB004FCF64 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8542DC531C55BFCB004FCF64 /* LaunchScreen.storyboard */; };
@@ -19,6 +18,7 @@
 		85F0CFF11C66D2FA00A38570 /* EnemyPin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85F0CFF01C66D2FA00A38570 /* EnemyPin.swift */; };
 		85F1724D1C698D550020F28D /* reload.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 85F1724C1C698D550020F28D /* reload.mp3 */; };
 		85FCCCDD1C6C2B4E008E7021 /* backpack.png in Resources */ = {isa = PBXBuildFile; fileRef = 85FCCCDC1C6C2B4E008E7021 /* backpack.png */; };
+		85FCCCDF1C6C34CB008E7021 /* BackpackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85FCCCDE1C6C34CB008E7021 /* BackpackViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,7 +41,6 @@
 /* Begin PBXFileReference section */
 		8542DC451C55BFCB004FCF64 /* Rytsar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rytsar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8542DC481C55BFCB004FCF64 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		8542DC4A1C55BFCB004FCF64 /* BackpackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackpackViewController.swift; sourceTree = "<group>"; };
 		8542DC4F1C55BFCB004FCF64 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		8542DC511C55BFCB004FCF64 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8542DC541C55BFCB004FCF64 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -57,6 +56,7 @@
 		85F0CFF01C66D2FA00A38570 /* EnemyPin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnemyPin.swift; sourceTree = "<group>"; };
 		85F1724C1C698D550020F28D /* reload.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = reload.mp3; sourceTree = "<group>"; };
 		85FCCCDC1C6C2B4E008E7021 /* backpack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = backpack.png; sourceTree = "<group>"; };
+		85FCCCDE1C6C34CB008E7021 /* BackpackViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackpackViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,8 +107,8 @@
 		8542DC471C55BFCB004FCF64 /* Rytsar */ = {
 			isa = PBXGroup;
 			children = (
+				85FCCCDE1C6C34CB008E7021 /* BackpackViewController.swift */,
 				8542DC481C55BFCB004FCF64 /* AppDelegate.swift */,
-				8542DC4A1C55BFCB004FCF64 /* BackpackViewController.swift */,
 				8542DC781C55C20F004FCF64 /* MapViewController.swift */,
 				85F1724C1C698D550020F28D /* reload.mp3 */,
 				85DC38E21C68D1EF004E1050 /* fire.mp3 */,
@@ -279,7 +279,7 @@
 			files = (
 				85F0CFF11C66D2FA00A38570 /* EnemyPin.swift in Sources */,
 				8542DC491C55BFCB004FCF64 /* AppDelegate.swift in Sources */,
-				8542DC4B1C55BFCB004FCF64 /* BackpackViewController.swift in Sources */,
+				85FCCCDF1C6C34CB008E7021 /* BackpackViewController.swift in Sources */,
 				8542DC791C55C20F004FCF64 /* MapViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

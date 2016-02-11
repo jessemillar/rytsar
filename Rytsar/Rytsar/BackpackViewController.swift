@@ -8,10 +8,16 @@
 
 import UIKit
 
-class BackpackViewController: UIViewController {
+class BackpackViewController: UIViewController {    
+    @IBOutlet weak var AmmoLabel: UILabel!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        AmmoLabel.text = "Ammo: \(Globals.ammo)"
     }
 
     override func didReceiveMemoryWarning() {

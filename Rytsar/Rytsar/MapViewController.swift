@@ -13,6 +13,10 @@ import CoreMotion
 import AVFoundation
 import AudioToolbox
 
+struct Globals {
+    static var ammo = 6
+}
+
 class Enemy: NSObject { // Used to make an array of enemies from the database
     var id : Int = 0 // Initialize to a "null" value that shouldn't ever be a valid ID on the server
     var latitude : Double = 0.0 // Initialize to a "null" double
@@ -26,12 +30,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     let baseURL = "http://woodsman.jessemillar.com:33333"
     
-    let enemyRadius = 1.5 // Kilometers
+    let enemyRadius = 1.25 // Kilometers
     let shootRadius = 150.0 // In meters
     
     var enemiesLoaded = false
     var canShoot = true
-    let reloadTime = 2.0 // In seconds (needs to be a double)
+    let reloadTime = 1.5 // In seconds (needs to be a double)
 
     var userLatitude = 0.0
     var userLongitude = 0.0
@@ -104,20 +108,29 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 //                print(self.canShoot, self.shootOrientation)
                 
                 if data!.rotationRate.z < -8{
-                    if (self.canShoot) {
-                        self.canShoot = false
-                        self.gunFire.play() // Play a gun firing sound
-                        print("FIRE")
-                        self.shootEnemy()
-                        
-                        let date = NSDate().dateByAddingTimeInterval(self.reloadTime)
-                        let timer = NSTimer(fireDate: date, interval: 0, target: self, selector: "canShootEnable", userInfo: nil, repeats: false)
-                        NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
-                    }
+                    self.shoot()
                 }
             }
         } else {
             print("Accelerometer is not available")
+        }
+    }
+    
+    func shoot() {
+        if (self.canShoot) {
+            if Globals.ammo > 1 {
+                Globals.ammo--
+            } else {
+                Globals.ammo = 6
+            }
+            
+            self.canShoot = false
+            self.gunFire.play() // Play a gun firing sound
+            self.shootEnemy()
+            
+            let date = NSDate().dateByAddingTimeInterval(self.reloadTime)
+            let timer = NSTimer(fireDate: date, interval: 0, target: self, selector: "canShootEnable", userInfo: nil, repeats: false)
+            NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
         }
     }
     
@@ -168,6 +181,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             if heading > leftCone && heading < rightCone && distance < shootRadius {
                 AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
                 enemyAimedAtID = enemy.id
+                break
+            } else {
+                enemyAimedAtID = 0
             }
         }
     }
@@ -217,7 +233,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             apiURL += "/database/"
             apiURL += latitude + "/"
             apiURL += longitude + "/" + radius
-        print(apiURL)
         let url = NSURL(string: apiURL)
         
         let task = NSURLSession.sharedSession().dataTaskWithURL(url!) {(data, response, error) in
@@ -257,32 +272,32 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     func shootEnemy() {
-        let enemyID = "\(enemyAimedAtID)"
-        
-        let endpoint: String = baseURL + "/delete/" + enemyID
-        let endpointRequest = NSMutableURLRequest(URL: NSURL(string: endpoint)!)
-        endpointRequest.HTTPMethod = "DELETE"
-        
-        print(endpoint)
-        
-        let config = NSURLSessionConfiguration.defaultSessionConfiguration()
-        let session = NSURLSession(configuration: config)
-        
-        let task = session.dataTaskWithRequest(endpointRequest, completionHandler: {
-            (data, response, error) in
-            guard let _ = data else {
-                print("Error shooting enemy")
-                return
-            }
+        if enemyAimedAtID > 0 {
+            let enemyID = "\(enemyAimedAtID)"
             
-            dispatch_async(dispatch_get_main_queue(), { // Kill all the enemy pins and repopulate with the updates from the database
-                let allAnnotations = self.mapView.annotations
-                self.mapView.removeAnnotations(allAnnotations)
-                self.enemies.removeAll() // Wipe the local array so we don't get duplicate pins
-                self.getEnemies()
+            let endpoint: String = baseURL + "/delete/" + enemyID
+            let endpointRequest = NSMutableURLRequest(URL: NSURL(string: endpoint)!)
+            endpointRequest.HTTPMethod = "DELETE"
+            
+            let config = NSURLSessionConfiguration.defaultSessionConfiguration()
+            let session = NSURLSession(configuration: config)
+            
+            let task = session.dataTaskWithRequest(endpointRequest, completionHandler: {
+                (data, response, error) in
+                guard let _ = data else {
+                    print("Error shooting enemy")
+                    return
+                }
+                
+                dispatch_async(dispatch_get_main_queue(), { // Kill all the enemy pins and repopulate with the updates from the database
+                    let allAnnotations = self.mapView.annotations
+                    self.mapView.removeAnnotations(allAnnotations)
+                    self.enemies.removeAll() // Wipe the local array so we don't get duplicate pins
+                    self.getEnemies()
+                })
             })
-        })
-        
-        task.resume()
+            
+            task.resume()
+        }
     }
 }
