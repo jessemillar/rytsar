@@ -52,14 +52,14 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let gunFireFile = NSBundle.mainBundle().URLForResource("fire", withExtension: "mp3")
+        let gunFireFile = NSBundle.mainBundle().URLForResource("shoot", withExtension: "wav")
         do {
             try gunFire = AVAudioPlayer(contentsOfURL: gunFireFile!, fileTypeHint: nil)
         } catch {
             print(error)
         }
         
-        let gunReloadFile = NSBundle.mainBundle().URLForResource("reload", withExtension: "mp3")
+        let gunReloadFile = NSBundle.mainBundle().URLForResource("cock", withExtension: "wav")
         do {
             try gunReload = AVAudioPlayer(contentsOfURL: gunReloadFile!, fileTypeHint: nil)
         } catch {
@@ -153,6 +153,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         
         mapView.setUserTrackingMode(MKUserTrackingMode.FollowWithHeading, animated: true)
         
+        self.mapView.addOverlay(MKCircle(centerCoordinate: CLLocationCoordinate2D(latitude: userLatitude, longitude: userLongitude), radius: CLLocationDistance(shootRadius))) // Show the shooting radius
+        
         if !enemiesLoaded {
             enemiesLoaded = true
             
@@ -163,7 +165,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 // MARK: Track compass heading and detect aiming
     func locationManager(manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
         for enemy in enemies {
-            let distance = distanceTo(userLatitude, lon1: userLongitude, lat2: enemy.latitude, lon2: enemy.longitude)
+            let distance = distanceTo(enemy.latitude, longitude: enemy.longitude)
             let heading = newHeading.magneticHeading
             let angle = angleTo(userLatitude, lon1: userLongitude, lat2: enemy.latitude, lon2: enemy.longitude)
             let halfCone = 8.0 // Make the aiming cone match up with the default compass cone
@@ -202,12 +204,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         return angle
     }
     
-    func distanceTo(lat1: Float64, lon1: Float64, lat2: Float64, lon2: Float64) -> Float64 {
-        let φ1 = toRadians(lat1)
-        let φ2 = toRadians(lat2)
-        let Δλ = toRadians(lon2-lon1)
-        let R = 6371000.0 // Gives distance in meters
-        let distance = acos(sin(φ1)*sin(φ2) + cos(φ1)*cos(φ2) * cos(Δλ) ) * R;
+    func distanceTo(latitude: Float64, longitude: Float64) -> Float64 {
+        let from = CLLocation(latitude: userLatitude, longitude: userLongitude)
+        let to = CLLocation(latitude: latitude, longitude: longitude)
+        let distance = from.distanceFromLocation(to)
         
         return distance
     }
