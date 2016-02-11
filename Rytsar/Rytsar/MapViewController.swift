@@ -106,7 +106,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 if data!.rotationRate.z < -8{
                     if (self.canShoot) {
                         self.canShoot = false
-//                        self.gunFire.play() // Play a gun firing sound
+                        self.gunFire.play() // Play a gun firing sound
                         print("FIRE")
                         self.shootEnemy()
                         
@@ -122,8 +122,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     func canShootEnable() {
-        print("Called")
         self.canShoot = true
+        self.gunReload.play()
     }
     
     override func didReceiveMemoryWarning() {

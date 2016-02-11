@@ -18,29 +18,79 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" text="Hello" textAlignment="center" lineBreakMode="tailTruncation" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="KQZ-1w-vlD">
-                                <rect key="frame" x="259" y="279" width="83" height="42"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                                <fontDescription key="fontDescription" name="Helvetica" family="Helvetica" pointSize="36"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="backpack.png" translatesAutoresizingMaskIntoConstraints="NO" id="ubB-fL-tdq">
+                                <rect key="frame" x="223" y="85" width="155" height="149"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="155" id="Da5-8k-pB1"/>
+                                    <constraint firstAttribute="height" constant="149" id="OeA-TR-v2a"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Revolver" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JJp-Xv-Qe7">
+                                <rect key="frame" x="198" y="249" width="205" height="81"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="205" id="Cd5-dM-HoU"/>
+                                    <constraint firstAttribute="height" constant="81" id="fT5-RH-7xU"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="30"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Loaded by FirstViewController" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="A5M-7J-77L">
-                                <rect key="frame" x="203" y="329" width="195" height="17"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pills: 2" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0F1-bz-j7U">
+                                <rect key="frame" x="198" y="411" width="205" height="81"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="81" id="NK9-EL-28x"/>
+                                    <constraint firstAttribute="width" constant="205" id="jDn-As-BsF"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="30"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Ammo: 6" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YBq-vF-vmV">
+                                <rect key="frame" x="198" y="330" width="205" height="81"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="81" id="0fI-qv-ujC"/>
+                                    <constraint firstAttribute="width" constant="205" id="81V-Rh-hPr"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="Chalkduster" family="Chalkduster" pointSize="30"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="0.50196081400000003" green="0.0" blue="0.25098040700000002" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstAttribute="centerX" secondItem="KQZ-1w-vlD" secondAttribute="centerX" id="6BV-lF-sBN"/>
-                            <constraint firstItem="A5M-7J-77L" firstAttribute="top" secondItem="KQZ-1w-vlD" secondAttribute="bottom" constant="8" symbolic="YES" id="cfb-er-3JN"/>
-                            <constraint firstItem="A5M-7J-77L" firstAttribute="centerX" secondItem="KQZ-1w-vlD" secondAttribute="centerX" id="e1l-AV-tCB"/>
-                            <constraint firstAttribute="centerY" secondItem="KQZ-1w-vlD" secondAttribute="centerY" id="exm-UA-ej4"/>
-                            <constraint firstItem="KQZ-1w-vlD" firstAttribute="centerY" secondItem="tsR-hK-woN" secondAttribute="centerY" id="lZU-wd-VTF"/>
-                            <constraint firstItem="KQZ-1w-vlD" firstAttribute="centerX" secondItem="tsR-hK-woN" secondAttribute="centerX" id="tzA-do-GNg"/>
+                            <constraint firstItem="JJp-Xv-Qe7" firstAttribute="top" secondItem="ubB-fL-tdq" secondAttribute="bottom" constant="85" id="3us-Hc-CI1"/>
+                            <constraint firstItem="0F1-bz-j7U" firstAttribute="top" secondItem="YBq-vF-vmV" secondAttribute="bottom" constant="85" id="5tY-3R-aYO"/>
+                            <constraint firstItem="YBq-vF-vmV" firstAttribute="centerX" secondItem="tsR-hK-woN" secondAttribute="centerX" id="6xL-ni-0TB"/>
+                            <constraint firstItem="JJp-Xv-Qe7" firstAttribute="top" secondItem="ubB-fL-tdq" secondAttribute="bottom" constant="15" id="PcA-HX-CoK"/>
+                            <constraint firstItem="ubB-fL-tdq" firstAttribute="top" secondItem="tsR-hK-woN" secondAttribute="topMargin" constant="85" id="RHJ-I6-HqT"/>
+                            <constraint firstItem="YBq-vF-vmV" firstAttribute="top" secondItem="JJp-Xv-Qe7" secondAttribute="bottom" id="RgL-JK-tgt"/>
+                            <constraint firstItem="YBq-vF-vmV" firstAttribute="centerY" secondItem="tsR-hK-woN" secondAttribute="centerY" id="TLf-KG-2W5"/>
+                            <constraint firstItem="YBq-vF-vmV" firstAttribute="top" secondItem="ubB-fL-tdq" secondAttribute="bottom" constant="30" id="VuS-ff-bLC"/>
+                            <constraint firstItem="0F1-bz-j7U" firstAttribute="centerX" secondItem="tsR-hK-woN" secondAttribute="centerX" id="YSL-5h-kFP"/>
+                            <constraint firstItem="ubB-fL-tdq" firstAttribute="centerX" secondItem="tsR-hK-woN" secondAttribute="centerX" id="YWA-oS-8Md"/>
+                            <constraint firstItem="YBq-vF-vmV" firstAttribute="centerY" secondItem="tsR-hK-woN" secondAttribute="centerY" constant="63.5" id="c3r-ey-k0M"/>
+                            <constraint firstItem="JJp-Xv-Qe7" firstAttribute="centerY" secondItem="tsR-hK-woN" secondAttribute="centerY" id="egc-75-Tng"/>
+                            <constraint firstItem="0F1-bz-j7U" firstAttribute="top" secondItem="YBq-vF-vmV" secondAttribute="bottom" id="k5q-Ug-eHu"/>
+                            <constraint firstItem="YBq-vF-vmV" firstAttribute="centerY" secondItem="tsR-hK-woN" secondAttribute="centerY" id="nHu-Bl-xaS"/>
+                            <constraint firstItem="YBq-vF-vmV" firstAttribute="top" secondItem="ubB-fL-tdq" secondAttribute="bottom" constant="30" id="u2n-PV-OTM"/>
+                            <constraint firstItem="JJp-Xv-Qe7" firstAttribute="centerX" secondItem="tsR-hK-woN" secondAttribute="centerX" id="wRK-zb-J1Q"/>
+                            <constraint firstItem="JJp-Xv-Qe7" firstAttribute="centerY" secondItem="tsR-hK-woN" secondAttribute="centerY" id="ytu-mY-0I3"/>
+                            <constraint firstItem="YBq-vF-vmV" firstAttribute="top" secondItem="ubB-fL-tdq" secondAttribute="bottom" constant="85" id="zaN-rs-0vZ"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="3us-Hc-CI1"/>
+                                <exclude reference="egc-75-Tng"/>
+                                <exclude reference="ytu-mY-0I3"/>
+                                <exclude reference="TLf-KG-2W5"/>
+                                <exclude reference="VuS-ff-bLC"/>
+                                <exclude reference="c3r-ey-k0M"/>
+                                <exclude reference="nHu-Bl-xaS"/>
+                                <exclude reference="u2n-PV-OTM"/>
+                                <exclude reference="zaN-rs-0vZ"/>
+                                <exclude reference="5tY-3R-aYO"/>
+                            </mask>
+                        </variation>
                     </view>
                     <tabBarItem key="tabBarItem" title="Backpack" image="first" id="acW-dT-cKf"/>
                     <connections>
@@ -105,6 +155,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="backpack.png" width="611" height="720"/>
         <image name="first" width="30" height="30"/>
     </resources>
 </document>
