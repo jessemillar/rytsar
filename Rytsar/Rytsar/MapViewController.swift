@@ -14,6 +14,7 @@ import AVFoundation
 import AudioToolbox
 
 class Enemy: NSObject { // Used to make an array of enemies from the database
+    var id : Int = 0 // Initialize to a "null" value that shouldn't ever be a valid ID on the server
     var latitude : Double = 0.0 // Initialize to a "null" double
     var longitude : Double = 0.0
 }
@@ -29,13 +30,14 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     let shootRadius = 150.0 // In meters
     
     var enemiesLoaded = false
+    var canShoot = true
+    let reloadTime = 2.0 // In seconds (needs to be a double)
 
     var userLatitude = 0.0
     var userLongitude = 0.0
     
-    var gunOrientation = true // Make sure we're in gun orientation before allowing a shot
-    var enemyAimedAtLatitude = 0.0
-    var enemyAimedAtLongitude = 0.0
+    var shootOrientation = true // Make sure we're in gun orientation before allowing a shot
+    var enemyAimedAtID = 0
     
     var gunFire = AVAudioPlayer()
     var gunReload = AVAudioPlayer()
@@ -68,24 +70,24 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         self.mapView.showsUserLocation = true
         self.mapView.rotateEnabled = true
         
-        if motionManager.accelerometerAvailable{
-            motionManager.startAccelerometerUpdatesToQueue(NSOperationQueue()) { (data: CMAccelerometerData?, error: NSError?) in
-                guard data != nil else {
-                    print("There was an error: \(error)")
-                    return
-                }
-                                
-                let cone = 0.1
-
-                if abs(data!.acceleration.x) > (0.9 - cone) && abs(data!.acceleration.x) < (0.9 + cone){
-                    self.gunOrientation = true
-                } else {
-                    self.gunOrientation = false
-                }
-            }
-        } else {
-            print("Accelerometer is not available")
-        }
+//        if motionManager.accelerometerAvailable{
+//            motionManager.startAccelerometerUpdatesToQueue(NSOperationQueue()) { (data: CMAccelerometerData?, error: NSError?) in
+//                guard data != nil else {
+//                    print("There was an error: \(error)")
+//                    return
+//                }
+//                                
+//                let cone = 0.1
+//
+//                if abs(data!.acceleration.x) > (0.9 - cone) && abs(data!.acceleration.x) < (0.9 + cone){
+//                    self.shootOrientation = true
+//                } else {
+//                    self.shootOrientation = false
+//                }
+//            }
+//        } else {
+//            print("Accelerometer is not available")
+//        }
         
         if motionManager.accelerometerAvailable{
             motionManager.startGyroUpdatesToQueue(NSOperationQueue()) { (data: CMGyroData?, error: NSError?) in
@@ -94,20 +96,34 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     return
                 }
                 
-                if data!.rotationRate.y < -15{
-                    self.gunReload.play()
-                    print("RELOAD")
-                }
+//                if data!.rotationRate.y < -15{
+//                    self.gunReload.play()
+//                    print("RELOAD")
+//                }
+                
+//                print(self.canShoot, self.shootOrientation)
                 
                 if data!.rotationRate.z < -8{
-                    self.gunFire.play() // Play a gun firing sound
-                    print("FIRE")
-                    self.shootEnemy()
+                    if (self.canShoot) {
+                        self.canShoot = false
+//                        self.gunFire.play() // Play a gun firing sound
+                        print("FIRE")
+                        self.shootEnemy()
+                        
+                        let date = NSDate().dateByAddingTimeInterval(self.reloadTime)
+                        let timer = NSTimer(fireDate: date, interval: 0, target: self, selector: "canShootEnable", userInfo: nil, repeats: false)
+                        NSRunLoop.mainRunLoop().addTimer(timer, forMode: NSRunLoopCommonModes)
+                    }
                 }
             }
         } else {
             print("Accelerometer is not available")
         }
+    }
+    
+    func canShootEnable() {
+        print("Called")
+        self.canShoot = true
     }
     
     override func didReceiveMemoryWarning() {
@@ -131,17 +147,27 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         }
     }
     
+// MARK: Track compass heading and detect aiming
     func locationManager(manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
         for enemy in enemies {
-            let halfCone = 8.0
-            let angle = angleTo(userLatitude, lon1: userLongitude, lat2: enemy.latitude, lon2: enemy.longitude)
             let distance = distanceTo(userLatitude, lon1: userLongitude, lat2: enemy.latitude, lon2: enemy.longitude)
+            let heading = newHeading.magneticHeading
+            let angle = angleTo(userLatitude, lon1: userLongitude, lat2: enemy.latitude, lon2: enemy.longitude)
+            let halfCone = 8.0 // Make the aiming cone match up with the default compass cone
+            var leftCone = angle - halfCone*4 // Not sure why I have to do this to get the cone to the right size...
+            var rightCone = angle + halfCone
             
-            if newHeading.magneticHeading > (angle - halfCone) && newHeading.magneticHeading < (angle + halfCone) && distance < shootRadius {
+            if leftCone < 0 {
+                leftCone += 360
+            }
+            
+            if rightCone > 360 {
+                rightCone -= 360
+            }
+            
+            if heading > leftCone && heading < rightCone && distance < shootRadius {
                 AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
-//                print("Aimed", newHeading.magneticHeading, angle, distance)
-                enemyAimedAtLatitude = enemy.latitude
-                enemyAimedAtLongitude = enemy.longitude
+                enemyAimedAtID = enemy.id
             }
         }
     }
@@ -164,7 +190,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         let φ1 = toRadians(lat1)
         let φ2 = toRadians(lat2)
         let Δλ = toRadians(lon2-lon1)
-        let R = 6371000.0 // gives distance in meters
+        let R = 6371000.0 // Gives distance in meters
         let distance = acos(sin(φ1)*sin(φ2) + cos(φ1)*cos(φ2) * cos(Δλ) ) * R;
         
         return distance
@@ -202,6 +228,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     for cursor in coordinates {
                         let newEnemy : Enemy = Enemy()
                         
+                        if let id = cursor["id"] as? String {
+                            newEnemy.id = Int(id)!
+                        }
+                        
                         if let latitude = cursor["latitude"] as? String {
                             newEnemy.latitude = Double(latitude)!
                         }
@@ -214,7 +244,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     }
                 }
             } catch {
-                print("error serializing JSON: \(error)")
+                print("Error serializing JSON: \(error)")
             }
             
             for enemy in self.enemies {
@@ -227,12 +257,13 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     func shootEnemy() {
-        let enemyLatitude = "\(enemyAimedAtLatitude)"
-        let enemyLongitude = "\(enemyAimedAtLongitude)"
+        let enemyID = "\(enemyAimedAtID)"
         
-        let endpoint: String = baseURL + "/" + enemyLatitude + "/" + enemyLongitude
+        let endpoint: String = baseURL + "/delete/" + enemyID
         let endpointRequest = NSMutableURLRequest(URL: NSURL(string: endpoint)!)
         endpointRequest.HTTPMethod = "DELETE"
+        
+        print(endpoint)
         
         let config = NSURLSessionConfiguration.defaultSessionConfiguration()
         let session = NSURLSession(configuration: config)
@@ -244,7 +275,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 return
             }
             
-            self.mapView.removeAnnotations(self.mapView.annotations) // Remove all annotations from the map
+            dispatch_async(dispatch_get_main_queue(), { // Kill all the enemy pins and repopulate with the updates from the database
+                let allAnnotations = self.mapView.annotations
+                self.mapView.removeAnnotations(allAnnotations)
+                self.enemies.removeAll() // Wipe the local array so we don't get duplicate pins
+                self.getEnemies()
+            })
         })
         
         task.resume()
